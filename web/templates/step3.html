@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Setup Project Helper</title>
+    <link rel="stylesheet" href="/static/assets/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Setup Project Helper</h1>
+        <p>This is to generate your `vars-ansible.yaml` file at the start to reduce typo errors, etc.</p>
+        <form action="/step3" method="post">
+            <input type="hidden" name="page" value="step3">
+
+            {{ if eq .form1.ProjectType "generic" "config" }}
+                {{ range .form2.Packages }}
+                Link package <b>{{ . }}</b> of project type <i>{{ $.form1.ProjectType }}</i> to
+                <input type="text" name="Link_package_lookup[]" placeholder="Enter value"/>
+                {{ end }}
+            {{ end }}
+
+            {{ range .form2.Packages }}
+                Set Ingress path prefix for <b>{{ . }}</b>
+                <input type="text" name="Ingress_path_prefix[]" placeholder="Enter value"/>
+            {{ end }}
+            <hr/>
+
+            <!-- Button Group with Spacer -->
+            <div class="button-group">
+                <input type="submit" name="submit" value="Next">
+                <div class="spacer"></div>
+                <input type="reset" name="reset" value="Reset">
+            </div>
+        </form>
+    </div>
+</body>
+</html>

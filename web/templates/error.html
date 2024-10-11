@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Setup Project Helper</title>
+    <link rel="stylesheet" href="/static/assets/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Setup Project Helper</h1>
+        <h3>ERROR</h3>
+        <p>{{ .err | unsafe_raw_html }}</p>
+        <p>{{ .output }}</p>
+        {{ .action | unsafe_raw_html }}
+    </div>
+</body>
+</html>

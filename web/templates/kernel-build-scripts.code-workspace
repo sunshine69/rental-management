@@ -1,0 +1,26 @@
+{
+	"folders": [
+		{
+			"path": "../../../../kernel-build-scripts"
+		},
+		{
+			"path": "../../../../automation-go"
+		},
+		{
+			"path": "../../.."
+		},
+		{
+			"path": "../../../../devops-tools"
+		},
+		{
+			"path": "../../../../webnote"
+		},
+		{
+			"path": "../../../../static-webserver-with-auth"
+		},
+		{
+			"path": "../../../../tmp/playgohttp"
+		}
+	],
+	"settings": {}
+}

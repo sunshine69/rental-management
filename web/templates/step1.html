@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Setup Project Helper</title>
+    <link rel="stylesheet" href="/static/assets/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Setup Project Helper</h1>
+        <p>This is to generate your `vars-ansible.yaml` file at the start to reduce typo errors, etc.</p>
+        <form action="/step1" method="post">
+            <input type="hidden" name="page" value="step1">
+
+            <label title="{{ .help_project_name }}">Project Name:</label>
+            <input type="text" name="project_name" value="{{ .v.ProjectName }}">
+
+            <label title="{{ .help_project_type }}">Project Type:</label>
+            <select name="project_type">
+                <option value="" selected="true" title="Empty tring; the default value">default</option>
+                <option value="generic">generic</option>
+                <option value="config">config</option>
+                <option value="config-pkg">config-pkg</option>
+            </select>
+
+            <label title="{{ .help_namespace_prefix }}">Namespace Prefix:</label>
+            <input type="text" name="namespace_prefix" value="{{ .v.Namespace_prefix }}">
+
+            <label title="{{ .help_tfs_project_name }}">TFS Project Name:</label>
+            <input type="text" name="tfs_project_name" value="{{ .v.Tfs_project_name}}">
+
+            <label title="{{ .help_tfs_repo_name }}">TFS Repo Name:</label>
+            <input type="text" name="tfs_repo_name" value="{{ .v.Tfs_repo_name }}">
+
+            <label title="{{ .help_build_operation_disabled }}">Build Operation Disabled:</label>
+            <select name="build_operation_disabled">
+                <option value="no" selected="true">no</option>
+                <option value="">yes</option>
+            </select>
+
+            <label title="{{ .help_Docker_registry_project_name }}">Docker Registry Project Name:</label>
+            <input type="text" name="docker_registry_project_name" value="{{ .v.Docker_registry_project_name }}">
+
+            <hr/>
+
+            <!-- Button Group with Spacer -->
+            <div class="button-group">
+                <input type="submit" name="submit" value="Next">
+                <div class="spacer"></div>
+                <input type="reset" name="reset" value="Reset">
+            </div>
+        </form>
+    </div>
+</body>
+</html>
