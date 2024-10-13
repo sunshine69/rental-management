@@ -7,10 +7,10 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/go-playground/form/v4"
 	"github.com/go-playground/validator/v10"
+	ag "github.com/sunshine69/automation-go/lib"
 	u "github.com/sunshine69/golang-tools/utils"
 )
 
@@ -29,44 +29,7 @@ var staticFolder embed.FS
 var tplFolder embed.FS // embeds the templates folder into variable tplFolder
 
 func loadAllTemplates() *template.Template {
-	TemplateFuncMap = &template.FuncMap{
-		// The name "inc" is what the function will be called in the template text.
-		"inc": func(i int) int {
-			return i + 1
-		},
-		"add": func(x, y int) int {
-			return x + y
-		},
-		"time_fmt": func(timelayout string, timeticks int64) string {
-			return u.NsToTime(timeticks).Format(timelayout)
-		},
-		"unsafe_raw_html": func(html string) template.HTML {
-			return template.HTML(html)
-		},
-		"truncatechars": func(length int, in string) template.HTML {
-			return template.HTML(u.ChunkString(in, length)[0])
-		},
-		"cycle": func(idx int, vals ...string) template.HTML {
-			_idx := idx % len(vals)
-			return template.HTML(vals[_idx])
-		},
-		"replace": func(old, new, data string) template.HTML {
-			o := strings.ReplaceAll(data, old, new)
-			return template.HTML(o)
-		},
-		"contains": func(subStr, data string) bool {
-			return strings.Contains(data, subStr)
-		},
-		"int_range": func(start, end int) []int {
-			n := end - start
-			result := make([]int, n)
-			for i := 0; i < n; i++ {
-				result[i] = start + i
-			}
-			return result
-		},
-	}
-	t, err := template.New("templ").Funcs(*TemplateFuncMap).ParseFS(tplFolder, "templates/*.html")
+	t, err := template.New("templ").Funcs(ag.GoTemplateFuncMap).ParseFS(tplFolder, "templates/*.html")
 	if err != nil {
 		log.Fatalf("can not parse templates %s", err.Error())
 	}

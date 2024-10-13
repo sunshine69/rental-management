@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	
 	_ "github.com/mutecomm/go-sqlcipher/v4"
 )
 
@@ -36,6 +37,28 @@ func NewTenant(email string ) Tenant {
 	return o	
 }
 
+func GetTenant(email string) *Tenant {
+	o := Tenant{
+		Email: email , 
+		Where: "email=:email "}
+	if r := o.Search(); r != nil {
+		return &r[0]
+	} else {
+		return nil
+	}
+}
+
+func GetTenantByID(id int64) *Tenant {
+	o := Tenant{
+		Id: id,
+		Where: "id=:id"}
+	if r := o.Search(); r != nil {
+		return &r[0]
+	} else {
+		return nil
+	}
+}
+
 // Search func
 func (o *Tenant) Search() []Tenant {
 	output := []Tenant{}
@@ -58,8 +81,23 @@ func (o *Tenant) Search() []Tenant {
 // Save existing object which is saved it into db 
 func (o *Tenant) Save() {
 	if res, err := DB.NamedExec(`INSERT INTO tenant(join_date,first_name,last_name,address,contact_number,email,note ) VALUES(:join_date,:first_name,:last_name,:address,:contact_number,:email,:note ) ON CONFLICT(email) DO UPDATE SET join_date=excluded.join_date,first_name=excluded.first_name,last_name=excluded.last_name,address=excluded.address,contact_number=excluded.contact_number,email=excluded.email,note=excluded.note`, o); err != nil {
-		panic(err.Error())
+		fmt.Printf("[ERROR] %s\n", err.Error())
 	} else {
 		o.Id, _ = res.LastInsertId()
+	}
+}
+
+// Delete one object
+func (o *Tenant) Delete() {
+	if _, err := DB.NamedExec(`DELETE FROM tenant WHERE email=:email`, o); err != nil {
+		fmt.Printf("[ERROR] %s\n", err.Error())
+	} else {
+		o = nil
+	}
+}
+
+func DeleteTenantByID(id int64) {
+	if _, err := DB.NamedExec(`DELETE FROM tenant WHERE id=?`, id); err != nil {
+		fmt.Printf("[ERROR] %s\n", err.Error())
 	}
 }

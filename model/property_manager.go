@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	
 	_ "github.com/mutecomm/go-sqlcipher/v4"
 )
 
@@ -36,6 +37,28 @@ func NewProperty_manager(email string ) Property_manager {
 	return o	
 }
 
+func GetProperty_manager(email string) *Property_manager {
+	o := Property_manager{
+		Email: email , 
+		Where: "email=:email "}
+	if r := o.Search(); r != nil {
+		return &r[0]
+	} else {
+		return nil
+	}
+}
+
+func GetProperty_managerByID(id int64) *Property_manager {
+	o := Property_manager{
+		Id: id,
+		Where: "id=:id"}
+	if r := o.Search(); r != nil {
+		return &r[0]
+	} else {
+		return nil
+	}
+}
+
 // Search func
 func (o *Property_manager) Search() []Property_manager {
 	output := []Property_manager{}
@@ -58,8 +81,23 @@ func (o *Property_manager) Search() []Property_manager {
 // Save existing object which is saved it into db 
 func (o *Property_manager) Save() {
 	if res, err := DB.NamedExec(`INSERT INTO property_manager(join_date,first_name,last_name,address,contact_number,email,note ) VALUES(:join_date,:first_name,:last_name,:address,:contact_number,:email,:note ) ON CONFLICT(email) DO UPDATE SET join_date=excluded.join_date,first_name=excluded.first_name,last_name=excluded.last_name,address=excluded.address,contact_number=excluded.contact_number,email=excluded.email,note=excluded.note`, o); err != nil {
-		panic(err.Error())
+		fmt.Printf("[ERROR] %s\n", err.Error())
 	} else {
 		o.Id, _ = res.LastInsertId()
+	}
+}
+
+// Delete one object
+func (o *Property_manager) Delete() {
+	if _, err := DB.NamedExec(`DELETE FROM property_manager WHERE email=:email`, o); err != nil {
+		fmt.Printf("[ERROR] %s\n", err.Error())
+	} else {
+		o = nil
+	}
+}
+
+func DeleteProperty_managerByID(id int64) {
+	if _, err := DB.NamedExec(`DELETE FROM property_manager WHERE id=?`, id); err != nil {
+		fmt.Printf("[ERROR] %s\n", err.Error())
 	}
 }

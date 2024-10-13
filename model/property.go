@@ -28,6 +28,28 @@ func NewProperty(name string ) Property {
 	return o	
 }
 
+func GetProperty(name string) *Property {
+	o := Property{
+		Name: name , 
+		Where: "name=:name "}
+	if r := o.Search(); r != nil {
+		return &r[0]
+	} else {
+		return nil
+	}
+}
+
+func GetPropertyByID(id int64) *Property {
+	o := Property{
+		Id: id,
+		Where: "id=:id"}
+	if r := o.Search(); r != nil {
+		return &r[0]
+	} else {
+		return nil
+	}
+}
+
 // Search func
 func (o *Property) Search() []Property {
 	output := []Property{}
@@ -50,8 +72,23 @@ func (o *Property) Search() []Property {
 // Save existing object which is saved it into db 
 func (o *Property) Save() {
 	if res, err := DB.NamedExec(`INSERT INTO property(address,name,note ) VALUES(:address,:name,:note ) ON CONFLICT(name) DO UPDATE SET address=excluded.address,name=excluded.name,note=excluded.note`, o); err != nil {
-		panic(err.Error())
+		fmt.Printf("[ERROR] %s\n", err.Error())
 	} else {
 		o.Id, _ = res.LastInsertId()
+	}
+}
+
+// Delete one object
+func (o *Property) Delete() {
+	if _, err := DB.NamedExec(`DELETE FROM property WHERE name=:name`, o); err != nil {
+		fmt.Printf("[ERROR] %s\n", err.Error())
+	} else {
+		o = nil
+	}
+}
+
+func DeletePropertyByID(id int64) {
+	if _, err := DB.NamedExec(`DELETE FROM property WHERE id=?`, id); err != nil {
+		fmt.Printf("[ERROR] %s\n", err.Error())
 	}
 }

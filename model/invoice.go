@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
-	"time"
+	
 	_ "github.com/mutecomm/go-sqlcipher/v4"
 )
 
@@ -42,6 +42,28 @@ func NewInvoice(number string ,issuer string ) Invoice {
 	return o	
 }
 
+func GetInvoice(number string, issuer string) *Invoice {
+	o := Invoice{
+		Number: number , Issuer: issuer , 
+		Where: "number=:number , issuer=:issuer "}
+	if r := o.Search(); r != nil {
+		return &r[0]
+	} else {
+		return nil
+	}
+}
+
+func GetInvoiceByID(id int64) *Invoice {
+	o := Invoice{
+		Id: id,
+		Where: "id=:id"}
+	if r := o.Search(); r != nil {
+		return &r[0]
+	} else {
+		return nil
+	}
+}
+
 // Search func
 func (o *Invoice) Search() []Invoice {
 	output := []Invoice{}
@@ -64,8 +86,23 @@ func (o *Invoice) Search() []Invoice {
 // Save existing object which is saved it into db 
 func (o *Invoice) Save() {
 	if res, err := DB.NamedExec(`INSERT INTO invoice(date,due_date,description,amount,number,issuer,to,property_id ) VALUES(:date,:due_date,:description,:amount,:number,:issuer,:to,:property_id ) ON CONFLICT(number,issuer) DO UPDATE SET date=excluded.date,due_date=excluded.due_date,description=excluded.description,amount=excluded.amount,number=excluded.number,issuer=excluded.issuer,to=excluded.to,property_id=excluded.property_id`, o); err != nil {
-		panic(err.Error())
+		fmt.Printf("[ERROR] %s\n", err.Error())
 	} else {
 		o.Id, _ = res.LastInsertId()
+	}
+}
+
+// Delete one object
+func (o *Invoice) Delete() {
+	if _, err := DB.NamedExec(`DELETE FROM invoice WHERE number=:number AND issuer=:issuer`, o); err != nil {
+		fmt.Printf("[ERROR] %s\n", err.Error())
+	} else {
+		o = nil
+	}
+}
+
+func DeleteInvoiceByID(id int64) {
+	if _, err := DB.NamedExec(`DELETE FROM invoice WHERE id=?`, id); err != nil {
+		fmt.Printf("[ERROR] %s\n", err.Error())
 	}
 }

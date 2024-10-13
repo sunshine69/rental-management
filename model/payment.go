@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	
 	_ "github.com/mutecomm/go-sqlcipher/v4"
 )
 
@@ -35,6 +36,28 @@ func NewPayment(account_id int64 ,pay_date int64 ) Payment {
 	return o	
 }
 
+func GetPayment(account_id int64, pay_date int64) *Payment {
+	o := Payment{
+		Account_id: account_id , Pay_date: pay_date , 
+		Where: "account_id=:account_id , pay_date=:pay_date "}
+	if r := o.Search(); r != nil {
+		return &r[0]
+	} else {
+		return nil
+	}
+}
+
+func GetPaymentByID(id int64) *Payment {
+	o := Payment{
+		Id: id,
+		Where: "id=:id"}
+	if r := o.Search(); r != nil {
+		return &r[0]
+	} else {
+		return nil
+	}
+}
+
 // Search func
 func (o *Payment) Search() []Payment {
 	output := []Payment{}
@@ -57,8 +80,23 @@ func (o *Payment) Search() []Payment {
 // Save existing object which is saved it into db 
 func (o *Payment) Save() {
 	if res, err := DB.NamedExec(`INSERT INTO payment(account_id,amount,pay_date,contract_id,reference ) VALUES(:account_id,:amount,:pay_date,:contract_id,:reference ) ON CONFLICT(account_id,pay_date) DO UPDATE SET account_id=excluded.account_id,amount=excluded.amount,pay_date=excluded.pay_date,contract_id=excluded.contract_id,reference=excluded.reference`, o); err != nil {
-		panic(err.Error())
+		fmt.Printf("[ERROR] %s\n", err.Error())
 	} else {
 		o.Id, _ = res.LastInsertId()
+	}
+}
+
+// Delete one object
+func (o *Payment) Delete() {
+	if _, err := DB.NamedExec(`DELETE FROM payment WHERE account_id=:account_id AND pay_date=:pay_date`, o); err != nil {
+		fmt.Printf("[ERROR] %s\n", err.Error())
+	} else {
+		o = nil
+	}
+}
+
+func DeletePaymentByID(id int64) {
+	if _, err := DB.NamedExec(`DELETE FROM payment WHERE id=?`, id); err != nil {
+		fmt.Printf("[ERROR] %s\n", err.Error())
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	
 	_ "github.com/mutecomm/go-sqlcipher/v4"
 )
 
@@ -36,6 +37,28 @@ func NewMaintenance_request(contract_id int64 ,request_date int64 ) Maintenance_
 	return o	
 }
 
+func GetMaintenance_request(contract_id int64, request_date int64) *Maintenance_request {
+	o := Maintenance_request{
+		Contract_id: contract_id , Request_date: request_date , 
+		Where: "contract_id=:contract_id , request_date=:request_date "}
+	if r := o.Search(); r != nil {
+		return &r[0]
+	} else {
+		return nil
+	}
+}
+
+func GetMaintenance_requestByID(id int64) *Maintenance_request {
+	o := Maintenance_request{
+		Id: id,
+		Where: "id=:id"}
+	if r := o.Search(); r != nil {
+		return &r[0]
+	} else {
+		return nil
+	}
+}
+
 // Search func
 func (o *Maintenance_request) Search() []Maintenance_request {
 	output := []Maintenance_request{}
@@ -58,8 +81,23 @@ func (o *Maintenance_request) Search() []Maintenance_request {
 // Save existing object which is saved it into db 
 func (o *Maintenance_request) Save() {
 	if res, err := DB.NamedExec(`INSERT INTO maintenance_request(request_date,type,status,cost,invoice_id,contract_id ) VALUES(:request_date,:type,:status,:cost,:invoice_id,:contract_id ) ON CONFLICT(contract_id,request_date) DO UPDATE SET request_date=excluded.request_date,type=excluded.type,status=excluded.status,cost=excluded.cost,invoice_id=excluded.invoice_id,contract_id=excluded.contract_id`, o); err != nil {
-		panic(err.Error())
+		fmt.Printf("[ERROR] %s\n", err.Error())
 	} else {
 		o.Id, _ = res.LastInsertId()
+	}
+}
+
+// Delete one object
+func (o *Maintenance_request) Delete() {
+	if _, err := DB.NamedExec(`DELETE FROM maintenance_request WHERE contract_id=:contract_id AND request_date=:request_date`, o); err != nil {
+		fmt.Printf("[ERROR] %s\n", err.Error())
+	} else {
+		o = nil
+	}
+}
+
+func DeleteMaintenance_requestByID(id int64) {
+	if _, err := DB.NamedExec(`DELETE FROM maintenance_request WHERE id=?`, id); err != nil {
+		fmt.Printf("[ERROR] %s\n", err.Error())
 	}
 }

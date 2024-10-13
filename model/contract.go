@@ -6,8 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
-	"time"
-	"time"
+	
 	_ "github.com/mutecomm/go-sqlcipher/v4"
 )
 
@@ -46,6 +45,28 @@ func NewContract(property_id int64 ,tenant_id int64 ,signed_date int64 ) Contrac
 	return o	
 }
 
+func GetContract(property_id int64, tenant_id int64, signed_date int64) *Contract {
+	o := Contract{
+		Property_id: property_id , Tenant_id: tenant_id , Signed_date: signed_date , 
+		Where: "property_id=:property_id , tenant_id=:tenant_id , signed_date=:signed_date "}
+	if r := o.Search(); r != nil {
+		return &r[0]
+	} else {
+		return nil
+	}
+}
+
+func GetContractByID(id int64) *Contract {
+	o := Contract{
+		Id: id,
+		Where: "id=:id"}
+	if r := o.Search(); r != nil {
+		return &r[0]
+	} else {
+		return nil
+	}
+}
+
 // Search func
 func (o *Contract) Search() []Contract {
 	output := []Contract{}
@@ -68,8 +89,23 @@ func (o *Contract) Search() []Contract {
 // Save existing object which is saved it into db 
 func (o *Contract) Save() {
 	if res, err := DB.NamedExec(`INSERT INTO contract(property_id,property_manager_id,tenant_id,start_date,end_date,signed_date,note ) VALUES(:property_id,:property_manager_id,:tenant_id,:start_date,:end_date,:signed_date,:note ) ON CONFLICT(property_id,tenant_id,signed_date) DO UPDATE SET property_id=excluded.property_id,property_manager_id=excluded.property_manager_id,tenant_id=excluded.tenant_id,start_date=excluded.start_date,end_date=excluded.end_date,signed_date=excluded.signed_date,note=excluded.note`, o); err != nil {
-		panic(err.Error())
+		fmt.Printf("[ERROR] %s\n", err.Error())
 	} else {
 		o.Id, _ = res.LastInsertId()
+	}
+}
+
+// Delete one object
+func (o *Contract) Delete() {
+	if _, err := DB.NamedExec(`DELETE FROM contract WHERE property_id=:property_id AND tenant_id=:tenant_id AND signed_date=:signed_date`, o); err != nil {
+		fmt.Printf("[ERROR] %s\n", err.Error())
+	} else {
+		o = nil
+	}
+}
+
+func DeleteContractByID(id int64) {
+	if _, err := DB.NamedExec(`DELETE FROM contract WHERE id=?`, id); err != nil {
+		fmt.Printf("[ERROR] %s\n", err.Error())
 	}
 }

@@ -28,6 +28,28 @@ func NewAccount(contract_id int64 ) Account {
 	return o	
 }
 
+func GetAccount(contract_id int64) *Account {
+	o := Account{
+		Contract_id: contract_id , 
+		Where: "contract_id=:contract_id "}
+	if r := o.Search(); r != nil {
+		return &r[0]
+	} else {
+		return nil
+	}
+}
+
+func GetAccountByID(id int64) *Account {
+	o := Account{
+		Id: id,
+		Where: "id=:id"}
+	if r := o.Search(); r != nil {
+		return &r[0]
+	} else {
+		return nil
+	}
+}
+
 // Search func
 func (o *Account) Search() []Account {
 	output := []Account{}
@@ -50,8 +72,23 @@ func (o *Account) Search() []Account {
 // Save existing object which is saved it into db 
 func (o *Account) Save() {
 	if res, err := DB.NamedExec(`INSERT INTO account(balance,type,contract_id ) VALUES(:balance,:type,:contract_id ) ON CONFLICT(contract_id) DO UPDATE SET balance=excluded.balance,type=excluded.type,contract_id=excluded.contract_id`, o); err != nil {
-		panic(err.Error())
+		fmt.Printf("[ERROR] %s\n", err.Error())
 	} else {
 		o.Id, _ = res.LastInsertId()
+	}
+}
+
+// Delete one object
+func (o *Account) Delete() {
+	if _, err := DB.NamedExec(`DELETE FROM account WHERE contract_id=:contract_id`, o); err != nil {
+		fmt.Printf("[ERROR] %s\n", err.Error())
+	} else {
+		o = nil
+	}
+}
+
+func DeleteAccountByID(id int64) {
+	if _, err := DB.NamedExec(`DELETE FROM account WHERE id=?`, id); err != nil {
+		fmt.Printf("[ERROR] %s\n", err.Error())
 	}
 }

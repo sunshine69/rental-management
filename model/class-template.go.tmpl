@@ -7,7 +7,8 @@ import (
 	"fmt"
 	{{- range $idx, $f := .fieldsList }}
 	{{- if contains $f "date" }}
-	"time"	
+	"time"
+	{{break}}
 	{{- end }}
 	{{- end }}
 	_ "github.com/mutecomm/go-sqlcipher/v4"
@@ -40,6 +41,28 @@ func New{{ .typename | title }}( {{- range $idx, $f := .uniqueFields -}}{{- $f }
 	return o	
 }
 
+func Get{{.typename|title}}({{range $idx, $f := .uniqueFields}}{{$f}} {{ index $.uniqueFieldsMap $f }}{{if ne $idx (add ($.uniqueFields|len) -1)}}, {{end}}{{end}}) *{{.typename|title}} {
+	o := {{.typename|title}}{
+		{{range $idx, $f := .uniqueFields}}{{$f|title}}: {{$f}} {{if ne $idx (add ($.uniqueFields|len) -1)}}, {{end}}{{end}}, 
+		Where: "{{range $idx, $f := .uniqueFields}}{{$f}}=:{{$f}} {{if ne $idx (add ($.uniqueFields|len) -1)}}, {{end}}{{end}}"}
+	if r := o.Search(); r != nil {
+		return &r[0]
+	} else {
+		return nil
+	}
+}
+
+func Get{{.typename|title}}ByID(id int64) *{{.typename|title}} {
+	o := {{.typename|title}}{
+		Id: id,
+		Where: "id=:id"}
+	if r := o.Search(); r != nil {
+		return &r[0]
+	} else {
+		return nil
+	}
+}
+
 // Search func
 func (o *{{.typename|title}}) Search() []{{.typename|title}} {
 	output := []{{.typename|title}}{}
@@ -62,8 +85,23 @@ func (o *{{.typename|title}}) Search() []{{.typename|title}} {
 // Save existing object which is saved it into db 
 func (o *{{.typename|title}}) Save() {
 	if res, err := DB.NamedExec(`INSERT INTO {{.typename}}({{range $idx, $f := .fieldsList}}{{$f}}{{if ne $idx (add ($.fieldsList|len) -1)}},{{end}}{{end}} ) VALUES({{range $idx, $f := .fieldsList}}:{{$f}}{{if ne $idx (add ($.fieldsList|len) -1)}},{{end}}{{end}} ) ON CONFLICT({{range $idx, $f := .uniqueFields}}{{$f}}{{if ne $idx (add ($.uniqueFields|len) -1)}},{{end}}{{end}}) DO UPDATE SET {{range $idx, $f := .fieldsList}}{{$f}}=excluded.{{$f}}{{if ne $idx (add ($.fieldsList|len) -1)}},{{end}}{{end}}`, o); err != nil {
-		panic(err.Error())
+		fmt.Printf("[ERROR] %s\n", err.Error())
 	} else {
 		o.Id, _ = res.LastInsertId()
+	}
+}
+
+// Delete one object
+func (o *{{.typename|title}}) Delete() {
+	if _, err := DB.NamedExec(`DELETE FROM {{.typename}} WHERE {{range $idx, $f := .uniqueFields}}{{$f}}=:{{$f}}{{if ne $idx (add ($.uniqueFields|len) -1)}} AND {{end}}{{end}}`, o); err != nil {
+		fmt.Printf("[ERROR] %s\n", err.Error())
+	} else {
+		o = nil
+	}
+}
+
+func Delete{{.typename|title}}ByID(id int64) {
+	if _, err := DB.NamedExec(`DELETE FROM {{.typename}} WHERE id=?`, id); err != nil {
+		fmt.Printf("[ERROR] %s\n", err.Error())
 	}
 }

@@ -12,6 +12,7 @@ import (
 type Config struct {
 	PublicHost             string
 	Port                   string
+	PathBase               string
 	DBUser                 string
 	DBPassword             string
 	DBAddress              string
