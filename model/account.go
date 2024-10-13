@@ -5,7 +5,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"os"
+	"strings"
 	_ "github.com/mutecomm/go-sqlcipher/v4"
+	ag "github.com/sunshine69/automation-go/lib"	
 )
 
 type Account struct {
@@ -28,11 +31,29 @@ func NewAccount(contract_id int64 ) Account {
 	return o	
 }
 
+func GetAccountByCompositeKey(data map[string]interface{}) *Account {
+	if rows, err := DB.NamedQuery(`SELECT * FROM account WHERE contract_id=:contract_id `, data); err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			tn := Account{}
+			if err = rows.StructScan(&tn); err == nil {
+				return &tn
+			} else {
+				fmt.Fprintf(os.Stderr, "[ERROR] GetAccountByCompositeKey %s\n", err.Error())
+				return nil
+			}
+		}
+	} else {
+		fmt.Fprintf(os.Stderr, "[ERROR] GetAccountByCompositeKey %s\n", err.Error())
+	}
+	return nil
+}
+
 func GetAccount(contract_id int64) *Account {
 	o := Account{
 		Contract_id: contract_id , 
 		Where: "contract_id=:contract_id "}
-	if r := o.Search(); r != nil {
+	if r := o.Search(); len(r) > 0 {
 		return &r[0]
 	} else {
 		return nil
@@ -43,7 +64,7 @@ func GetAccountByID(id int64) *Account {
 	o := Account{
 		Id: id,
 		Where: "id=:id"}
-	if r := o.Search(); r != nil {
+	if r := o.Search(); len(r) > 0 {
 		return &r[0]
 	} else {
 		return nil
@@ -54,6 +75,7 @@ func GetAccountByID(id int64) *Account {
 func (o *Account) Search() []Account {
 	output := []Account{}
 	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM account WHERE %s`, o.Where), o); err == nil {
+		defer rows.Close()
 		for rows.Next() {
 			_t := Account{}
 			if er := rows.StructScan(&_t); er == nil {
@@ -69,26 +91,64 @@ func (o *Account) Search() []Account {
 	return output
 }
 
+// Save new object which is saved it into db
+func (o *Account) Update(data map[string]interface{}) error {
+	fields := ag.MapKeysToSlice(data)
+	fieldsWithoutKey := ag.SliceMap(fields, func(s string) *string {
+		if s != "id" && s != "email" {
+			return &s
+		}
+		return nil
+	})
+	updateFields := ag.SliceMap(fieldsWithoutKey, func(s string) *string { s = s + " = :" + s; return &s })
+	updateFieldsStr := strings.Join(updateFields, ",")
+
+	if _, err := DB.NamedExec(`UPDATE account SET `+updateFieldsStr, data); err != nil {
+		return err
+	}
+	return nil
+}
+
+
 // Save existing object which is saved it into db 
-func (o *Account) Save() {
-	if res, err := DB.NamedExec(`INSERT INTO account(balance,type,contract_id ) VALUES(:balance,:type,:contract_id ) ON CONFLICT(contract_id) DO UPDATE SET balance=excluded.balance,type=excluded.type,contract_id=excluded.contract_id`, o); err != nil {
-		fmt.Printf("[ERROR] %s\n", err.Error())
+func (o *Account) Save() error {
+	if res, err := DB.NamedExec(`INSERT INTO account(balance,type,contract_id ) VALUES(:balance,:type,:contract_id)`, o); err != nil {
+		return err
 	} else {
 		o.Id, _ = res.LastInsertId()
 	}
+	return nil 
 }
 
 // Delete one object
-func (o *Account) Delete() {
-	if _, err := DB.NamedExec(`DELETE FROM account WHERE contract_id=:contract_id`, o); err != nil {
-		fmt.Printf("[ERROR] %s\n", err.Error())
+func (o *Account) Delete() error {
+	if res, err := DB.NamedExec(`DELETE FROM account WHERE contract_id=:contract_id `, o); err != nil {
+		return err
 	} else {
-		o = nil
+		r, err := res.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if r == 0 {
+			return fmt.Errorf("ERROR account not found")
+		}
 	}
+	return nil
 }
 
-func DeleteAccountByID(id int64) {
-	if _, err := DB.NamedExec(`DELETE FROM account WHERE id=?`, id); err != nil {
-		fmt.Printf("[ERROR] %s\n", err.Error())
+func DeleteAccountByID(id int64) error {
+	// sqlx bug? If directly use Exec and sql is a pure string it never delete it but still return ok
+	// looks like we always need to bind the named query with sqlx - can not parse pure string in
+	if res, err := DB.NamedExec(`DELETE FROM account WHERE id = :id`, map[string]interface{}{"id": id}); err != nil {
+		return err
+	} else {
+		r, err := res.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if r == 0 {
+			return fmt.Errorf("ERROR account not found")
+		}
 	}
+	return nil
 }

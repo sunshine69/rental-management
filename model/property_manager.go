@@ -5,9 +5,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"os"
+	"strings"
 	"time"
 	
 	_ "github.com/mutecomm/go-sqlcipher/v4"
+	ag "github.com/sunshine69/automation-go/lib"	
 )
 
 type Property_manager struct {
@@ -37,11 +40,29 @@ func NewProperty_manager(email string ) Property_manager {
 	return o	
 }
 
+func GetProperty_managerByCompositeKey(data map[string]interface{}) *Property_manager {
+	if rows, err := DB.NamedQuery(`SELECT * FROM property_manager WHERE email=:email `, data); err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			tn := Property_manager{}
+			if err = rows.StructScan(&tn); err == nil {
+				return &tn
+			} else {
+				fmt.Fprintf(os.Stderr, "[ERROR] GetProperty_managerByCompositeKey %s\n", err.Error())
+				return nil
+			}
+		}
+	} else {
+		fmt.Fprintf(os.Stderr, "[ERROR] GetProperty_managerByCompositeKey %s\n", err.Error())
+	}
+	return nil
+}
+
 func GetProperty_manager(email string) *Property_manager {
 	o := Property_manager{
 		Email: email , 
 		Where: "email=:email "}
-	if r := o.Search(); r != nil {
+	if r := o.Search(); len(r) > 0 {
 		return &r[0]
 	} else {
 		return nil
@@ -52,7 +73,7 @@ func GetProperty_managerByID(id int64) *Property_manager {
 	o := Property_manager{
 		Id: id,
 		Where: "id=:id"}
-	if r := o.Search(); r != nil {
+	if r := o.Search(); len(r) > 0 {
 		return &r[0]
 	} else {
 		return nil
@@ -63,6 +84,7 @@ func GetProperty_managerByID(id int64) *Property_manager {
 func (o *Property_manager) Search() []Property_manager {
 	output := []Property_manager{}
 	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM property_manager WHERE %s`, o.Where), o); err == nil {
+		defer rows.Close()
 		for rows.Next() {
 			_t := Property_manager{}
 			if er := rows.StructScan(&_t); er == nil {
@@ -78,26 +100,64 @@ func (o *Property_manager) Search() []Property_manager {
 	return output
 }
 
+// Save new object which is saved it into db
+func (o *Property_manager) Update(data map[string]interface{}) error {
+	fields := ag.MapKeysToSlice(data)
+	fieldsWithoutKey := ag.SliceMap(fields, func(s string) *string {
+		if s != "id" && s != "email" {
+			return &s
+		}
+		return nil
+	})
+	updateFields := ag.SliceMap(fieldsWithoutKey, func(s string) *string { s = s + " = :" + s; return &s })
+	updateFieldsStr := strings.Join(updateFields, ",")
+
+	if _, err := DB.NamedExec(`UPDATE property_manager SET `+updateFieldsStr, data); err != nil {
+		return err
+	}
+	return nil
+}
+
+
 // Save existing object which is saved it into db 
-func (o *Property_manager) Save() {
-	if res, err := DB.NamedExec(`INSERT INTO property_manager(join_date,first_name,last_name,address,contact_number,email,note ) VALUES(:join_date,:first_name,:last_name,:address,:contact_number,:email,:note ) ON CONFLICT(email) DO UPDATE SET join_date=excluded.join_date,first_name=excluded.first_name,last_name=excluded.last_name,address=excluded.address,contact_number=excluded.contact_number,email=excluded.email,note=excluded.note`, o); err != nil {
-		fmt.Printf("[ERROR] %s\n", err.Error())
+func (o *Property_manager) Save() error {
+	if res, err := DB.NamedExec(`INSERT INTO property_manager(join_date,first_name,last_name,address,contact_number,email,note ) VALUES(:join_date,:first_name,:last_name,:address,:contact_number,:email,:note)`, o); err != nil {
+		return err
 	} else {
 		o.Id, _ = res.LastInsertId()
 	}
+	return nil 
 }
 
 // Delete one object
-func (o *Property_manager) Delete() {
-	if _, err := DB.NamedExec(`DELETE FROM property_manager WHERE email=:email`, o); err != nil {
-		fmt.Printf("[ERROR] %s\n", err.Error())
+func (o *Property_manager) Delete() error {
+	if res, err := DB.NamedExec(`DELETE FROM property_manager WHERE email=:email `, o); err != nil {
+		return err
 	} else {
-		o = nil
+		r, err := res.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if r == 0 {
+			return fmt.Errorf("ERROR property_manager not found")
+		}
 	}
+	return nil
 }
 
-func DeleteProperty_managerByID(id int64) {
-	if _, err := DB.NamedExec(`DELETE FROM property_manager WHERE id=?`, id); err != nil {
-		fmt.Printf("[ERROR] %s\n", err.Error())
+func DeleteProperty_managerByID(id int64) error {
+	// sqlx bug? If directly use Exec and sql is a pure string it never delete it but still return ok
+	// looks like we always need to bind the named query with sqlx - can not parse pure string in
+	if res, err := DB.NamedExec(`DELETE FROM property_manager WHERE id = :id`, map[string]interface{}{"id": id}); err != nil {
+		return err
+	} else {
+		r, err := res.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if r == 0 {
+			return fmt.Errorf("ERROR property_manager not found")
+		}
 	}
+	return nil
 }

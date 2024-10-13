@@ -5,7 +5,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"os"
+	"strings"
 	_ "github.com/mutecomm/go-sqlcipher/v4"
+	ag "github.com/sunshine69/automation-go/lib"	
 )
 
 type Property struct {
@@ -28,11 +31,29 @@ func NewProperty(name string ) Property {
 	return o	
 }
 
+func GetPropertyByCompositeKey(data map[string]interface{}) *Property {
+	if rows, err := DB.NamedQuery(`SELECT * FROM property WHERE name=:name `, data); err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			tn := Property{}
+			if err = rows.StructScan(&tn); err == nil {
+				return &tn
+			} else {
+				fmt.Fprintf(os.Stderr, "[ERROR] GetPropertyByCompositeKey %s\n", err.Error())
+				return nil
+			}
+		}
+	} else {
+		fmt.Fprintf(os.Stderr, "[ERROR] GetPropertyByCompositeKey %s\n", err.Error())
+	}
+	return nil
+}
+
 func GetProperty(name string) *Property {
 	o := Property{
 		Name: name , 
 		Where: "name=:name "}
-	if r := o.Search(); r != nil {
+	if r := o.Search(); len(r) > 0 {
 		return &r[0]
 	} else {
 		return nil
@@ -43,7 +64,7 @@ func GetPropertyByID(id int64) *Property {
 	o := Property{
 		Id: id,
 		Where: "id=:id"}
-	if r := o.Search(); r != nil {
+	if r := o.Search(); len(r) > 0 {
 		return &r[0]
 	} else {
 		return nil
@@ -54,6 +75,7 @@ func GetPropertyByID(id int64) *Property {
 func (o *Property) Search() []Property {
 	output := []Property{}
 	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM property WHERE %s`, o.Where), o); err == nil {
+		defer rows.Close()
 		for rows.Next() {
 			_t := Property{}
 			if er := rows.StructScan(&_t); er == nil {
@@ -69,26 +91,64 @@ func (o *Property) Search() []Property {
 	return output
 }
 
+// Save new object which is saved it into db
+func (o *Property) Update(data map[string]interface{}) error {
+	fields := ag.MapKeysToSlice(data)
+	fieldsWithoutKey := ag.SliceMap(fields, func(s string) *string {
+		if s != "id" && s != "email" {
+			return &s
+		}
+		return nil
+	})
+	updateFields := ag.SliceMap(fieldsWithoutKey, func(s string) *string { s = s + " = :" + s; return &s })
+	updateFieldsStr := strings.Join(updateFields, ",")
+
+	if _, err := DB.NamedExec(`UPDATE property SET `+updateFieldsStr, data); err != nil {
+		return err
+	}
+	return nil
+}
+
+
 // Save existing object which is saved it into db 
-func (o *Property) Save() {
-	if res, err := DB.NamedExec(`INSERT INTO property(address,name,note ) VALUES(:address,:name,:note ) ON CONFLICT(name) DO UPDATE SET address=excluded.address,name=excluded.name,note=excluded.note`, o); err != nil {
-		fmt.Printf("[ERROR] %s\n", err.Error())
+func (o *Property) Save() error {
+	if res, err := DB.NamedExec(`INSERT INTO property(address,name,note ) VALUES(:address,:name,:note)`, o); err != nil {
+		return err
 	} else {
 		o.Id, _ = res.LastInsertId()
 	}
+	return nil 
 }
 
 // Delete one object
-func (o *Property) Delete() {
-	if _, err := DB.NamedExec(`DELETE FROM property WHERE name=:name`, o); err != nil {
-		fmt.Printf("[ERROR] %s\n", err.Error())
+func (o *Property) Delete() error {
+	if res, err := DB.NamedExec(`DELETE FROM property WHERE name=:name `, o); err != nil {
+		return err
 	} else {
-		o = nil
+		r, err := res.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if r == 0 {
+			return fmt.Errorf("ERROR property not found")
+		}
 	}
+	return nil
 }
 
-func DeletePropertyByID(id int64) {
-	if _, err := DB.NamedExec(`DELETE FROM property WHERE id=?`, id); err != nil {
-		fmt.Printf("[ERROR] %s\n", err.Error())
+func DeletePropertyByID(id int64) error {
+	// sqlx bug? If directly use Exec and sql is a pure string it never delete it but still return ok
+	// looks like we always need to bind the named query with sqlx - can not parse pure string in
+	if res, err := DB.NamedExec(`DELETE FROM property WHERE id = :id`, map[string]interface{}{"id": id}); err != nil {
+		return err
+	} else {
+		r, err := res.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if r == 0 {
+			return fmt.Errorf("ERROR property not found")
+		}
 	}
+	return nil
 }

@@ -10,7 +10,7 @@ import (
 var DB *sqlx.DB
 
 func init() {
-	DB = sqlx.MustConnect("sqlite3", u.Getenv("DBPATH", "test.sqlite3"))
+	DB = sqlx.MustConnect("sqlite3", u.Getenv("DB_PATH", "test.sqlite3"))
 }
 
 type Searchable struct {

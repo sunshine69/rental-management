@@ -5,9 +5,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"os"
+	"strings"
 	"time"
 	
 	_ "github.com/mutecomm/go-sqlcipher/v4"
+	ag "github.com/sunshine69/automation-go/lib"	
 )
 
 type Contract struct {
@@ -45,11 +48,29 @@ func NewContract(property_id int64 ,tenant_id int64 ,signed_date int64 ) Contrac
 	return o	
 }
 
+func GetContractByCompositeKey(data map[string]interface{}) *Contract {
+	if rows, err := DB.NamedQuery(`SELECT * FROM contract WHERE property_id=:property_id  AND tenant_id=:tenant_id  AND signed_date=:signed_date `, data); err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			tn := Contract{}
+			if err = rows.StructScan(&tn); err == nil {
+				return &tn
+			} else {
+				fmt.Fprintf(os.Stderr, "[ERROR] GetContractByCompositeKey %s\n", err.Error())
+				return nil
+			}
+		}
+	} else {
+		fmt.Fprintf(os.Stderr, "[ERROR] GetContractByCompositeKey %s\n", err.Error())
+	}
+	return nil
+}
+
 func GetContract(property_id int64, tenant_id int64, signed_date int64) *Contract {
 	o := Contract{
 		Property_id: property_id , Tenant_id: tenant_id , Signed_date: signed_date , 
 		Where: "property_id=:property_id , tenant_id=:tenant_id , signed_date=:signed_date "}
-	if r := o.Search(); r != nil {
+	if r := o.Search(); len(r) > 0 {
 		return &r[0]
 	} else {
 		return nil
@@ -60,7 +81,7 @@ func GetContractByID(id int64) *Contract {
 	o := Contract{
 		Id: id,
 		Where: "id=:id"}
-	if r := o.Search(); r != nil {
+	if r := o.Search(); len(r) > 0 {
 		return &r[0]
 	} else {
 		return nil
@@ -71,6 +92,7 @@ func GetContractByID(id int64) *Contract {
 func (o *Contract) Search() []Contract {
 	output := []Contract{}
 	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM contract WHERE %s`, o.Where), o); err == nil {
+		defer rows.Close()
 		for rows.Next() {
 			_t := Contract{}
 			if er := rows.StructScan(&_t); er == nil {
@@ -86,26 +108,64 @@ func (o *Contract) Search() []Contract {
 	return output
 }
 
+// Save new object which is saved it into db
+func (o *Contract) Update(data map[string]interface{}) error {
+	fields := ag.MapKeysToSlice(data)
+	fieldsWithoutKey := ag.SliceMap(fields, func(s string) *string {
+		if s != "id" && s != "email" {
+			return &s
+		}
+		return nil
+	})
+	updateFields := ag.SliceMap(fieldsWithoutKey, func(s string) *string { s = s + " = :" + s; return &s })
+	updateFieldsStr := strings.Join(updateFields, ",")
+
+	if _, err := DB.NamedExec(`UPDATE contract SET `+updateFieldsStr, data); err != nil {
+		return err
+	}
+	return nil
+}
+
+
 // Save existing object which is saved it into db 
-func (o *Contract) Save() {
-	if res, err := DB.NamedExec(`INSERT INTO contract(property_id,property_manager_id,tenant_id,start_date,end_date,signed_date,note ) VALUES(:property_id,:property_manager_id,:tenant_id,:start_date,:end_date,:signed_date,:note ) ON CONFLICT(property_id,tenant_id,signed_date) DO UPDATE SET property_id=excluded.property_id,property_manager_id=excluded.property_manager_id,tenant_id=excluded.tenant_id,start_date=excluded.start_date,end_date=excluded.end_date,signed_date=excluded.signed_date,note=excluded.note`, o); err != nil {
-		fmt.Printf("[ERROR] %s\n", err.Error())
+func (o *Contract) Save() error {
+	if res, err := DB.NamedExec(`INSERT INTO contract(property_id,property_manager_id,tenant_id,start_date,end_date,signed_date,note ) VALUES(:property_id,:property_manager_id,:tenant_id,:start_date,:end_date,:signed_date,:note)`, o); err != nil {
+		return err
 	} else {
 		o.Id, _ = res.LastInsertId()
 	}
+	return nil 
 }
 
 // Delete one object
-func (o *Contract) Delete() {
-	if _, err := DB.NamedExec(`DELETE FROM contract WHERE property_id=:property_id AND tenant_id=:tenant_id AND signed_date=:signed_date`, o); err != nil {
-		fmt.Printf("[ERROR] %s\n", err.Error())
+func (o *Contract) Delete() error {
+	if res, err := DB.NamedExec(`DELETE FROM contract WHERE property_id=:property_id , tenant_id=:tenant_id , signed_date=:signed_date `, o); err != nil {
+		return err
 	} else {
-		o = nil
+		r, err := res.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if r == 0 {
+			return fmt.Errorf("ERROR contract not found")
+		}
 	}
+	return nil
 }
 
-func DeleteContractByID(id int64) {
-	if _, err := DB.NamedExec(`DELETE FROM contract WHERE id=?`, id); err != nil {
-		fmt.Printf("[ERROR] %s\n", err.Error())
+func DeleteContractByID(id int64) error {
+	// sqlx bug? If directly use Exec and sql is a pure string it never delete it but still return ok
+	// looks like we always need to bind the named query with sqlx - can not parse pure string in
+	if res, err := DB.NamedExec(`DELETE FROM contract WHERE id = :id`, map[string]interface{}{"id": id}); err != nil {
+		return err
+	} else {
+		r, err := res.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if r == 0 {
+			return fmt.Errorf("ERROR contract not found")
+		}
 	}
+	return nil
 }

@@ -3,6 +3,7 @@ module github.com/sunshine69/rental-management
 go 1.22.2
 
 require (
+	github.com/R167/go-sets v0.2.0
 	github.com/go-playground/form/v4 v4.2.1
 	github.com/go-playground/validator/v10 v10.22.1
 	github.com/jmoiron/sqlx v1.4.0
@@ -31,7 +32,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/hashicorp/logutils v1.0.0 // indirect
-	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/json-iterator/go v1.1.12
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect

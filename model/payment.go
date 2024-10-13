@@ -5,9 +5,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"os"
+	"strings"
 	"time"
 	
 	_ "github.com/mutecomm/go-sqlcipher/v4"
+	ag "github.com/sunshine69/automation-go/lib"	
 )
 
 type Payment struct {
@@ -36,11 +39,29 @@ func NewPayment(account_id int64 ,pay_date int64 ) Payment {
 	return o	
 }
 
+func GetPaymentByCompositeKey(data map[string]interface{}) *Payment {
+	if rows, err := DB.NamedQuery(`SELECT * FROM payment WHERE account_id=:account_id  AND pay_date=:pay_date `, data); err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			tn := Payment{}
+			if err = rows.StructScan(&tn); err == nil {
+				return &tn
+			} else {
+				fmt.Fprintf(os.Stderr, "[ERROR] GetPaymentByCompositeKey %s\n", err.Error())
+				return nil
+			}
+		}
+	} else {
+		fmt.Fprintf(os.Stderr, "[ERROR] GetPaymentByCompositeKey %s\n", err.Error())
+	}
+	return nil
+}
+
 func GetPayment(account_id int64, pay_date int64) *Payment {
 	o := Payment{
 		Account_id: account_id , Pay_date: pay_date , 
 		Where: "account_id=:account_id , pay_date=:pay_date "}
-	if r := o.Search(); r != nil {
+	if r := o.Search(); len(r) > 0 {
 		return &r[0]
 	} else {
 		return nil
@@ -51,7 +72,7 @@ func GetPaymentByID(id int64) *Payment {
 	o := Payment{
 		Id: id,
 		Where: "id=:id"}
-	if r := o.Search(); r != nil {
+	if r := o.Search(); len(r) > 0 {
 		return &r[0]
 	} else {
 		return nil
@@ -62,6 +83,7 @@ func GetPaymentByID(id int64) *Payment {
 func (o *Payment) Search() []Payment {
 	output := []Payment{}
 	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM payment WHERE %s`, o.Where), o); err == nil {
+		defer rows.Close()
 		for rows.Next() {
 			_t := Payment{}
 			if er := rows.StructScan(&_t); er == nil {
@@ -77,26 +99,64 @@ func (o *Payment) Search() []Payment {
 	return output
 }
 
+// Save new object which is saved it into db
+func (o *Payment) Update(data map[string]interface{}) error {
+	fields := ag.MapKeysToSlice(data)
+	fieldsWithoutKey := ag.SliceMap(fields, func(s string) *string {
+		if s != "id" && s != "email" {
+			return &s
+		}
+		return nil
+	})
+	updateFields := ag.SliceMap(fieldsWithoutKey, func(s string) *string { s = s + " = :" + s; return &s })
+	updateFieldsStr := strings.Join(updateFields, ",")
+
+	if _, err := DB.NamedExec(`UPDATE payment SET `+updateFieldsStr, data); err != nil {
+		return err
+	}
+	return nil
+}
+
+
 // Save existing object which is saved it into db 
-func (o *Payment) Save() {
-	if res, err := DB.NamedExec(`INSERT INTO payment(account_id,amount,pay_date,contract_id,reference ) VALUES(:account_id,:amount,:pay_date,:contract_id,:reference ) ON CONFLICT(account_id,pay_date) DO UPDATE SET account_id=excluded.account_id,amount=excluded.amount,pay_date=excluded.pay_date,contract_id=excluded.contract_id,reference=excluded.reference`, o); err != nil {
-		fmt.Printf("[ERROR] %s\n", err.Error())
+func (o *Payment) Save() error {
+	if res, err := DB.NamedExec(`INSERT INTO payment(account_id,amount,pay_date,contract_id,reference ) VALUES(:account_id,:amount,:pay_date,:contract_id,:reference)`, o); err != nil {
+		return err
 	} else {
 		o.Id, _ = res.LastInsertId()
 	}
+	return nil 
 }
 
 // Delete one object
-func (o *Payment) Delete() {
-	if _, err := DB.NamedExec(`DELETE FROM payment WHERE account_id=:account_id AND pay_date=:pay_date`, o); err != nil {
-		fmt.Printf("[ERROR] %s\n", err.Error())
+func (o *Payment) Delete() error {
+	if res, err := DB.NamedExec(`DELETE FROM payment WHERE account_id=:account_id , pay_date=:pay_date `, o); err != nil {
+		return err
 	} else {
-		o = nil
+		r, err := res.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if r == 0 {
+			return fmt.Errorf("ERROR payment not found")
+		}
 	}
+	return nil
 }
 
-func DeletePaymentByID(id int64) {
-	if _, err := DB.NamedExec(`DELETE FROM payment WHERE id=?`, id); err != nil {
-		fmt.Printf("[ERROR] %s\n", err.Error())
+func DeletePaymentByID(id int64) error {
+	// sqlx bug? If directly use Exec and sql is a pure string it never delete it but still return ok
+	// looks like we always need to bind the named query with sqlx - can not parse pure string in
+	if res, err := DB.NamedExec(`DELETE FROM payment WHERE id = :id`, map[string]interface{}{"id": id}); err != nil {
+		return err
+	} else {
+		r, err := res.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if r == 0 {
+			return fmt.Errorf("ERROR payment not found")
+		}
 	}
+	return nil
 }

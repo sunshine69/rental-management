@@ -1,13 +1,14 @@
 package api
 
 import (
+	"bytes"
 	"fmt"
-	json "github.com/json-iterator/go"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
 
-	"github.com/sunshine69/rental-management/model"
+	json "github.com/json-iterator/go"
 )
 
 func ParseID(r *http.Request) int64 {
@@ -17,14 +18,35 @@ func ParseID(r *http.Request) int64 {
 	}
 	if idstr != "" {
 		if id, err := strconv.ParseInt(idstr, 10, 64); err != nil {
-			fmt.Fprintf(os.Stderr, `{"status": "ERROR", "msg": "[ERROR] parsing id"}`)
+			fmt.Fprintln(os.Stderr, `{"status": "ERROR", "msg": "[ERROR] parsing id"}`)
 			return 0
 		} else {
 			return id
 		}
 	} else {
-		fmt.Fprintf(os.Stderr, `{"status": "ERROR", "msg": "[ERROR] no id supplied"}`)
+		fmt.Fprintln(os.Stderr, `{"status": "ERROR", "msg": "[ERROR] no id supplied"}`)
 		return 0
+	}
+}
+
+func JsonToMap(jsonStr string) map[string]interface{} {
+	result := make(map[string]interface{})
+	json.Unmarshal([]byte(jsonStr), &result)
+	return result
+}
+
+func ParseJSONToMap(r *http.Request) map[string]interface{} {
+	switch r.Method {
+	case "POST", "PUT", "DELETE":
+		jsonBytes := bytes.Buffer{}
+		if _, err := io.Copy(&jsonBytes, r.Body); err != nil {
+			fmt.Fprintf(os.Stderr, "[ERROR] ParseJSONToMap loading request body - %s\n", err.Error())
+		}
+		defer r.Body.Close()
+		return JsonToMap(string(jsonBytes.Bytes()))
+	default:
+		fmt.Fprintf(os.Stderr, "[ERROR] ParseJSONToMap Do not call me with this method - %s\n", r.Method)
+		return nil
 	}
 }
 
