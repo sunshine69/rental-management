@@ -45,7 +45,8 @@ func NewInvoice(number string, issuer string) Invoice {
 	return o
 }
 
-func GetInvoiceByCompositeKey(data map[string]interface{}) *Invoice {
+func GetInvoiceByCompositeKeyOrNew(data map[string]interface{}) *Invoice {
+	data = ParseDatetimeFieldOfMapData(data)
 	if rows, err := DB.NamedQuery(`SELECT * FROM invoice WHERE number=:number  AND issuer=:issuer `, data); err == nil {
 		defer rows.Close()
 		for rows.Next() {
@@ -57,6 +58,10 @@ func GetInvoiceByCompositeKey(data map[string]interface{}) *Invoice {
 				return nil
 			}
 		}
+		// create new one
+		tn := NewInvoice(data["number"].(string), data["issuer"].(string))
+		tn.Update(data)
+		return &tn
 	} else {
 		fmt.Fprintf(os.Stderr, "[ERROR] GetInvoiceByCompositeKey %s\n", err.Error())
 	}

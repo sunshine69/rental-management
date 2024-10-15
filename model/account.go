@@ -31,7 +31,8 @@ func NewAccount(contract_id int64) Account {
 	return o
 }
 
-func GetAccountByCompositeKey(data map[string]interface{}) *Account {
+func GetAccountByCompositeKeyOrNew(data map[string]interface{}) *Account {
+	data = ParseDatetimeFieldOfMapData(data)
 	if rows, err := DB.NamedQuery(`SELECT * FROM account WHERE contract_id=:contract_id `, data); err == nil {
 		defer rows.Close()
 		for rows.Next() {
@@ -43,6 +44,10 @@ func GetAccountByCompositeKey(data map[string]interface{}) *Account {
 				return nil
 			}
 		}
+		// create new one
+		tn := NewAccount(data["contract_id"].(int64))
+		tn.Update(data)
+		return &tn
 	} else {
 		fmt.Fprintf(os.Stderr, "[ERROR] GetAccountByCompositeKey %s\n", err.Error())
 	}

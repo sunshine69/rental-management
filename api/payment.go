@@ -42,7 +42,7 @@ func UpdatePayment(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, `{"status": "ERROR", "msg": "Payment no key value not provided"}`)
 			return
 		}
-		tn := model.GetPaymentByCompositeKey(o)
+		tn := model.GetPaymentByCompositeKeyOrNew(o)
 		if tn == nil {
 			fmt.Fprint(w, `{"status": "ERROR", "msg": "Payment not found with this unique field"}`)
 			return

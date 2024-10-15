@@ -40,7 +40,8 @@ func NewProperty_manager(email string) Property_manager {
 	return o
 }
 
-func GetProperty_managerByCompositeKey(data map[string]interface{}) *Property_manager {
+func GetProperty_managerByCompositeKeyOrNew(data map[string]interface{}) *Property_manager {
+	data = ParseDatetimeFieldOfMapData(data)
 	if rows, err := DB.NamedQuery(`SELECT * FROM property_manager WHERE email=:email `, data); err == nil {
 		defer rows.Close()
 		for rows.Next() {
@@ -52,6 +53,10 @@ func GetProperty_managerByCompositeKey(data map[string]interface{}) *Property_ma
 				return nil
 			}
 		}
+		// create new one
+		tn := NewProperty_manager(data["email"].(string))
+		tn.Update(data)
+		return &tn
 	} else {
 		fmt.Fprintf(os.Stderr, "[ERROR] GetProperty_managerByCompositeKey %s\n", err.Error())
 	}

@@ -42,7 +42,7 @@ func UpdateProperty(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, `{"status": "ERROR", "msg": "Property no key value not provided"}`)
 			return
 		}
-		tn := model.GetPropertyByCompositeKey(o)
+		tn := model.GetPropertyByCompositeKeyOrNew(o)
 		if tn == nil {
 			fmt.Fprint(w, `{"status": "ERROR", "msg": "Property not found with this unique field"}`)
 			return

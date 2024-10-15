@@ -39,7 +39,8 @@ func NewPayment(account_id int64, pay_date int64) Payment {
 	return o
 }
 
-func GetPaymentByCompositeKey(data map[string]interface{}) *Payment {
+func GetPaymentByCompositeKeyOrNew(data map[string]interface{}) *Payment {
+	data = ParseDatetimeFieldOfMapData(data)
 	if rows, err := DB.NamedQuery(`SELECT * FROM payment WHERE account_id=:account_id  AND pay_date=:pay_date `, data); err == nil {
 		defer rows.Close()
 		for rows.Next() {
@@ -51,6 +52,10 @@ func GetPaymentByCompositeKey(data map[string]interface{}) *Payment {
 				return nil
 			}
 		}
+		// create new one
+		tn := NewPayment(data["account_id"].(int64), data["pay_date"].(int64))
+		tn.Update(data)
+		return &tn
 	} else {
 		fmt.Fprintf(os.Stderr, "[ERROR] GetPaymentByCompositeKey %s\n", err.Error())
 	}

@@ -11,26 +11,12 @@ import (
 
 func TestTenant(t *testing.T) {
 	fmt.Println("start test")
-	NewTenant("msh.computing@gmail.com")
-	NewTenant("msh.computing1@gmail.com")
-	k := NewTenant("kaycaonz@gmail.com")
-	k.Address = "On the moon"
-	k.Save()
-
-	at := Tenant{Email: "andrew@bla"}
-	at.Save()
-	at1 := Tenant{Address: "Only address"}
-	at1.Save()
-	at2 := Tenant{Address: "Only address 2"}
-	at2.Save()
-	at3 := GetTenant("msh.computing@gmail.com")
-	fmt.Printf("AT3 SEARCH BY ID %v\n", *at3)
-	ts := Tenant{Email: "%msh%", Where: "email LIKE :email"}
-	o := ts.Search()
+	m0 := map[string]interface{}{"email": "k@k", "start_date": 12333, "end_date": "12/02/2023 00:00:00 +11"}
+	m1 := ParseDatetimeFieldOfMapData(m0)
+	fmt.Printf("m1: %s\n", u.JsonDump(m1, ""))
+	GetTenantByCompositeKeyOrNew(map[string]interface{}{"email": "myf@ptcm"})
 	// fmt.Printf("%v\n", k)
 	// tn := Tenant{Address: "%moon%"}
-	fmt.Printf("%s\n", u.JsonDump(o, "  "))
-
 }
 
 func TestReflect(t *testing.T) {

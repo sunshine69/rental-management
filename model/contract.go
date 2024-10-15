@@ -48,7 +48,8 @@ func NewContract(property_id int64, tenant_id int64, signed_date int64) Contract
 	return o
 }
 
-func GetContractByCompositeKey(data map[string]interface{}) *Contract {
+func GetContractByCompositeKeyOrNew(data map[string]interface{}) *Contract {
+	data = ParseDatetimeFieldOfMapData(data)
 	if rows, err := DB.NamedQuery(`SELECT * FROM contract WHERE property_id=:property_id  AND tenant_id=:tenant_id  AND signed_date=:signed_date `, data); err == nil {
 		defer rows.Close()
 		for rows.Next() {
@@ -60,6 +61,10 @@ func GetContractByCompositeKey(data map[string]interface{}) *Contract {
 				return nil
 			}
 		}
+		// create new one
+		tn := NewContract(data["property_id"].(int64), data["tenant_id"].(int64), data["signed_date"].(int64))
+		tn.Update(data)
+		return &tn
 	} else {
 		fmt.Fprintf(os.Stderr, "[ERROR] GetContractByCompositeKey %s\n", err.Error())
 	}

@@ -42,7 +42,7 @@ func UpdateContract(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, `{"status": "ERROR", "msg": "Contract no key value not provided"}`)
 			return
 		}
-		tn := model.GetContractByCompositeKey(o)
+		tn := model.GetContractByCompositeKeyOrNew(o)
 		if tn == nil {
 			fmt.Fprint(w, `{"status": "ERROR", "msg": "Contract not found with this unique field"}`)
 			return

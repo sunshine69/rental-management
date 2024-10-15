@@ -42,7 +42,7 @@ func UpdateTenant(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, `{"status": "ERROR", "msg": "Tenant no key value not provided"}`)
 			return
 		}
-		tn := model.GetTenantByCompositeKey(o)
+		tn := model.GetTenantByCompositeKeyOrNew(o)
 		if tn == nil {
 			fmt.Fprint(w, `{"status": "ERROR", "msg": "Tenant not found with this unique field"}`)
 			return

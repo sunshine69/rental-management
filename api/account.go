@@ -42,7 +42,7 @@ func UpdateAccount(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, `{"status": "ERROR", "msg": "Account no key value not provided"}`)
 			return
 		}
-		tn := model.GetAccountByCompositeKey(o)
+		tn := model.GetAccountByCompositeKeyOrNew(o)
 		if tn == nil {
 			fmt.Fprint(w, `{"status": "ERROR", "msg": "Account not found with this unique field"}`)
 			return

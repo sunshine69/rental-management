@@ -40,7 +40,8 @@ func NewMaintenance_request(contract_id int64, request_date int64) Maintenance_r
 	return o
 }
 
-func GetMaintenance_requestByCompositeKey(data map[string]interface{}) *Maintenance_request {
+func GetMaintenance_requestByCompositeKeyOrNew(data map[string]interface{}) *Maintenance_request {
+	data = ParseDatetimeFieldOfMapData(data)
 	if rows, err := DB.NamedQuery(`SELECT * FROM maintenance_request WHERE contract_id=:contract_id  AND request_date=:request_date `, data); err == nil {
 		defer rows.Close()
 		for rows.Next() {
@@ -52,6 +53,10 @@ func GetMaintenance_requestByCompositeKey(data map[string]interface{}) *Maintena
 				return nil
 			}
 		}
+		// create new one
+		tn := NewMaintenance_request(data["contract_id"].(int64), data["request_date"].(int64))
+		tn.Update(data)
+		return &tn
 	} else {
 		fmt.Fprintf(os.Stderr, "[ERROR] GetMaintenance_requestByCompositeKey %s\n", err.Error())
 	}

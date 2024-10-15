@@ -42,7 +42,7 @@ func UpdateInvoice(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, `{"status": "ERROR", "msg": "Invoice no key value not provided"}`)
 			return
 		}
-		tn := model.GetInvoiceByCompositeKey(o)
+		tn := model.GetInvoiceByCompositeKeyOrNew(o)
 		if tn == nil {
 			fmt.Fprint(w, `{"status": "ERROR", "msg": "Invoice not found with this unique field"}`)
 			return

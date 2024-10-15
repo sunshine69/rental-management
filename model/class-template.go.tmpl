@@ -44,7 +44,8 @@ func New{{ .typename | title }}( {{- range $idx, $f := .uniqueFields -}}{{- $f }
 	return o	
 }
 
-func Get{{.typename|title}}ByCompositeKey(data map[string]interface{}) *{{.typename|title}} {
+func Get{{.typename|title}}ByCompositeKeyOrNew(data map[string]interface{}) *{{.typename|title}} {
+	data = ParseDatetimeFieldOfMapData(data)
 	if rows, err := DB.NamedQuery(`SELECT * FROM {{.typename}} WHERE {{range $idx, $f := .uniqueFields}}{{$f}}=:{{$f}} {{if ne $idx (add ($.uniqueFields|len) -1)}} AND {{end}}{{end}}`, data); err == nil {
 		defer rows.Close()
 		for rows.Next() {
@@ -56,6 +57,10 @@ func Get{{.typename|title}}ByCompositeKey(data map[string]interface{}) *{{.typen
 				return nil
 			}
 		}
+		// create new one
+		tn := New{{.typename|title}}({{range $idx, $f := .uniqueFields}}data["{{$f}}"].({{index $.uniqueFieldsMap $f}}){{if ne $idx (add ($.uniqueFields|len) -1)}}, {{end}}{{end}})
+		tn.Update(data)
+		return &tn
 	} else {
 		fmt.Fprintf(os.Stderr, "[ERROR] Get{{.typename|title}}ByCompositeKey %s\n", err.Error())
 	}

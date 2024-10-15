@@ -31,7 +31,8 @@ func NewProperty(name string) Property {
 	return o
 }
 
-func GetPropertyByCompositeKey(data map[string]interface{}) *Property {
+func GetPropertyByCompositeKeyOrNew(data map[string]interface{}) *Property {
+	data = ParseDatetimeFieldOfMapData(data)
 	if rows, err := DB.NamedQuery(`SELECT * FROM property WHERE name=:name `, data); err == nil {
 		defer rows.Close()
 		for rows.Next() {
@@ -43,6 +44,10 @@ func GetPropertyByCompositeKey(data map[string]interface{}) *Property {
 				return nil
 			}
 		}
+		// create new one
+		tn := NewProperty(data["name"].(string))
+		tn.Update(data)
+		return &tn
 	} else {
 		fmt.Fprintf(os.Stderr, "[ERROR] GetPropertyByCompositeKey %s\n", err.Error())
 	}

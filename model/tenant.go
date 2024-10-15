@@ -40,7 +40,8 @@ func NewTenant(email string) Tenant {
 	return o
 }
 
-func GetTenantByCompositeKey(data map[string]interface{}) *Tenant {
+func GetTenantByCompositeKeyOrNew(data map[string]interface{}) *Tenant {
+	data = ParseDatetimeFieldOfMapData(data)
 	if rows, err := DB.NamedQuery(`SELECT * FROM tenant WHERE email=:email `, data); err == nil {
 		defer rows.Close()
 		for rows.Next() {
@@ -52,6 +53,10 @@ func GetTenantByCompositeKey(data map[string]interface{}) *Tenant {
 				return nil
 			}
 		}
+		// create new one
+		tn := NewTenant(data["email"].(string))
+		tn.Update(data)
+		return &tn
 	} else {
 		fmt.Fprintf(os.Stderr, "[ERROR] GetTenantByCompositeKey %s\n", err.Error())
 	}
