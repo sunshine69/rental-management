@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/R167/go-sets"
+	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/sunshine69/rental-management/model"
 )
 
@@ -71,7 +71,7 @@ func DeleteTenant(w http.ResponseWriter, r *http.Request) {
 				model.DeleteTenantByID(tenant.Id)
 				fmt.Fprint(w, `{"status": "OK", "msg": "Tenant deleted"}`)
 				return
-			} else if tenant.Email != ""   {
+			} else if tenant.Email != "" {
 				tenant.Delete()
 				fmt.Fprint(w, `{"status": "OK", "msg": "Tenant deleted"}`)
 				return

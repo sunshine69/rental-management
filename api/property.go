@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/R167/go-sets"
+	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/sunshine69/rental-management/model"
 )
 
@@ -71,7 +71,7 @@ func DeleteProperty(w http.ResponseWriter, r *http.Request) {
 				model.DeletePropertyByID(property.Id)
 				fmt.Fprint(w, `{"status": "OK", "msg": "Property deleted"}`)
 				return
-			} else if property.Name != ""   {
+			} else if property.Name != "" {
 				property.Delete()
 				fmt.Fprint(w, `{"status": "OK", "msg": "Property deleted"}`)
 				return

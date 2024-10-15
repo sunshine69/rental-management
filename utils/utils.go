@@ -56,7 +56,8 @@ func GenerateClass(sqltext, classTemplateFile string) {
 			query_new = query_new + " AND "
 		}
 	}
-	ag.GoTemplateFile(classTemplateFile, filepath.Dir(classTemplateFile)+"/"+o[1]+".go", map[string]interface{}{
+	targetFile := filepath.Dir(classTemplateFile) + "/" + o[1] + ".go"
+	ag.GoTemplateFile(classTemplateFile, targetFile, map[string]interface{}{
 		"typename":        o[1],
 		"fields":          fieldmap,
 		"fieldsList":      fieldsList,
@@ -64,6 +65,7 @@ func GenerateClass(sqltext, classTemplateFile string) {
 		"uniqueFields":    uniqueFields,
 		"query_new":       query_new,
 	}, 0640)
+	u.RunSystemCommandV2("go fmt "+targetFile, true)
 }
 
 func ReflectStruct(astruct any) map[string]map[string]interface{} {

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/R167/go-sets"
+	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/sunshine69/rental-management/model"
 )
 
@@ -71,7 +71,7 @@ func DeleteInvoice(w http.ResponseWriter, r *http.Request) {
 				model.DeleteInvoiceByID(invoice.Id)
 				fmt.Fprint(w, `{"status": "OK", "msg": "Invoice deleted"}`)
 				return
-			} else if invoice.Number != ""   && invoice.Issuer != ""   {
+			} else if invoice.Number != "" && invoice.Issuer != "" {
 				invoice.Delete()
 				fmt.Fprint(w, `{"status": "OK", "msg": "Invoice deleted"}`)
 				return
