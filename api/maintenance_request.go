@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	u "github.com/sunshine69/golang-tools/utils"
-
+	"github.com/R167/go-sets"
 	"github.com/sunshine69/rental-management/model"
 )
 
@@ -71,7 +71,7 @@ func DeleteMaintenance_request(w http.ResponseWriter, r *http.Request) {
 				model.DeleteMaintenance_requestByID(maintenance_request.Id)
 				fmt.Fprint(w, `{"status": "OK", "msg": "Maintenance_request deleted"}`)
 				return
-			} else if maintenance_request.Email != "" {
+			} else if maintenance_request.Contract_id != 0   && maintenance_request.Request_date != 0   {
 				maintenance_request.Delete()
 				fmt.Fprint(w, `{"status": "OK", "msg": "Maintenance_request deleted"}`)
 				return

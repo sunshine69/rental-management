@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	u "github.com/sunshine69/golang-tools/utils"
-
+	"github.com/R167/go-sets"
 	"github.com/sunshine69/rental-management/model"
 )
 
@@ -71,7 +71,7 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 				model.DeleteAccountByID(account.Id)
 				fmt.Fprint(w, `{"status": "OK", "msg": "Account deleted"}`)
 				return
-			} else if account.Email != "" {
+			} else if account.Contract_id != 0   {
 				account.Delete()
 				fmt.Fprint(w, `{"status": "OK", "msg": "Account deleted"}`)
 				return

@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	u "github.com/sunshine69/golang-tools/utils"
-
+	"github.com/R167/go-sets"
 	"github.com/sunshine69/rental-management/model"
 )
 
@@ -71,7 +71,7 @@ func DeletePayment(w http.ResponseWriter, r *http.Request) {
 				model.DeletePaymentByID(payment.Id)
 				fmt.Fprint(w, `{"status": "OK", "msg": "Payment deleted"}`)
 				return
-			} else if payment.Email != "" {
+			} else if payment.Account_id != 0   && payment.Pay_date != 0   {
 				payment.Delete()
 				fmt.Fprint(w, `{"status": "OK", "msg": "Payment deleted"}`)
 				return

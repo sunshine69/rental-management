@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	u "github.com/sunshine69/golang-tools/utils"
-
+	"github.com/R167/go-sets"
 	"github.com/sunshine69/rental-management/model"
 )
 
@@ -71,7 +71,7 @@ func Delete{{.typename|title}}(w http.ResponseWriter, r *http.Request) {
 				model.Delete{{.typename|title}}ByID({{.typename}}.Id)
 				fmt.Fprint(w, `{"status": "OK", "msg": "{{.typename|title}} deleted"}`)
 				return
-			} else if {{.typename}}.Email != "" {
+			} else if {{range $idx, $f := .uniqueFields}}{{$.typename}}.{{$f|title}} != {{if eq (index $.uniqueFieldsMap $f) "string"}}""{{else}}0{{end}}  {{if ne $idx (add ($.uniqueFields|len) -1)}} && {{end}}{{end}} {
 				{{.typename}}.Delete()
 				fmt.Fprint(w, `{"status": "OK", "msg": "{{.typename|title}} deleted"}`)
 				return

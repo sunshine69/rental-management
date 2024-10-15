@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	u "github.com/sunshine69/golang-tools/utils"
-
+	"github.com/R167/go-sets"
 	"github.com/sunshine69/rental-management/model"
 )
 
@@ -71,7 +71,7 @@ func DeleteContract(w http.ResponseWriter, r *http.Request) {
 				model.DeleteContractByID(contract.Id)
 				fmt.Fprint(w, `{"status": "OK", "msg": "Contract deleted"}`)
 				return
-			} else if contract.Email != "" {
+			} else if contract.Property_id != 0   && contract.Tenant_id != 0   && contract.Signed_date != 0   {
 				contract.Delete()
 				fmt.Fprint(w, `{"status": "OK", "msg": "Contract deleted"}`)
 				return

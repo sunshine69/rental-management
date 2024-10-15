@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	u "github.com/sunshine69/golang-tools/utils"
-
+	"github.com/R167/go-sets"
 	"github.com/sunshine69/rental-management/model"
 )
 
@@ -71,7 +71,7 @@ func DeleteProperty_manager(w http.ResponseWriter, r *http.Request) {
 				model.DeleteProperty_managerByID(property_manager.Id)
 				fmt.Fprint(w, `{"status": "OK", "msg": "Property_manager deleted"}`)
 				return
-			} else if property_manager.Email != "" {
+			} else if property_manager.Email != ""   {
 				property_manager.Delete()
 				fmt.Fprint(w, `{"status": "OK", "msg": "Property_manager deleted"}`)
 				return
