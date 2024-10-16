@@ -100,7 +100,7 @@ func (o *Property) Search() []Property {
 func (o *Property) Update(data map[string]interface{}) error {
 	fields := ag.MapKeysToSlice(data)
 	fieldsWithoutKey := ag.SliceMap(fields, func(s string) *string {
-		if s != "id" && s != "email" {
+		if s != "id" && s != "name" {
 			return &s
 		}
 		return nil

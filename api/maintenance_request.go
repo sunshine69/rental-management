@@ -43,10 +43,6 @@ func UpdateMaintenance_request(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		tn := model.GetMaintenance_requestByCompositeKeyOrNew(o)
-		if tn == nil {
-			fmt.Fprint(w, `{"status": "ERROR", "msg": "Maintenance_request not found with this unique field"}`)
-			return
-		}
 		if err := tn.Update(o); err == nil {
 			fmt.Fprint(w, `{"status": "OK", "msg": "Maintenance_request updated"}`)
 		} else {

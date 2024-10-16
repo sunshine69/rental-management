@@ -37,16 +37,12 @@ func UpdateContract(w http.ResponseWriter, r *http.Request) {
 		return
 	} else {
 		inputSet := sets.FromMap(o)
-		keySet := sets.New("property_id", "tenant_id", "signed_date")
+		keySet := sets.New("property_id", "signed_date")
 		if !inputSet.Superset(keySet) {
 			fmt.Fprint(w, `{"status": "ERROR", "msg": "Contract no key value not provided"}`)
 			return
 		}
 		tn := model.GetContractByCompositeKeyOrNew(o)
-		if tn == nil {
-			fmt.Fprint(w, `{"status": "ERROR", "msg": "Contract not found with this unique field"}`)
-			return
-		}
 		if err := tn.Update(o); err == nil {
 			fmt.Fprint(w, `{"status": "OK", "msg": "Contract updated"}`)
 		} else {
@@ -71,7 +67,7 @@ func DeleteContract(w http.ResponseWriter, r *http.Request) {
 				model.DeleteContractByID(contract.Id)
 				fmt.Fprint(w, `{"status": "OK", "msg": "Contract deleted"}`)
 				return
-			} else if contract.Property_id != 0 && contract.Tenant_id != 0 && contract.Signed_date != 0 {
+			} else if contract.Property_id != 0 && contract.Signed_date != 0 {
 				contract.Delete()
 				fmt.Fprint(w, `{"status": "OK", "msg": "Contract deleted"}`)
 				return

@@ -43,10 +43,6 @@ func UpdatePayment(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		tn := model.GetPaymentByCompositeKeyOrNew(o)
-		if tn == nil {
-			fmt.Fprint(w, `{"status": "ERROR", "msg": "Payment not found with this unique field"}`)
-			return
-		}
 		if err := tn.Update(o); err == nil {
 			fmt.Fprint(w, `{"status": "OK", "msg": "Payment updated"}`)
 		} else {

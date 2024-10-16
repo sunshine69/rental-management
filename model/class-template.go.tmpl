@@ -113,7 +113,7 @@ func (o *{{.typename|title}}) Search() []{{.typename|title}} {
 func (o *{{.typename|title}}) Update(data map[string]interface{}) error {
 	fields := ag.MapKeysToSlice(data)
 	fieldsWithoutKey := ag.SliceMap(fields, func(s string) *string {
-		if s != "id" && s != "email" {
+		if s != "id" && {{range $idx, $f := .uniqueFields}}s != "{{$f}}" {{if ne $idx (add ($.uniqueFields|len) -1)}} && {{end}}{{end}} {
 			return &s
 		}
 		return nil

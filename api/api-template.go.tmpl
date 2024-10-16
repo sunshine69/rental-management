@@ -42,11 +42,7 @@ func Update{{.typename|title}}(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, `{"status": "ERROR", "msg": "{{.typename|title}} no key value not provided"}`)
 			return
 		}
-		tn := model.Get{{.typename|title}}ByCompositeKeyOrNew(o)
-		if tn == nil {
-			fmt.Fprint(w, `{"status": "ERROR", "msg": "{{.typename|title}} not found with this unique field"}`)
-			return
-		}
+		tn := model.Get{{.typename|title}}ByCompositeKeyOrNew(o)		
 		if err := tn.Update(o); err == nil {
 			fmt.Fprint(w, `{"status": "OK", "msg": "{{.typename|title}} updated"}`)
 		} else {

@@ -108,7 +108,7 @@ func (o *Payment) Search() []Payment {
 func (o *Payment) Update(data map[string]interface{}) error {
 	fields := ag.MapKeysToSlice(data)
 	fieldsWithoutKey := ag.SliceMap(fields, func(s string) *string {
-		if s != "id" && s != "email" {
+		if s != "id" && s != "account_id" && s != "pay_date" {
 			return &s
 		}
 		return nil

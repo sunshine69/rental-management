@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	json "github.com/json-iterator/go"
+	utils "github.com/sunshine69/rental-management/utils"
 )
 
 func ParseID(r *http.Request) int64 {
@@ -32,7 +33,7 @@ func ParseID(r *http.Request) int64 {
 func JsonToMap(jsonStr string) map[string]interface{} {
 	result := make(map[string]interface{})
 	json.Unmarshal([]byte(jsonStr), &result)
-	return result
+	return utils.AssertInt64ValueForMap(result)
 }
 
 func ParseJSONToMap(r *http.Request) map[string]interface{} {

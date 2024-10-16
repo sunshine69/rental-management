@@ -26,12 +26,11 @@ type Contract struct {
 	Where string
 }
 
-func NewContract(property_id int64, tenant_id int64, signed_date int64) Contract {
+func NewContract(property_id int64, signed_date int64) Contract {
 
 	o := Contract{}
-	if err := DB.Get(&o, "SELECT * FROM contract WHERE  property_id = ? AND  tenant_id = ? AND  signed_date = ?", property_id, tenant_id, signed_date); errors.Is(err, sql.ErrNoRows) {
+	if err := DB.Get(&o, "SELECT * FROM contract WHERE  property_id = ? AND  signed_date = ?", property_id, signed_date); errors.Is(err, sql.ErrNoRows) {
 		o.Property_id = property_id
-		o.Tenant_id = tenant_id
 		o.Signed_date = signed_date
 		if o.Start_date == 0 {
 			o.Start_date = time.Now().Unix()
@@ -50,7 +49,7 @@ func NewContract(property_id int64, tenant_id int64, signed_date int64) Contract
 
 func GetContractByCompositeKeyOrNew(data map[string]interface{}) *Contract {
 	data = ParseDatetimeFieldOfMapData(data)
-	if rows, err := DB.NamedQuery(`SELECT * FROM contract WHERE property_id=:property_id  AND tenant_id=:tenant_id  AND signed_date=:signed_date `, data); err == nil {
+	if rows, err := DB.NamedQuery(`SELECT * FROM contract WHERE property_id=:property_id  AND signed_date=:signed_date `, data); err == nil {
 		defer rows.Close()
 		for rows.Next() {
 			tn := Contract{}
@@ -62,7 +61,7 @@ func GetContractByCompositeKeyOrNew(data map[string]interface{}) *Contract {
 			}
 		}
 		// create new one
-		tn := NewContract(data["property_id"].(int64), data["tenant_id"].(int64), data["signed_date"].(int64))
+		tn := NewContract(data["property_id"].(int64), data["signed_date"].(int64))
 		tn.Update(data)
 		return &tn
 	} else {
@@ -71,10 +70,10 @@ func GetContractByCompositeKeyOrNew(data map[string]interface{}) *Contract {
 	return nil
 }
 
-func GetContract(property_id int64, tenant_id int64, signed_date int64) *Contract {
+func GetContract(property_id int64, signed_date int64) *Contract {
 	o := Contract{
-		Property_id: property_id, Tenant_id: tenant_id, Signed_date: signed_date,
-		Where: "property_id=:property_id , tenant_id=:tenant_id , signed_date=:signed_date "}
+		Property_id: property_id, Signed_date: signed_date,
+		Where: "property_id=:property_id , signed_date=:signed_date "}
 	if r := o.Search(); len(r) > 0 {
 		return &r[0]
 	} else {
@@ -117,7 +116,7 @@ func (o *Contract) Search() []Contract {
 func (o *Contract) Update(data map[string]interface{}) error {
 	fields := ag.MapKeysToSlice(data)
 	fieldsWithoutKey := ag.SliceMap(fields, func(s string) *string {
-		if s != "id" && s != "email" {
+		if s != "id" && s != "property_id" && s != "signed_date" {
 			return &s
 		}
 		return nil
@@ -143,7 +142,7 @@ func (o *Contract) Save() error {
 
 // Delete one object
 func (o *Contract) Delete() error {
-	if res, err := DB.NamedExec(`DELETE FROM contract WHERE property_id=:property_id , tenant_id=:tenant_id , signed_date=:signed_date `, o); err != nil {
+	if res, err := DB.NamedExec(`DELETE FROM contract WHERE property_id=:property_id , signed_date=:signed_date `, o); err != nil {
 		return err
 	} else {
 		r, err := res.RowsAffected()

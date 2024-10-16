@@ -35,11 +35,11 @@ CREATE TABLE IF NOT EXISTS "contract" (
     "property_id" int NOT NULL REFERENCES "property" ("id"),
     "property_manager_id" int NOT NULL REFERENCES "property_manager" ("id"),
     "tenant_id" int NOT NULL REFERENCES "tenant" ("id"),
-    "start_date" integer,
-    "end_date" integer,        
-    "signed_date" integer,
+    "start_date" integer NOT NULL,
+    "end_date" integer NOT NULL,        
+    "signed_date" integer NOT NULL,
     "note" text,
-    UNIQUE("property_id", "tenant_id", "signed_date") 
+    UNIQUE("property_id", "signed_date")
 );
 
 CREATE TABLE IF NOT EXISTS "account" (

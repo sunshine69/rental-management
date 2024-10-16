@@ -43,10 +43,6 @@ func UpdateInvoice(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		tn := model.GetInvoiceByCompositeKeyOrNew(o)
-		if tn == nil {
-			fmt.Fprint(w, `{"status": "ERROR", "msg": "Invoice not found with this unique field"}`)
-			return
-		}
 		if err := tn.Update(o); err == nil {
 			fmt.Fprint(w, `{"status": "OK", "msg": "Invoice updated"}`)
 		} else {

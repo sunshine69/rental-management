@@ -43,10 +43,6 @@ func UpdateProperty_manager(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		tn := model.GetProperty_managerByCompositeKeyOrNew(o)
-		if tn == nil {
-			fmt.Fprint(w, `{"status": "ERROR", "msg": "Property_manager not found with this unique field"}`)
-			return
-		}
 		if err := tn.Update(o); err == nil {
 			fmt.Fprint(w, `{"status": "OK", "msg": "Property_manager updated"}`)
 		} else {

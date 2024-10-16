@@ -10,9 +10,13 @@ import (
 	u "github.com/sunshine69/golang-tools/utils"
 )
 
-func Must[T any](o T, err error) T {
-	u.CheckErr(err, "Must")
-	return o
+func AssertInt64ValueForMap(input map[string]interface{}) map[string]interface{} {
+	for k, v := range input {
+		if v, ok := v.(float64); ok {
+			input[k] = int64(v)
+		}
+	}
+	return input
 }
 
 func GotypeLookup(sqltype string) string {

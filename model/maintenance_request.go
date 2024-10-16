@@ -109,7 +109,7 @@ func (o *Maintenance_request) Search() []Maintenance_request {
 func (o *Maintenance_request) Update(data map[string]interface{}) error {
 	fields := ag.MapKeysToSlice(data)
 	fieldsWithoutKey := ag.SliceMap(fields, func(s string) *string {
-		if s != "id" && s != "email" {
+		if s != "id" && s != "contract_id" && s != "request_date" {
 			return &s
 		}
 		return nil
