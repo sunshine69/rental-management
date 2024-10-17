@@ -3,6 +3,7 @@ module github.com/sunshine69/rental-management
 go 1.22.2
 
 require (
+	github.com/GeertJohan/go.rice v1.0.3
 	github.com/R167/go-sets v0.2.0
 	github.com/go-playground/form/v4 v4.2.1
 	github.com/go-playground/validator/v10 v10.22.1
@@ -13,6 +14,7 @@ require (
 )
 
 require (
+	github.com/daaku/go.zipexe v1.0.2 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/kr/text v0.1.0 // indirect
 	github.com/nikolalohinski/gonja/v2 v2.3.1 // indirect
