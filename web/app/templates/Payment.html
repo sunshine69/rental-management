@@ -1,0 +1,22 @@
+{{ define "FormPayment" }}
+	<div id="FormPayment" class="form-group" style="display:none;">
+	<form method="POST" action="/payment">
+		<label for="Account_id">Account id:</label>
+        <input type="text" id="Account_id" name="Account_id" value="" placeholder="Enter Account id" />		
+		<label for="Amount">Amount:</label>
+        <input type="text" id="Amount" name="Amount" value="" placeholder="Enter Amount" />		
+		<label for="Contract_id">Contract id:</label>
+        <input type="text" id="Contract_id" name="Contract_id" value="" placeholder="Enter Contract id" />		
+		<label for="Id">Id:</label>
+        <input type="text" id="Id" name="Id" value="" placeholder="Enter Id" />		
+		<label for="Pay_date">Pay date:</label>
+        <input type="text" id="Pay_date" name="Pay_date" value="" placeholder="Enter Pay date" />		
+		<label for="Reference">Reference:</label>
+        <input type="text" id="Reference" name="Reference" value="" placeholder="Enter Reference" />		
+		<label for="Where">Where:</label>
+        <input type="text" id="Where" name="Where" value="" placeholder="Enter Where" />		
+		<input type="submit" name="submit" value="Submit" />
+		<input type="reset" name="reset" value="Reset" />
+	</form>
+	</div>
+{{ end }}

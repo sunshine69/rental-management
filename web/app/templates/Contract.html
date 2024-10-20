@@ -1,0 +1,26 @@
+{{ define "FormContract" }}
+	<div id="FormContract" class="form-group" style="display:none;">
+	<form method="POST" action="/contract">
+		<label for="End_date">End date:</label>
+        <input type="text" id="End_date" name="End_date" value="" placeholder="Enter End date" />		
+		<label for="Id">Id:</label>
+        <input type="text" id="Id" name="Id" value="" placeholder="Enter Id" />		
+		<label for="Note">Note:</label>
+        <input type="text" id="Note" name="Note" value="" placeholder="Enter Note" />		
+		<label for="Property_id">Property id:</label>
+        <input type="text" id="Property_id" name="Property_id" value="" placeholder="Enter Property id" />		
+		<label for="Property_manager_id">Property manager id:</label>
+        <input type="text" id="Property_manager_id" name="Property_manager_id" value="" placeholder="Enter Property manager id" />		
+		<label for="Signed_date">Signed date:</label>
+        <input type="text" id="Signed_date" name="Signed_date" value="" placeholder="Enter Signed date" />		
+		<label for="Start_date">Start date:</label>
+        <input type="text" id="Start_date" name="Start_date" value="" placeholder="Enter Start date" />		
+		<label for="Tenant_id">Tenant id:</label>
+        <input type="text" id="Tenant_id" name="Tenant_id" value="" placeholder="Enter Tenant id" />		
+		<label for="Where">Where:</label>
+        <input type="text" id="Where" name="Where" value="" placeholder="Enter Where" />		
+		<input type="submit" name="submit" value="Submit" />
+		<input type="reset" name="reset" value="Reset" />
+	</form>
+	</div>
+{{ end }}

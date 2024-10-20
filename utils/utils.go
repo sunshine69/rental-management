@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"fmt"
+	"os"
 	"path/filepath"
 	"reflect"
 	"regexp"
@@ -9,6 +11,19 @@ import (
 	ag "github.com/sunshine69/automation-go/lib"
 	u "github.com/sunshine69/golang-tools/utils"
 )
+
+func CodeGen(templateFile string) {
+	if sqlb, err := os.ReadFile("db/schema.sql"); err == nil {
+		sqls := ag.SplitTextByPattern(string(sqlb), `(?m)^CREATE TABLE IF NOT EXISTS .*`, true)
+		// fmt.Printf("%s\n", u.JsonDump(sqls, "  "))
+		for _, sqltext := range sqls {
+			fmt.Println(sqltext)
+			GenerateClass(sqltext, templateFile)
+		}
+	} else {
+		panic(err.Error())
+	}
+}
 
 func AssertInt64ValueForMap(input map[string]interface{}) map[string]interface{} {
 	for k, v := range input {
@@ -72,29 +87,76 @@ func GenerateClass(sqltext, classTemplateFile string) {
 	u.RunSystemCommandV2("go fmt "+targetFile, true)
 }
 
-func ReflectStruct(astruct any) map[string]map[string]interface{} {
+type StructInfo struct {
+	Name       string
+	FieldName  []string
+	FieldType  map[string]string
+	FieldValue map[string]any
+	TagCapture map[string][]string
+}
 
-	o := map[string]map[string]interface{}{}
-	tagExtractPtn := regexp.MustCompile(`db:"([^"]+)"`)
+// Give it a struct and a tag pattern to capture the tag content - return a map of string which is the struct Field name, point to a map of
+// string which is the capture in the pattern
+func ReflectStruct(astruct any, tagPtn string) StructInfo {
+	if tagPtn == "" {
+		tagPtn = `db:"([^"]+)"`
+	}
+	o := StructInfo{}
+	tagExtractPtn := regexp.MustCompile(tagPtn)
 
 	rf := reflect.TypeOf(astruct)
+	o.Name = rf.Name()
 	if rf.Kind().String() != "struct" {
 		panic("I need a struct")
 	}
 	rValue := reflect.ValueOf(astruct)
+	o.FieldName = []string{}
+	o.FieldType = map[string]string{}
+	o.FieldValue = map[string]any{}
+	o.TagCapture = map[string][]string{}
 	for i := 0; i < rf.NumField(); i++ {
 		f := rf.Field(i)
-		o[f.Name] = map[string]interface{}{}
-		dbcolum := tagExtractPtn.FindStringSubmatch(string(f.Tag))[1]
+		o.FieldName = append(o.FieldName, f.Name)
 		fieldValue := rValue.Field(i)
+		o.FieldType[f.Name] = fieldValue.Type().String()
+		o.TagCapture[f.Name] = []string{}
 		switch fieldValue.Type().String() {
 		case "string":
-			o[f.Name][dbcolum] = fieldValue.String()
+			o.FieldValue[f.Name] = fieldValue.String()
 		case "int64":
-			o[f.Name][dbcolum] = fieldValue.Int()
+			o.FieldValue[f.Name] = fieldValue.Int()
 		default:
-			panic("Unsupported field type " + fieldValue.Type().String())
+			fmt.Printf("Unsupported field type " + fieldValue.Type().String())
+		}
+		if ext := tagExtractPtn.FindStringSubmatch(string(f.Tag)); len(ext) == 2 {
+			o.TagCapture[f.Name] = append(o.TagCapture[f.Name], ext...)
 		}
 	}
 	return o
+}
+
+// Take all structs in model and generate golang template html form - write to target dir
+func FormGen(structType any, writeDirectory string) {
+	sInfo := ReflectStruct(structType, `form:"([^"]+)"`)
+	destFile := writeDirectory + "/" + sInfo.Name + ".html"
+
+	fieldProp := map[string]map[string]any{}
+	for _, v := range sInfo.FieldName {
+		fieldProp[v] = map[string]any{"display": true, "ele": "<input", "type": "text", "html": ""}
+		tags := sInfo.TagCapture[v]
+		if len(tags) > 1 {
+			if tags[1] == "-" {
+				fieldProp[v]["display"] = false
+			}
+		}
+	}
+
+	ag.GoTemplateFile("utils/form.go.tmpl", destFile, map[string]any{
+		"formName":   sInfo.Name,
+		"formClass":  "form-group",
+		"formAction": "/" + strings.ToLower(sInfo.Name),
+		"formID":     strings.ToLower(sInfo.Name),
+		"fInfo":      sInfo,
+		"fieldProp":  fieldProp,
+	}, 0640)
 }

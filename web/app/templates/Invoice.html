@@ -1,0 +1,28 @@
+{{ define "FormInvoice" }}
+	<div id="FormInvoice" class="form-group" style="display:none;">
+	<form method="POST" action="/invoice">
+		<label for="Amount">Amount:</label>
+        <input type="text" id="Amount" name="Amount" value="" placeholder="Enter Amount" />		
+		<label for="Date">Date:</label>
+        <input type="text" id="Date" name="Date" value="" placeholder="Enter Date" />		
+		<label for="Description">Description:</label>
+        <input type="text" id="Description" name="Description" value="" placeholder="Enter Description" />		
+		<label for="Due_date">Due date:</label>
+        <input type="text" id="Due_date" name="Due_date" value="" placeholder="Enter Due date" />		
+		<label for="Id">Id:</label>
+        <input type="text" id="Id" name="Id" value="" placeholder="Enter Id" />		
+		<label for="Issuer">Issuer:</label>
+        <input type="text" id="Issuer" name="Issuer" value="" placeholder="Enter Issuer" />		
+		<label for="Number">Number:</label>
+        <input type="text" id="Number" name="Number" value="" placeholder="Enter Number" />		
+		<label for="Property_id">Property id:</label>
+        <input type="text" id="Property_id" name="Property_id" value="" placeholder="Enter Property id" />		
+		<label for="To">To:</label>
+        <input type="text" id="To" name="To" value="" placeholder="Enter To" />		
+		<label for="Where">Where:</label>
+        <input type="text" id="Where" name="Where" value="" placeholder="Enter Where" />		
+		<input type="submit" name="submit" value="Submit" />
+		<input type="reset" name="reset" value="Reset" />
+	</form>
+	</div>
+{{ end }}

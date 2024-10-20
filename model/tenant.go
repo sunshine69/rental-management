@@ -23,7 +23,7 @@ type Tenant struct {
 	Last_name      string `db:"last_name"`
 	Note           string `db:"note"`
 
-	Where string
+	Where string `form:"-"`
 }
 
 func NewTenant(email string) Tenant {

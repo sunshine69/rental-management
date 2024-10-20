@@ -20,7 +20,7 @@ func TestTenant(t *testing.T) {
 }
 
 func TestReflect(t *testing.T) {
-	o := utils.ReflectStruct(Tenant{Email: "msh@example.com"})
+	o := utils.ReflectStruct(Tenant{Email: "msh@example.com"}, `form:"([^"]+)"`)
 
-	fmt.Printf("%s\n", u.JsonDump(o, "  "))
+	fmt.Printf("%s\n", u.JsonDump(o, ""))
 }

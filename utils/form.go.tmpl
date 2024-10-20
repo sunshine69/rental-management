@@ -1,0 +1,15 @@
+{{"{{"}} define "Form{{.formName}}" {{"}}"}}
+	<div id="Form{{.formName}}" class="{{.formClass}}" style="display:none;">
+	<form method="POST" action="{{.formAction}}">
+		{{ range $fName := .fInfo.FieldName -}}
+		{{ $fp := (index $.fieldProp $fName) -}}
+		{{ if index $fp "display" -}}				
+		<label for="{{$fName}}">{{replace $fName "_" " "}}:</label>
+        {{ unsafe_raw_html (index $fp "ele")}} type="{{index $fp "type"}}" id="{{$fName}}" name="{{$fName}}" value="" placeholder="Enter {{replace $fName "_" " "}}" />		
+		{{ end -}}		
+		{{ end -}}
+		<input type="submit" name="submit" value="Submit" />
+		<input type="reset" name="reset" value="Reset" />
+	</form>
+	</div>
+{{"{{"}} end {{"}}"}}

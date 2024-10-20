@@ -3,24 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os"
-
-	ag "github.com/sunshine69/automation-go/lib"
+	"github.com/sunshine69/rental-management/model"
 	"github.com/sunshine69/rental-management/utils"
 )
-
-func CodeGen(templateFile string) {
-	if sqlb, err := os.ReadFile("db/schema.sql"); err == nil {
-		sqls := ag.SplitTextByPattern(string(sqlb), `(?m)^CREATE TABLE IF NOT EXISTS .*`, true)
-		// fmt.Printf("%s\n", u.JsonDump(sqls, "  "))
-		for _, sqltext := range sqls {
-			fmt.Println(sqltext)
-			utils.GenerateClass(sqltext, templateFile)
-		}
-	} else {
-		panic(err.Error())
-	}
-}
 
 func main() {
 	gentype := flag.String("type", "", "Code gen type. Can be model | api")
@@ -28,9 +13,18 @@ func main() {
 
 	switch *gentype {
 	case "model":
-		CodeGen("model/class-template.go.tmpl")
+		utils.CodeGen("model/class-template.go.tmpl")
 	case "api":
-		CodeGen("api/api-template.go.tmpl")
+		utils.CodeGen("api/api-template.go.tmpl")
+	case "form":
+		utils.FormGen(model.Tenant{}, "web/app/templates")
+		utils.FormGen(model.Property{}, "web/app/templates")
+		utils.FormGen(model.Account{}, "web/app/templates")
+		utils.FormGen(model.Payment{}, "web/app/templates")
+		utils.FormGen(model.Contract{}, "web/app/templates")
+		utils.FormGen(model.Invoice{}, "web/app/templates")
+		utils.FormGen(model.Maintenance_request{}, "web/app/templates")
+		utils.FormGen(model.Property_manager{}, "web/app/templates")
 	default:
 		fmt.Println("Unknown type " + *gentype)
 	}
