@@ -42,7 +42,7 @@ require (
 	github.com/sendgrid/sendgrid-go v3.16.0+incompatible // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
 	github.com/stvoidit/gosmtp v1.0.7 // indirect
-	github.com/sunshine69/automation-go v0.0.0-20241012233915-5b7d888ec31e
+	github.com/sunshine69/automation-go v0.0.0-20241021102248-7d89e04035a5
 	golang.org/x/crypto v0.28.0 // indirect
 	golang.org/x/net v0.30.0 // indirect
 	golang.org/x/sys v0.26.0 // indirect

@@ -18,13 +18,13 @@ type Payment struct {
 	Amount      int64  `db:"amount"`
 	Contract_id int64  `db:"contract_id"`
 	Id          int64  `db:"id"`
-	Pay_date    int64  `db:"pay_date"`
+	Pay_date    string `db:"pay_date"`
 	Reference   string `db:"reference"`
 
 	Where string
 }
 
-func NewPayment(account_id int64, pay_date int64) Payment {
+func NewPayment(account_id int64, pay_date string) Payment {
 
 	o := Payment{}
 	if err := DB.Get(&o, "SELECT * FROM payment WHERE  account_id = ? AND  pay_date = ?", account_id, pay_date); errors.Is(err, sql.ErrNoRows) {
@@ -53,7 +53,7 @@ func GetPaymentByCompositeKeyOrNew(data map[string]interface{}) *Payment {
 			}
 		}
 		// create new one
-		tn := NewPayment(data["account_id"].(int64), data["pay_date"].(int64))
+		tn := NewPayment(data["account_id"].(int64), data["pay_date"].(string))
 		tn.Update(data)
 		return &tn
 	} else {
@@ -62,7 +62,7 @@ func GetPaymentByCompositeKeyOrNew(data map[string]interface{}) *Payment {
 	return nil
 }
 
-func GetPayment(account_id int64, pay_date int64) *Payment {
+func GetPayment(account_id int64, pay_date string) *Payment {
 	o := Payment{
 		Account_id: account_id, Pay_date: pay_date,
 		Where: "account_id=:account_id , pay_date=:pay_date "}

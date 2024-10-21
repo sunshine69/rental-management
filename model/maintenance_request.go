@@ -18,14 +18,14 @@ type Maintenance_request struct {
 	Cost         int64  `db:"cost"`
 	Id           int64  `db:"id"`
 	Invoice_id   int64  `db:"invoice_id"`
-	Request_date int64  `db:"request_date"`
+	Request_date string `db:"request_date"`
 	Status       string `db:"status"`
 	Type         string `db:"type"`
 
 	Where string
 }
 
-func NewMaintenance_request(contract_id int64, request_date int64) Maintenance_request {
+func NewMaintenance_request(contract_id int64, request_date string) Maintenance_request {
 
 	o := Maintenance_request{}
 	if err := DB.Get(&o, "SELECT * FROM maintenance_request WHERE  contract_id = ? AND  request_date = ?", contract_id, request_date); errors.Is(err, sql.ErrNoRows) {
@@ -54,7 +54,7 @@ func GetMaintenance_requestByCompositeKeyOrNew(data map[string]interface{}) *Mai
 			}
 		}
 		// create new one
-		tn := NewMaintenance_request(data["contract_id"].(int64), data["request_date"].(int64))
+		tn := NewMaintenance_request(data["contract_id"].(int64), data["request_date"].(string))
 		tn.Update(data)
 		return &tn
 	} else {
@@ -63,7 +63,7 @@ func GetMaintenance_requestByCompositeKeyOrNew(data map[string]interface{}) *Mai
 	return nil
 }
 
-func GetMaintenance_request(contract_id int64, request_date int64) *Maintenance_request {
+func GetMaintenance_request(contract_id int64, request_date string) *Maintenance_request {
 	o := Maintenance_request{
 		Contract_id: contract_id, Request_date: request_date,
 		Where: "contract_id=:contract_id , request_date=:request_date "}

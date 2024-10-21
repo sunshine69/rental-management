@@ -33,7 +33,7 @@ func New{{ .typename | title }}( {{- range $idx, $f := .uniqueFields -}}{{- $f }
 		{{- end }}
 		{{- range $idx, $f := .fieldsList }}
 		{{- if contains $f "date" }}
-		if o.{{ $f|title }} == 0 {
+		if o.{{ $f|title }} == "" {
 			o.{{ $f|title }} = time.Now().Unix()
 		}		
 		{{- end }}

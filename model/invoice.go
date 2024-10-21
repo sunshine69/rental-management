@@ -15,9 +15,9 @@ import (
 
 type Invoice struct {
 	Amount      int64  `db:"amount"`
-	Date        int64  `db:"date"`
+	Date        string `db:"date"`
 	Description string `db:"description"`
-	Due_date    int64  `db:"due_date"`
+	Due_date    string `db:"due_date"`
 	Id          int64  `db:"id"`
 	Issuer      string `db:"issuer"`
 	Number      string `db:"number"`

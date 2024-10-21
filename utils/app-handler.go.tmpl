@@ -1,0 +1,18 @@
+{{- range $objName := index . "objs" }}
+func {{$objName}}(w http.ResponseWriter, r *http.Request) {
+    ProcessPreSteps(w, r, model.{{$objName}}{})
+    if err := u.CheckErrNonFatal(formDecoder.Decode(&form{{$objName}}, r.PostForm), "formDecoder.Decode"); err != nil {
+        fmt.Println("[ERROR] for decode")
+        return
+    }
+    fmt.Fprintf(os.Stderr, "Decode form %s\n", u.JsonDump(form{{$objName}}, ""))
+    // TODO add CRUD ops here 
+    /* form{{$objName}} */
+}
+{{- end }}
+
+func AddHandler(mux *http.ServeMux, Cfg *configs.Config) {
+    {{- range $objName := index . "objs" }}
+    mux.HandleFunc("POST "+Cfg.PathBase+"/{{lower $objName}}", {{$objName}})
+    {{- end }}
+}

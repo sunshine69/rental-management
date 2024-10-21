@@ -11,29 +11,30 @@ import (
 
 	_ "github.com/mutecomm/go-sqlcipher/v4"
 	ag "github.com/sunshine69/automation-go/lib"
+	u "github.com/sunshine69/golang-tools/utils"
 )
 
 type Contract struct {
-	End_date            int64  `db:"end_date"`
+	End_date            string `db:"end_date"`
 	Id                  int64  `db:"id"`
 	Note                string `db:"note"`
 	Property_id         int64  `db:"property_id"`
 	Property_manager_id int64  `db:"property_manager_id"`
-	Signed_date         int64  `db:"signed_date"`
-	Start_date          int64  `db:"start_date"`
+	Signed_date         string `db:"signed_date"`
+	Start_date          string `db:"start_date"`
 	Tenant_id           int64  `db:"tenant_id"`
 
 	Where string
 }
 
-func NewContract(property_id int64, signed_date int64) Contract {
+func NewContract(property_id int64, signed_date string) Contract {
 
 	o := Contract{}
 	if err := DB.Get(&o, "SELECT * FROM contract WHERE  property_id = ? AND  signed_date = ?", property_id, signed_date); errors.Is(err, sql.ErrNoRows) {
 		o.Property_id = property_id
 		o.Signed_date = signed_date
-		if o.Start_date == 0 {
-			o.Start_date = time.Now().Unix()
+		if o.Start_date == "" {
+			o.Start_date = time.Now().Format(u.AUTimeLayout)
 		}
 		if o.End_date == 0 {
 			o.End_date = time.Now().Unix()
@@ -61,7 +62,7 @@ func GetContractByCompositeKeyOrNew(data map[string]interface{}) *Contract {
 			}
 		}
 		// create new one
-		tn := NewContract(data["property_id"].(int64), data["signed_date"].(int64))
+		tn := NewContract(data["property_id"].(int64), data["signed_date"].(string))
 		tn.Update(data)
 		return &tn
 	} else {
@@ -70,7 +71,7 @@ func GetContractByCompositeKeyOrNew(data map[string]interface{}) *Contract {
 	return nil
 }
 
-func GetContract(property_id int64, signed_date int64) *Contract {
+func GetContract(property_id int64, signed_date string) *Contract {
 	o := Contract{
 		Property_id: property_id, Signed_date: signed_date,
 		Where: "property_id=:property_id , signed_date=:signed_date "}

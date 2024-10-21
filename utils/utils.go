@@ -10,6 +10,7 @@ import (
 
 	ag "github.com/sunshine69/automation-go/lib"
 	u "github.com/sunshine69/golang-tools/utils"
+	"github.com/sunshine69/rental-management/model"
 )
 
 func CodeGen(templateFile string) {
@@ -135,6 +136,8 @@ func ReflectStruct(astruct any, tagPtn string) StructInfo {
 	return o
 }
 
+var AllModelObjects []any = []any{model.Tenant{}, model.Property{}, model.Account{}, model.Contract{}, model.Payment{}, model.Maintenance_request{}, model.Property_manager{}}
+
 // Take all structs in model and generate golang template html form - write to target dir
 func FormGen(structType any, writeDirectory string) {
 	sInfo := ReflectStruct(structType, `form:"([^"]+)"`)
@@ -162,6 +165,5 @@ func FormGen(structType any, writeDirectory string) {
 	ag.GoTemplateFile("utils/form.go.tmpl", destFile, data, 0640)
 
 	// Generate some common func handler and form validation to copy/paste into the app.go
-	ag.GoTemplateString(``, data)
 
 }

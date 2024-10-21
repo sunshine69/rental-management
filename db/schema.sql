@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS "tenant" (
     "id" integer NOT NULL PRIMARY KEY,
-    "join_date" integer,
+    "join_date" text,
     "first_name" varchar(254) NOT NULL,
     "last_name" varchar(254) NOT NULL,
     "address" varchar(254) NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS "tenant" (
 
 CREATE TABLE IF NOT EXISTS "property_manager" (
     "id" integer NOT NULL PRIMARY KEY,
-    "join_date" integer,
+    "join_date" text,
     "first_name" varchar(254) NOT NULL,
     "last_name" varchar(254) NOT NULL,
     "address" varchar(254) NOT NULL,
@@ -35,9 +35,9 @@ CREATE TABLE IF NOT EXISTS "contract" (
     "property_id" int NOT NULL REFERENCES "property" ("id"),
     "property_manager_id" int NOT NULL REFERENCES "property_manager" ("id"),
     "tenant_id" int NOT NULL REFERENCES "tenant" ("id"),
-    "start_date" integer NOT NULL,
-    "end_date" integer NOT NULL,        
-    "signed_date" integer NOT NULL,
+    "start_date" text NOT NULL,
+    "end_date" text NOT NULL,        
+    "signed_date" text NOT NULL,
     "note" text,
     UNIQUE("property_id", "signed_date")
 );
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS "payment" (
     "id" integer NOT NULL PRIMARY KEY,
     "account_id" int NOT NULL REFERENCES "account" ("id"),
     "amount" int,
-    "pay_date" int,    
+    "pay_date" text,    
     "contract_id" int NOT NULL REFERENCES "contract" ("id"),
     "reference" varchar(256),
     UNIQUE("account_id", "pay_date")
@@ -62,8 +62,8 @@ CREATE TABLE IF NOT EXISTS "payment" (
 
 CREATE TABLE IF NOT EXISTS "invoice" (
     "id" integer NOT NULL PRIMARY KEY,
-    "date" int,
-    "due_date" int, 
+    "date" text,
+    "due_date" text, 
     "description" varchar(256),
     "amount" int, 
     "number" varchar(128),
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS "invoice" (
 
 CREATE TABLE IF NOT EXISTS "maintenance_request" (
     "id" integer NOT NULL PRIMARY KEY,
-    "request_date" int,
+    "request_date" text,
     "type" varchar(128),    
     "status" varchar(256),
     "cost" int,

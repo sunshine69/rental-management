@@ -19,11 +19,11 @@ type Tenant struct {
 	Email          string `db:"email"`
 	First_name     string `db:"first_name"`
 	Id             int64  `db:"id"`
-	Join_date      int64  `db:"join_date"`
+	Join_date      string `db:"join_date"`
 	Last_name      string `db:"last_name"`
 	Note           string `db:"note"`
 
-	Where string `form:"-"`
+	Where string
 }
 
 func NewTenant(email string) Tenant {
