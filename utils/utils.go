@@ -151,12 +151,17 @@ func FormGen(structType any, writeDirectory string) {
 		}
 	}
 
-	ag.GoTemplateFile("utils/form.go.tmpl", destFile, map[string]any{
+	data := map[string]any{
 		"formName":   sInfo.Name,
 		"formClass":  "form-group",
 		"formAction": "/" + strings.ToLower(sInfo.Name),
 		"formID":     strings.ToLower(sInfo.Name),
 		"fInfo":      sInfo,
 		"fieldProp":  fieldProp,
-	}, 0640)
+	}
+	ag.GoTemplateFile("utils/form.go.tmpl", destFile, data, 0640)
+
+	// Generate some common func handler and form validation to copy/paste into the app.go
+	ag.GoTemplateString(``, data)
+
 }

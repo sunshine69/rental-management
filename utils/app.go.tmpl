@@ -1,0 +1,65 @@
+var (
+{{ range $fName := .fInfo.FieldName -}}
+    form{{$fName}} model.{{$fName}}
+{{ end -}}
+)
+
+{{ range $fName := .fInfo.FieldName -}}
+func {{$fName}}StructLevelValidation(sl validator.StructLevel) {
+	// Change it to suit
+	/* form := sl.Current().Interface().(model.{{$fName}}) 
+	  if form{{$fName}}.XXX != "XXX" {
+		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
+	} */
+}
+{{ end -}}
+
+// Common action for processing all forms.
+func ProcessPreSteps(w http.ResponseWriter, r *http.Request, currentFormType any) {
+	fmt.Fprintf(os.Stderr, "[DEBUG] Form of Type '%s'\n", reflect.TypeOf(currentFormType).Name())
+	u.CheckErr(r.ParseForm(), "[ERROR] can not parse form")
+	var err, err1 error	
+	// reflect.TypeOf will return a string representing the struct name, such as 'Form1'. Need to pass not using &
+	switch reflect.TypeOf(currentFormType).Name() {
+    {{ range $fName := .fInfo.FieldName -}}
+	case "{{$fName}}":
+		// Now we do type assertion based on string return by reflect to cast it to the original type (from any). This is needed as formDecoder
+		// and validator needs the exact type to bind html for to struct because it needs to see the struct field and tags to collect html form data into it
+		CurrentRoutePath, NextRoutePath = form1.RoutePath, form1.NextForm.RoutePath
+		err = u.CheckErrNonFatal(formDecoder.Decode(&form{{$fName}}, r.PostForm), "formDecoder.Decode")
+		err1 = validate.Struct(form{{$fName}})		
+    
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "[ERROR] Form binding '%s'\n", err.Error())
+		AllTemplate.ExecuteTemplate(w, "error.html", map[string]any{"output": "ERROR form binding please check server log"})
+		return
+	}
+	if err1 != nil { // Check validation so any errors will come out here. Currently it would just display the validation tag string
+		fmt.Fprintf(os.Stderr, "[ERROR] Form validation '%s'\n", err1.Error())
+		AllTemplate.ExecuteTemplate(w, "error.html", map[string]any{
+			"err":    strings.ReplaceAll(err1.Error(), "\n", "<br/>"),
+			"output": "",
+			"action": fmt.Sprintf(`<p>Error</p>
+				<a href="%s">click here to try again</a><br>
+				Exit button to quit the program
+				<div class="button-group">
+					<form action="/quit" method="post">
+					<input type="submit" name="submit" value="Exit">
+					</form>
+				</div>`, "/home"),
+		})
+		return
+	}
+    {{ end -}}
+}
+
+// This should be insert into the init
+func init () {
+	validate = validator.New(validator.WithRequiredStructEnabled())
+	formDecoder = form.NewDecoder()	
+	
+	// Register validation
+	{{ range $fName := .fInfo.FieldName -}}
+	validate.RegisterStructValidation({{$fName}}StructLevelValidation, form{{$fName}}{})
+	{{ end -}}
+}

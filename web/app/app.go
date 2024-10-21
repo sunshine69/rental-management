@@ -23,14 +23,6 @@ var (
 	AllTemplate *template.Template
 )
 
-// GUI structure and vars
-type Form1 struct {
-}
-
-var (
-	form1 Form1
-)
-
 func loadAllTemplates() *template.Template {
 	t := template.New("tmpl")
 	myFuncmap := ag.GoTemplateFuncMap
@@ -71,14 +63,11 @@ func Home(w http.ResponseWriter, r *http.Request) {
 
 // Startup the app
 func StartWebApp(mux *http.ServeMux, Cfg *configs.Config) {
-	validate = validator.New(validator.WithRequiredStructEnabled())
-	formDecoder = form.NewDecoder()
-
-	fmt.Printf("[DEBUG] form initialization %s\n", u.JsonDump(form1, "  "))
 
 	AllTemplate = loadAllTemplates()
 	// Web app part.
 	assetBox := rice.MustFindBox("assets")
 	mux.Handle(Cfg.PathBase+"/static/", http.StripPrefix(Cfg.PathBase+"/static/", http.FileServer(assetBox.HTTPBox())))
 	mux.HandleFunc("GET "+Cfg.PathBase+"/home", Home)
+	mux.HandleFunc("POST "+Cfg.PathBase+"/tenant", Home)
 }
