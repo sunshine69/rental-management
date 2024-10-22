@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	u "github.com/sunshine69/golang-tools/utils"
 	"os"
 	"strings"
 	"time"
@@ -14,17 +15,16 @@ import (
 )
 
 type Invoice struct {
-	Amount      int64  `db:"amount"`
+	Id          int64  `db:"id"`
 	Date        string `db:"date"`
 	Description string `db:"description"`
-	Due_date    string `db:"due_date"`
-	Id          int64  `db:"id"`
-	Issuer      string `db:"issuer"`
-	Number      string `db:"number"`
-	Property_id int64  `db:"property_id"`
+	Amount      int64  `db:"amount"`
+	Number      string `db:"number,unique"`
+	Issuer      string `db:"issuer,unique"`
 	To          string `db:"to"`
-
-	Where string
+	Property_id int64  `db:"property_id"`
+	Due_date    string `db:"due_date"`
+	Where       string `form:"-"`
 }
 
 func NewInvoice(number string, issuer string) Invoice {
@@ -33,11 +33,11 @@ func NewInvoice(number string, issuer string) Invoice {
 	if err := DB.Get(&o, "SELECT * FROM invoice WHERE  number = ? AND  issuer = ?", number, issuer); errors.Is(err, sql.ErrNoRows) {
 		o.Number = number
 		o.Issuer = issuer
-		if o.Date == 0 {
-			o.Date = time.Now().Unix()
+		if o.Date == "" {
+			o.Date = time.Now().Format(u.TimeISO8601LayOut)
 		}
-		if o.Due_date == 0 {
-			o.Due_date = time.Now().Unix()
+		if o.Due_date == "" {
+			o.Due_date = time.Now().Format(u.TimeISO8601LayOut)
 		}
 		o.Save()
 	}
@@ -130,7 +130,7 @@ func (o *Invoice) Update(data map[string]interface{}) error {
 
 // Save existing object which is saved it into db
 func (o *Invoice) Save() error {
-	if res, err := DB.NamedExec(`INSERT INTO invoice(date,due_date,description,amount,number,issuer,to,property_id ) VALUES(:date,:due_date,:description,:amount,:number,:issuer,:to,:property_id)`, o); err != nil {
+	if res, err := DB.NamedExec(`INSERT INTO invoice(date,description,amount,number,issuer,to,property_id,due_date) VALUES(:date,:description,:amount,:number,:issuer,:to,:property_id,:due_date) ON CONFLICT( number,issuer) DO UPDATE SET date=excluded.date,description=excluded.description,amount=excluded.amount,number=excluded.number,issuer=excluded.issuer,to=excluded.to,property_id=excluded.property_id,due_date=excluded.due_date`, o); err != nil {
 		return err
 	} else {
 		o.Id, _ = res.LastInsertId()

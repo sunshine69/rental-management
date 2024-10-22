@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Web GUI with Menu and Form</title>
   <link rel="stylesheet" href="/static/style.css">
+  {{- template "FormHeader" }}
 </head>
 <body>
 
@@ -21,11 +22,13 @@
   <!-- Right Column (Form Content) -->
   <div class="content">
     <h2 id="form-title">Tenant</h2>
-    <div id="form-container">      
+    <div id="form-container">
       {{- range $f := .formList }}
-      <!-- {{$f}} (Default). Example of passing a var to a filter func - Need to be like this to work, can not quote string around the var -->       
+      <!-- {{$f}} (Default). Example of passing a var to a filter func - Need to be like this to work, can not quote string around the var -->
       {{- CallTemplate $f . }}
-      {{- end }}      
+      {{- end }}
+      <hr>
+      <div id="post-response" onclick="alert( document.getElementById('post-response').HTML ); this.HTML=''"></div>
     </div>
   </div>
 
@@ -43,11 +46,10 @@
       const formTitleMap = {
         {{- range $f := .formList }}
         'Form{{$f}}': '{{$f}}',
-        {{- end }}        
+        {{- end }}
       };
       document.getElementById('form-title').innerText = formTitleMap[formId];
     }
   </script>
-
 </body>
 </html>

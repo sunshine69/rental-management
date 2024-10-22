@@ -67,7 +67,7 @@ func DeletePayment(w http.ResponseWriter, r *http.Request) {
 				model.DeletePaymentByID(payment.Id)
 				fmt.Fprint(w, `{"status": "OK", "msg": "Payment deleted"}`)
 				return
-			} else if payment.Account_id != 0 && payment.Pay_date != 0 {
+			} else if payment.Account_id != 0 && payment.Pay_date != "" {
 				payment.Delete()
 				fmt.Fprint(w, `{"status": "OK", "msg": "Payment deleted"}`)
 				return

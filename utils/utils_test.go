@@ -5,8 +5,9 @@ import (
 	"os"
 	"testing"
 
-	// u "github.com/sunshine69/golang-tools/utils"
 	ag "github.com/sunshine69/automation-go/lib"
+	u "github.com/sunshine69/golang-tools/utils"
+	"github.com/sunshine69/rental-management/model"
 )
 
 func GetTemplateData() (data map[string]any) {
@@ -41,4 +42,9 @@ func TestAppHanderGen(t *testing.T) {
 
 	code := ag.GoTemplateString(string(appGoB), data)
 	ag.BlockInFile("web/app/app.go", []string{}, []string{`// End app-handler.go.tmpl`}, []string{`// Auto generate using app-handler.go.tmpl template`}, code, true, true)
+}
+
+func TestReflect(t *testing.T) {
+	o := ReflectStruct(model.Tenant{}, "")
+	fmt.Printf("%s\n", u.JsonDump(o, ""))
 }

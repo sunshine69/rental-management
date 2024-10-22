@@ -1,17 +1,13 @@
 {{ define "FormAccount" }}
 	<div id="FormAccount" class="form-group" style="display:none;">
-	<form method="POST" action="/account">
-		<label for="Balance">Balance:</label>
-        <input type="text" id="Balance" name="Balance" value="" placeholder="Enter Balance" />		
-		<label for="Contract_id">Contract id:</label>
-        <input type="text" id="Contract_id" name="Contract_id" value="" placeholder="Enter Contract id" />		
-		<label for="Id">Id:</label>
-        <input type="text" id="Id" name="Id" value="" placeholder="Enter Id" />		
-		<label for="Type">Type:</label>
-        <input type="text" id="Type" name="Type" value="" placeholder="Enter Type" />		
-		<label for="Where">Where:</label>
-        <input type="text" id="Where" name="Where" value="" placeholder="Enter Where" />		
-		<input type="submit" name="submit" value="Submit" />
+	<form>
+		<label for="Type">Type :</label>
+        <input type="text" id="Type" name="Type" value="" placeholder="Enter Type" />
+		<label for="Balance">Balance :</label>
+        <input type="text" id="Balance" name="Balance" value="" placeholder="Enter Balance" />
+		<label for="Contract_id">Contract id *:</label>
+        <input type="text" id="Contract_id" name="Contract_id" value="" placeholder="Enter Contract id" />
+		<input type="button" id="save-Account" name="save" value="Submit" hx-post="/account" hx-target="#post-response" />
 		<input type="reset" name="reset" value="Reset" />
 	</form>
 	</div>

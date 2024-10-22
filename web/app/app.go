@@ -29,61 +29,62 @@ var (
 
 // Auto generate using app-validation.go.tmpl template
 var (
-	formTenant              model.Tenant
-	formProperty            model.Property
-	formAccount             model.Account
-	formContract            model.Contract
-	formPayment             model.Payment
-	formMaintenance_request model.Maintenance_request
-	formProperty_manager    model.Property_manager
+	FormTenant              model.Tenant
+	FormProperty            model.Property
+	FormAccount             model.Account
+	FormContract            model.Contract
+	FormPayment             model.Payment
+	FormMaintenance_request model.Maintenance_request
+	FormProperty_manager    model.Property_manager
+	FormInvoice             model.Invoice
 )
 
 func TenantStructLevelValidation(sl validator.StructLevel) {
 	// Change it to suit
 	/* form := sl.Current().Interface().(model.Tenant)
-	  if formTenant.XXX != "XXX" {
+	  if FormTenant.XXX != "XXX" {
 		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
 	} */
 }
 func PropertyStructLevelValidation(sl validator.StructLevel) {
 	// Change it to suit
 	/* form := sl.Current().Interface().(model.Property)
-	  if formProperty.XXX != "XXX" {
+	  if FormProperty.XXX != "XXX" {
 		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
 	} */
 }
 func AccountStructLevelValidation(sl validator.StructLevel) {
 	// Change it to suit
 	/* form := sl.Current().Interface().(model.Account)
-	  if formAccount.XXX != "XXX" {
+	  if FormAccount.XXX != "XXX" {
 		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
 	} */
 }
 func ContractStructLevelValidation(sl validator.StructLevel) {
 	// Change it to suit
 	/* form := sl.Current().Interface().(model.Contract)
-	  if formContract.XXX != "XXX" {
+	  if FormContract.XXX != "XXX" {
 		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
 	} */
 }
 func PaymentStructLevelValidation(sl validator.StructLevel) {
 	// Change it to suit
 	/* form := sl.Current().Interface().(model.Payment)
-	  if formPayment.XXX != "XXX" {
+	  if FormPayment.XXX != "XXX" {
 		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
 	} */
 }
 func Maintenance_requestStructLevelValidation(sl validator.StructLevel) {
 	// Change it to suit
 	/* form := sl.Current().Interface().(model.Maintenance_request)
-	  if formMaintenance_request.XXX != "XXX" {
+	  if FormMaintenance_request.XXX != "XXX" {
 		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
 	} */
 }
 func Property_managerStructLevelValidation(sl validator.StructLevel) {
 	// Change it to suit
 	/* form := sl.Current().Interface().(model.Property_manager)
-	  if formProperty_manager.XXX != "XXX" {
+	  if FormProperty_manager.XXX != "XXX" {
 		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
 	} */
 }
@@ -99,8 +100,8 @@ func ProcessPreSteps(w http.ResponseWriter, r *http.Request, currentFormType any
 		// Now we do type assertion based on string return by reflect to cast it to the original type (from any). This is needed as formDecoder
 		// and validator needs the exact type to bind html for to struct because it needs to see the struct field and tags to collect html form data into it
 
-		err = u.CheckErrNonFatal(formDecoder.Decode(&formTenant, r.PostForm), "formDecoder.Decode")
-		err1 = validate.Struct(formTenant)
+		err = u.CheckErrNonFatal(formDecoder.Decode(&FormTenant, r.PostForm), "formDecoder.Decode")
+		err1 = validate.Struct(FormTenant)
 
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[ERROR] Form binding '%s'\n", err.Error())
@@ -127,8 +128,8 @@ func ProcessPreSteps(w http.ResponseWriter, r *http.Request, currentFormType any
 		// Now we do type assertion based on string return by reflect to cast it to the original type (from any). This is needed as formDecoder
 		// and validator needs the exact type to bind html for to struct because it needs to see the struct field and tags to collect html form data into it
 
-		err = u.CheckErrNonFatal(formDecoder.Decode(&formProperty, r.PostForm), "formDecoder.Decode")
-		err1 = validate.Struct(formProperty)
+		err = u.CheckErrNonFatal(formDecoder.Decode(&FormProperty, r.PostForm), "formDecoder.Decode")
+		err1 = validate.Struct(FormProperty)
 
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[ERROR] Form binding '%s'\n", err.Error())
@@ -155,8 +156,8 @@ func ProcessPreSteps(w http.ResponseWriter, r *http.Request, currentFormType any
 		// Now we do type assertion based on string return by reflect to cast it to the original type (from any). This is needed as formDecoder
 		// and validator needs the exact type to bind html for to struct because it needs to see the struct field and tags to collect html form data into it
 
-		err = u.CheckErrNonFatal(formDecoder.Decode(&formAccount, r.PostForm), "formDecoder.Decode")
-		err1 = validate.Struct(formAccount)
+		err = u.CheckErrNonFatal(formDecoder.Decode(&FormAccount, r.PostForm), "formDecoder.Decode")
+		err1 = validate.Struct(FormAccount)
 
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[ERROR] Form binding '%s'\n", err.Error())
@@ -183,8 +184,8 @@ func ProcessPreSteps(w http.ResponseWriter, r *http.Request, currentFormType any
 		// Now we do type assertion based on string return by reflect to cast it to the original type (from any). This is needed as formDecoder
 		// and validator needs the exact type to bind html for to struct because it needs to see the struct field and tags to collect html form data into it
 
-		err = u.CheckErrNonFatal(formDecoder.Decode(&formContract, r.PostForm), "formDecoder.Decode")
-		err1 = validate.Struct(formContract)
+		err = u.CheckErrNonFatal(formDecoder.Decode(&FormContract, r.PostForm), "formDecoder.Decode")
+		err1 = validate.Struct(FormContract)
 
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[ERROR] Form binding '%s'\n", err.Error())
@@ -211,8 +212,8 @@ func ProcessPreSteps(w http.ResponseWriter, r *http.Request, currentFormType any
 		// Now we do type assertion based on string return by reflect to cast it to the original type (from any). This is needed as formDecoder
 		// and validator needs the exact type to bind html for to struct because it needs to see the struct field and tags to collect html form data into it
 
-		err = u.CheckErrNonFatal(formDecoder.Decode(&formPayment, r.PostForm), "formDecoder.Decode")
-		err1 = validate.Struct(formPayment)
+		err = u.CheckErrNonFatal(formDecoder.Decode(&FormPayment, r.PostForm), "formDecoder.Decode")
+		err1 = validate.Struct(FormPayment)
 
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[ERROR] Form binding '%s'\n", err.Error())
@@ -239,8 +240,8 @@ func ProcessPreSteps(w http.ResponseWriter, r *http.Request, currentFormType any
 		// Now we do type assertion based on string return by reflect to cast it to the original type (from any). This is needed as formDecoder
 		// and validator needs the exact type to bind html for to struct because it needs to see the struct field and tags to collect html form data into it
 
-		err = u.CheckErrNonFatal(formDecoder.Decode(&formMaintenance_request, r.PostForm), "formDecoder.Decode")
-		err1 = validate.Struct(formMaintenance_request)
+		err = u.CheckErrNonFatal(formDecoder.Decode(&FormMaintenance_request, r.PostForm), "formDecoder.Decode")
+		err1 = validate.Struct(FormMaintenance_request)
 
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[ERROR] Form binding '%s'\n", err.Error())
@@ -267,8 +268,8 @@ func ProcessPreSteps(w http.ResponseWriter, r *http.Request, currentFormType any
 		// Now we do type assertion based on string return by reflect to cast it to the original type (from any). This is needed as formDecoder
 		// and validator needs the exact type to bind html for to struct because it needs to see the struct field and tags to collect html form data into it
 
-		err = u.CheckErrNonFatal(formDecoder.Decode(&formProperty_manager, r.PostForm), "formDecoder.Decode")
-		err1 = validate.Struct(formProperty_manager)
+		err = u.CheckErrNonFatal(formDecoder.Decode(&FormProperty_manager, r.PostForm), "formDecoder.Decode")
+		err1 = validate.Struct(FormProperty_manager)
 
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[ERROR] Form binding '%s'\n", err.Error())
@@ -299,13 +300,13 @@ func init() {
 	formDecoder = form.NewDecoder()
 
 	// Register validation
-	validate.RegisterStructValidation(TenantStructLevelValidation, formTenant)
-	validate.RegisterStructValidation(PropertyStructLevelValidation, formProperty)
-	validate.RegisterStructValidation(AccountStructLevelValidation, formAccount)
-	validate.RegisterStructValidation(ContractStructLevelValidation, formContract)
-	validate.RegisterStructValidation(PaymentStructLevelValidation, formPayment)
-	validate.RegisterStructValidation(Maintenance_requestStructLevelValidation, formMaintenance_request)
-	validate.RegisterStructValidation(Property_managerStructLevelValidation, formProperty_manager)
+	validate.RegisterStructValidation(TenantStructLevelValidation, FormTenant)
+	validate.RegisterStructValidation(PropertyStructLevelValidation, FormProperty)
+	validate.RegisterStructValidation(AccountStructLevelValidation, FormAccount)
+	validate.RegisterStructValidation(ContractStructLevelValidation, FormContract)
+	validate.RegisterStructValidation(PaymentStructLevelValidation, FormPayment)
+	validate.RegisterStructValidation(Maintenance_requestStructLevelValidation, FormMaintenance_request)
+	validate.RegisterStructValidation(Property_managerStructLevelValidation, FormProperty_manager)
 }
 
 // End app-validation.go.tmpl
@@ -314,73 +315,75 @@ func init() {
 
 func Tenant(w http.ResponseWriter, r *http.Request) {
     ProcessPreSteps(w, r, model.Tenant{})
-    if err := u.CheckErrNonFatal(formDecoder.Decode(&formTenant, r.PostForm), "formDecoder.Decode"); err != nil {
-        fmt.Println("[ERROR] for decode")
+    if err := FormTenant.Save(); err != nil {
+        fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
+        fmt.Fprintf(os.Stderr, "%s", err.Error())
         return
     }
-    fmt.Fprintf(os.Stderr, "Decode form %s\n", u.JsonDump(formTenant, ""))
-    // TODO add CRUD ops here 
-    /* formTenant */
+    fmt.Fprint(w, "Data saved")
 }
 func Property(w http.ResponseWriter, r *http.Request) {
     ProcessPreSteps(w, r, model.Property{})
-    if err := u.CheckErrNonFatal(formDecoder.Decode(&formProperty, r.PostForm), "formDecoder.Decode"); err != nil {
-        fmt.Println("[ERROR] for decode")
+    if err := FormProperty.Save(); err != nil {
+        fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
+        fmt.Fprintf(os.Stderr, "%s", err.Error())
         return
     }
-    fmt.Fprintf(os.Stderr, "Decode form %s\n", u.JsonDump(formProperty, ""))
-    // TODO add CRUD ops here 
-    /* formProperty */
+    fmt.Fprint(w, "Data saved")
 }
 func Account(w http.ResponseWriter, r *http.Request) {
     ProcessPreSteps(w, r, model.Account{})
-    if err := u.CheckErrNonFatal(formDecoder.Decode(&formAccount, r.PostForm), "formDecoder.Decode"); err != nil {
-        fmt.Println("[ERROR] for decode")
+    if err := FormAccount.Save(); err != nil {
+        fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
+        fmt.Fprintf(os.Stderr, "%s", err.Error())
         return
     }
-    fmt.Fprintf(os.Stderr, "Decode form %s\n", u.JsonDump(formAccount, ""))
-    // TODO add CRUD ops here 
-    /* formAccount */
+    fmt.Fprint(w, "Data saved")
 }
 func Contract(w http.ResponseWriter, r *http.Request) {
     ProcessPreSteps(w, r, model.Contract{})
-    if err := u.CheckErrNonFatal(formDecoder.Decode(&formContract, r.PostForm), "formDecoder.Decode"); err != nil {
-        fmt.Println("[ERROR] for decode")
+    if err := FormContract.Save(); err != nil {
+        fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
+        fmt.Fprintf(os.Stderr, "%s", err.Error())
         return
     }
-    fmt.Fprintf(os.Stderr, "Decode form %s\n", u.JsonDump(formContract, ""))
-    // TODO add CRUD ops here 
-    /* formContract */
+    fmt.Fprint(w, "Data saved")
 }
 func Payment(w http.ResponseWriter, r *http.Request) {
     ProcessPreSteps(w, r, model.Payment{})
-    if err := u.CheckErrNonFatal(formDecoder.Decode(&formPayment, r.PostForm), "formDecoder.Decode"); err != nil {
-        fmt.Println("[ERROR] for decode")
+    if err := FormPayment.Save(); err != nil {
+        fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
+        fmt.Fprintf(os.Stderr, "%s", err.Error())
         return
     }
-    fmt.Fprintf(os.Stderr, "Decode form %s\n", u.JsonDump(formPayment, ""))
-    // TODO add CRUD ops here 
-    /* formPayment */
+    fmt.Fprint(w, "Data saved")
 }
 func Maintenance_request(w http.ResponseWriter, r *http.Request) {
     ProcessPreSteps(w, r, model.Maintenance_request{})
-    if err := u.CheckErrNonFatal(formDecoder.Decode(&formMaintenance_request, r.PostForm), "formDecoder.Decode"); err != nil {
-        fmt.Println("[ERROR] for decode")
+    if err := FormMaintenance_request.Save(); err != nil {
+        fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
+        fmt.Fprintf(os.Stderr, "%s", err.Error())
         return
     }
-    fmt.Fprintf(os.Stderr, "Decode form %s\n", u.JsonDump(formMaintenance_request, ""))
-    // TODO add CRUD ops here 
-    /* formMaintenance_request */
+    fmt.Fprint(w, "Data saved")
 }
 func Property_manager(w http.ResponseWriter, r *http.Request) {
     ProcessPreSteps(w, r, model.Property_manager{})
-    if err := u.CheckErrNonFatal(formDecoder.Decode(&formProperty_manager, r.PostForm), "formDecoder.Decode"); err != nil {
-        fmt.Println("[ERROR] for decode")
+    if err := FormProperty_manager.Save(); err != nil {
+        fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
+        fmt.Fprintf(os.Stderr, "%s", err.Error())
         return
     }
-    fmt.Fprintf(os.Stderr, "Decode form %s\n", u.JsonDump(formProperty_manager, ""))
-    // TODO add CRUD ops here 
-    /* formProperty_manager */
+    fmt.Fprint(w, "Data saved")
+}
+func Invoice(w http.ResponseWriter, r *http.Request) {
+    ProcessPreSteps(w, r, model.Invoice{})
+    if err := FormInvoice.Save(); err != nil {
+        fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
+        fmt.Fprintf(os.Stderr, "%s", err.Error())
+        return
+    }
+    fmt.Fprint(w, "Data saved")
 }
 
 func AddHandler(mux *http.ServeMux, Cfg *configs.Config) {
@@ -391,6 +394,7 @@ func AddHandler(mux *http.ServeMux, Cfg *configs.Config) {
     mux.HandleFunc("POST "+Cfg.PathBase+"/payment", Payment)
     mux.HandleFunc("POST "+Cfg.PathBase+"/maintenance_request", Maintenance_request)
     mux.HandleFunc("POST "+Cfg.PathBase+"/property_manager", Property_manager)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/invoice", Invoice)
 }
 // End app-handler.go.tmpl
 

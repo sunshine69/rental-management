@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	u "github.com/sunshine69/golang-tools/utils"
 	"os"
 	"strings"
 	"time"
@@ -14,14 +15,13 @@ import (
 )
 
 type Payment struct {
-	Account_id  int64  `db:"account_id"`
-	Amount      int64  `db:"amount"`
-	Contract_id int64  `db:"contract_id"`
 	Id          int64  `db:"id"`
-	Pay_date    string `db:"pay_date"`
+	Account_id  int64  `db:"account_id,unique"`
+	Amount      int64  `db:"amount"`
+	Pay_date    string `db:"pay_date,unique"`
+	Contract_id int64  `db:"contract_id"`
 	Reference   string `db:"reference"`
-
-	Where string
+	Where       string `form:"-"`
 }
 
 func NewPayment(account_id int64, pay_date string) Payment {
@@ -30,8 +30,8 @@ func NewPayment(account_id int64, pay_date string) Payment {
 	if err := DB.Get(&o, "SELECT * FROM payment WHERE  account_id = ? AND  pay_date = ?", account_id, pay_date); errors.Is(err, sql.ErrNoRows) {
 		o.Account_id = account_id
 		o.Pay_date = pay_date
-		if o.Pay_date == 0 {
-			o.Pay_date = time.Now().Unix()
+		if o.Pay_date == "" {
+			o.Pay_date = time.Now().Format(u.TimeISO8601LayOut)
 		}
 		o.Save()
 	}
@@ -124,7 +124,7 @@ func (o *Payment) Update(data map[string]interface{}) error {
 
 // Save existing object which is saved it into db
 func (o *Payment) Save() error {
-	if res, err := DB.NamedExec(`INSERT INTO payment(account_id,amount,pay_date,contract_id,reference ) VALUES(:account_id,:amount,:pay_date,:contract_id,:reference)`, o); err != nil {
+	if res, err := DB.NamedExec(`INSERT INTO payment(account_id,amount,pay_date,contract_id,reference) VALUES(:account_id,:amount,:pay_date,:contract_id,:reference) ON CONFLICT( account_id,pay_date) DO UPDATE SET account_id=excluded.account_id,amount=excluded.amount,pay_date=excluded.pay_date,contract_id=excluded.contract_id,reference=excluded.reference`, o); err != nil {
 		return err
 	} else {
 		o.Id, _ = res.LastInsertId()

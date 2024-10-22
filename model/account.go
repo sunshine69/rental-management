@@ -12,12 +12,11 @@ import (
 )
 
 type Account struct {
-	Balance     int64  `db:"balance"`
-	Contract_id int64  `db:"contract_id"`
 	Id          int64  `db:"id"`
 	Type        string `db:"type"`
-
-	Where string
+	Balance     int64  `db:"balance"`
+	Contract_id int64  `db:"contract_id,unique"`
+	Where       string `form:"-"`
 }
 
 func NewAccount(contract_id int64) Account {
@@ -116,7 +115,7 @@ func (o *Account) Update(data map[string]interface{}) error {
 
 // Save existing object which is saved it into db
 func (o *Account) Save() error {
-	if res, err := DB.NamedExec(`INSERT INTO account(balance,type,contract_id ) VALUES(:balance,:type,:contract_id)`, o); err != nil {
+	if res, err := DB.NamedExec(`INSERT INTO account(type,balance,contract_id) VALUES(:type,:balance,:contract_id) ON CONFLICT( contract_id) DO UPDATE SET type=excluded.type,balance=excluded.balance,contract_id=excluded.contract_id`, o); err != nil {
 		return err
 	} else {
 		o.Id, _ = res.LastInsertId()

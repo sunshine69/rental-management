@@ -1,14 +1,14 @@
 {{"{{"}} define "Form{{.formName}}" {{"}}"}}
 	<div id="Form{{.formName}}" class="{{.formClass}}" style="display:none;">
-	<form method="POST" action="{{.formAction}}">
+	<form>
 		{{ range $fName := .fInfo.FieldName -}}
 		{{ $fp := (index $.fieldProp $fName) -}}
-		{{ if index $fp "display" -}}				
-		<label for="{{$fName}}">{{replace $fName "_" " "}}:</label>
-        {{ unsafe_raw_html (index $fp "ele")}} type="{{index $fp "type"}}" id="{{$fName}}" name="{{$fName}}" value="" placeholder="Enter {{replace $fName "_" " "}}" />		
-		{{ end -}}		
+		{{ if index $fp "display" -}}
+		<label for="{{$fName}}">{{replace $fName "_" " "}} {{index $fp "label"}}:</label>
+        {{ raw_html (index $fp "ele")}} type="{{index $fp "type"}}" id="{{$fName}}" name="{{$fName}}" value="" placeholder="Enter {{replace $fName "_" " "}}" {{ raw_html (index $fp "close_ele")}}
 		{{ end -}}
-		<input type="submit" name="submit" value="Submit" />
+		{{ end -}}
+		<input type="button" id="save-{{$.formName}}" name="save" value="Submit" hx-post="/{{lower $.formName}}" hx-target="#post-response" />
 		<input type="reset" name="reset" value="Reset" />
 	</form>
 	</div>

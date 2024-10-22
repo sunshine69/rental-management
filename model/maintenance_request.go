@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	u "github.com/sunshine69/golang-tools/utils"
 	"os"
 	"strings"
 	"time"
@@ -14,15 +15,14 @@ import (
 )
 
 type Maintenance_request struct {
-	Contract_id  int64  `db:"contract_id"`
-	Cost         int64  `db:"cost"`
 	Id           int64  `db:"id"`
-	Invoice_id   int64  `db:"invoice_id"`
-	Request_date string `db:"request_date"`
-	Status       string `db:"status"`
+	Request_date string `db:"request_date,unique"`
 	Type         string `db:"type"`
-
-	Where string
+	Status       string `db:"status"`
+	Cost         int64  `db:"cost"`
+	Invoice_id   int64  `db:"invoice_id"`
+	Contract_id  int64  `db:"contract_id,unique"`
+	Where        string `form:"-"`
 }
 
 func NewMaintenance_request(contract_id int64, request_date string) Maintenance_request {
@@ -31,8 +31,8 @@ func NewMaintenance_request(contract_id int64, request_date string) Maintenance_
 	if err := DB.Get(&o, "SELECT * FROM maintenance_request WHERE  contract_id = ? AND  request_date = ?", contract_id, request_date); errors.Is(err, sql.ErrNoRows) {
 		o.Contract_id = contract_id
 		o.Request_date = request_date
-		if o.Request_date == 0 {
-			o.Request_date = time.Now().Unix()
+		if o.Request_date == "" {
+			o.Request_date = time.Now().Format(u.TimeISO8601LayOut)
 		}
 		o.Save()
 	}
@@ -125,7 +125,7 @@ func (o *Maintenance_request) Update(data map[string]interface{}) error {
 
 // Save existing object which is saved it into db
 func (o *Maintenance_request) Save() error {
-	if res, err := DB.NamedExec(`INSERT INTO maintenance_request(request_date,type,status,cost,invoice_id,contract_id ) VALUES(:request_date,:type,:status,:cost,:invoice_id,:contract_id)`, o); err != nil {
+	if res, err := DB.NamedExec(`INSERT INTO maintenance_request(request_date,type,status,cost,invoice_id,contract_id) VALUES(:request_date,:type,:status,:cost,:invoice_id,:contract_id) ON CONFLICT( contract_id,request_date) DO UPDATE SET request_date=excluded.request_date,type=excluded.type,status=excluded.status,cost=excluded.cost,invoice_id=excluded.invoice_id,contract_id=excluded.contract_id`, o); err != nil {
 		return err
 	} else {
 		o.Id, _ = res.LastInsertId()

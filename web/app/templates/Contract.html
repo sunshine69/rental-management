@@ -1,25 +1,35 @@
 {{ define "FormContract" }}
 	<div id="FormContract" class="form-group" style="display:none;">
-	<form method="POST" action="/contract">
-		<label for="End_date">End date:</label>
-        <input type="text" id="End_date" name="End_date" value="" placeholder="Enter End date" />		
-		<label for="Id">Id:</label>
-        <input type="text" id="Id" name="Id" value="" placeholder="Enter Id" />		
-		<label for="Note">Note:</label>
-        <input type="text" id="Note" name="Note" value="" placeholder="Enter Note" />		
-		<label for="Property_id">Property id:</label>
-        <input type="text" id="Property_id" name="Property_id" value="" placeholder="Enter Property id" />		
-		<label for="Property_manager_id">Property manager id:</label>
-        <input type="text" id="Property_manager_id" name="Property_manager_id" value="" placeholder="Enter Property manager id" />		
-		<label for="Signed_date">Signed date:</label>
-        <input type="text" id="Signed_date" name="Signed_date" value="" placeholder="Enter Signed date" />		
-		<label for="Start_date">Start date:</label>
-        <input type="text" id="Start_date" name="Start_date" value="" placeholder="Enter Start date" />		
-		<label for="Tenant_id">Tenant id:</label>
-        <input type="text" id="Tenant_id" name="Tenant_id" value="" placeholder="Enter Tenant id" />		
-		<label for="Where">Where:</label>
-        <input type="text" id="Where" name="Where" value="" placeholder="Enter Where" />		
-		<input type="submit" name="submit" value="Submit" />
+	<form>
+		<label for="Property_id">Property id *:</label>
+        <input type="text" id="Property_id" name="Property_id" value="" placeholder="Enter Property id" />
+		<label for="Property_manager_id">Property manager id :</label>
+        <input type="text" id="Property_manager_id" name="Property_manager_id" value="" placeholder="Enter Property manager id" />
+		<label for="Tenant_id">Tenant id :</label>
+        <input type="text" id="Tenant_id" name="Tenant_id" value="" placeholder="Enter Tenant id" />
+		<label for="Start_date">Start date :</label>
+        <input type="text" id="Start_date" name="Start_date" value="" placeholder="Enter Start date" />
+		<label for="End_date">End date :</label>
+        <input type="text" id="End_date" name="End_date" value="" placeholder="Enter End date" />
+		<label for="Signed_date">Signed date *:</label>
+        <input type="text" id="Signed_date" name="Signed_date" value="" placeholder="Enter Signed date" />
+		<label for="Term">Term :</label>
+        <input type="text" id="Term" name="Term" value="" placeholder="Enter Term" />
+		<label for="Rent">Rent :</label>
+        <input type="text" id="Rent" name="Rent" value="" placeholder="Enter Rent" />
+		<label for="Rent_period">Rent period :</label>
+        <input type="text" id="Rent_period" name="Rent_period" value="" placeholder="Enter Rent period" />
+		<label for="Rent_paid_on">Rent paid on :</label>
+        <input type="text" id="Rent_paid_on" name="Rent_paid_on" value="" placeholder="Enter Rent paid on" />
+		<label for="Water_charged">Water charged :</label>
+        <input type="text" id="Water_charged" name="Water_charged" value="" placeholder="Enter Water charged" />
+		<label for="Document_file_path">Document file path :</label>
+        <input type="text" id="Document_file_path" name="Document_file_path" value="" placeholder="Enter Document file path" />
+		<label for="Url">Url :</label>
+        <input type="text" id="Url" name="Url" value="" placeholder="Enter Url" />
+		<label for="Note">Note :</label>
+        <textarea type="text" id="Note" name="Note" value="" placeholder="Enter Note" ></textarea>
+		<input type="button" id="save-Contract" name="save" value="Submit" hx-post="/contract" hx-target="#post-response" />
 		<input type="reset" name="reset" value="Reset" />
 	</form>
 	</div>

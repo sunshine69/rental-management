@@ -17,7 +17,7 @@ func main() {
 	case "api":
 		utils.CodeGen("api/api-template.go.tmpl")
 	case "form":
-		for it := range utils.AllModelObjects {
+		for _, it := range utils.AllModelObjects {
 			utils.FormGen(it, "web/app/templates")
 		}
 	default:

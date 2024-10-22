@@ -5,26 +5,32 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	u "github.com/sunshine69/golang-tools/utils"
 	"os"
 	"strings"
 	"time"
 
 	_ "github.com/mutecomm/go-sqlcipher/v4"
 	ag "github.com/sunshine69/automation-go/lib"
-	u "github.com/sunshine69/golang-tools/utils"
 )
 
 type Contract struct {
-	End_date            string `db:"end_date"`
 	Id                  int64  `db:"id"`
-	Note                string `db:"note"`
-	Property_id         int64  `db:"property_id"`
+	Property_id         int64  `db:"property_id,unique"`
 	Property_manager_id int64  `db:"property_manager_id"`
-	Signed_date         string `db:"signed_date"`
-	Start_date          string `db:"start_date"`
 	Tenant_id           int64  `db:"tenant_id"`
-
-	Where string
+	Start_date          string `db:"start_date"`
+	End_date            string `db:"end_date"`
+	Signed_date         string `db:"signed_date,unique"`
+	Term                string `db:"term"`
+	Rent                int64  `db:"rent"`
+	Rent_period         string `db:"rent_period"`
+	Rent_paid_on        string `db:"rent_paid_on"`
+	Water_charged       int64  `db:"water_charged"`
+	Document_file_path  string `db:"document_file_path"`
+	Url                 string `db:"url"`
+	Note                string `db:"note" form:"ele=textarea"`
+	Where               string `form:"-"`
 }
 
 func NewContract(property_id int64, signed_date string) Contract {
@@ -34,13 +40,13 @@ func NewContract(property_id int64, signed_date string) Contract {
 		o.Property_id = property_id
 		o.Signed_date = signed_date
 		if o.Start_date == "" {
-			o.Start_date = time.Now().Format(u.AUTimeLayout)
+			o.Start_date = time.Now().Format(u.TimeISO8601LayOut)
 		}
-		if o.End_date == 0 {
-			o.End_date = time.Now().Unix()
+		if o.End_date == "" {
+			o.End_date = time.Now().Format(u.TimeISO8601LayOut)
 		}
-		if o.Signed_date == 0 {
-			o.Signed_date = time.Now().Unix()
+		if o.Signed_date == "" {
+			o.Signed_date = time.Now().Format(u.TimeISO8601LayOut)
 		}
 		o.Save()
 	}
@@ -133,7 +139,7 @@ func (o *Contract) Update(data map[string]interface{}) error {
 
 // Save existing object which is saved it into db
 func (o *Contract) Save() error {
-	if res, err := DB.NamedExec(`INSERT INTO contract(property_id,property_manager_id,tenant_id,start_date,end_date,signed_date,note ) VALUES(:property_id,:property_manager_id,:tenant_id,:start_date,:end_date,:signed_date,:note)`, o); err != nil {
+	if res, err := DB.NamedExec(`INSERT INTO contract(property_id,property_manager_id,tenant_id,start_date,end_date,signed_date,term,rent,rent_period,rent_paid_on,water_charged,document_file_path,url,note) VALUES(:property_id,:property_manager_id,:tenant_id,:start_date,:end_date,:signed_date,:term,:rent,:rent_period,:rent_paid_on,:water_charged,:document_file_path,:url,:note) ON CONFLICT( property_id,signed_date) DO UPDATE SET property_id=excluded.property_id,property_manager_id=excluded.property_manager_id,tenant_id=excluded.tenant_id,start_date=excluded.start_date,end_date=excluded.end_date,signed_date=excluded.signed_date,term=excluded.term,rent=excluded.rent,rent_period=excluded.rent_period,rent_paid_on=excluded.rent_paid_on,water_charged=excluded.water_charged,document_file_path=excluded.document_file_path,url=excluded.url,note=excluded.note`, o); err != nil {
 		return err
 	} else {
 		o.Id, _ = res.LastInsertId()

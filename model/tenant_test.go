@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/sunshine69/rental-management/utils"
-
 	u "github.com/sunshine69/golang-tools/utils"
 )
 
@@ -15,12 +13,13 @@ func TestTenant(t *testing.T) {
 	m1 := ParseDatetimeFieldOfMapData(m0)
 	fmt.Printf("m1: %s\n", u.JsonDump(m1, ""))
 	GetTenantByCompositeKeyOrNew(map[string]interface{}{"email": "myf@ptcm"})
-	// fmt.Printf("%v\n", k)
+	// at := Tenant{Email: "msh@come"}
+	// at.Save()
+	at := Tenant{Where: "email like '%msh%'"}
+	at1 := at.Search()[0]
+	fmt.Printf("%s\n", u.JsonDump(at1, ""))
+	at1.Address = "New address stevek "
+	u.CheckErr(at1.Save(), "")
+	fmt.Printf("%s\n", u.JsonDump(at1, ""))
 	// tn := Tenant{Address: "%moon%"}
-}
-
-func TestReflect(t *testing.T) {
-	o := utils.ReflectStruct(Tenant{Email: "msh@example.com"}, `form:"([^"]+)"`)
-
-	fmt.Printf("%s\n", u.JsonDump(o, ""))
 }

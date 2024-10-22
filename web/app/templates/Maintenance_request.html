@@ -1,23 +1,19 @@
 {{ define "FormMaintenance_request" }}
 	<div id="FormMaintenance_request" class="form-group" style="display:none;">
-	<form method="POST" action="/maintenance_request">
-		<label for="Contract_id">Contract id:</label>
-        <input type="text" id="Contract_id" name="Contract_id" value="" placeholder="Enter Contract id" />		
-		<label for="Cost">Cost:</label>
-        <input type="text" id="Cost" name="Cost" value="" placeholder="Enter Cost" />		
-		<label for="Id">Id:</label>
-        <input type="text" id="Id" name="Id" value="" placeholder="Enter Id" />		
-		<label for="Invoice_id">Invoice id:</label>
-        <input type="text" id="Invoice_id" name="Invoice_id" value="" placeholder="Enter Invoice id" />		
-		<label for="Request_date">Request date:</label>
-        <input type="text" id="Request_date" name="Request_date" value="" placeholder="Enter Request date" />		
-		<label for="Status">Status:</label>
-        <input type="text" id="Status" name="Status" value="" placeholder="Enter Status" />		
-		<label for="Type">Type:</label>
-        <input type="text" id="Type" name="Type" value="" placeholder="Enter Type" />		
-		<label for="Where">Where:</label>
-        <input type="text" id="Where" name="Where" value="" placeholder="Enter Where" />		
-		<input type="submit" name="submit" value="Submit" />
+	<form>
+		<label for="Request_date">Request date *:</label>
+        <input type="text" id="Request_date" name="Request_date" value="" placeholder="Enter Request date" />
+		<label for="Type">Type :</label>
+        <input type="text" id="Type" name="Type" value="" placeholder="Enter Type" />
+		<label for="Status">Status :</label>
+        <input type="text" id="Status" name="Status" value="" placeholder="Enter Status" />
+		<label for="Cost">Cost :</label>
+        <input type="text" id="Cost" name="Cost" value="" placeholder="Enter Cost" />
+		<label for="Invoice_id">Invoice id :</label>
+        <input type="text" id="Invoice_id" name="Invoice_id" value="" placeholder="Enter Invoice id" />
+		<label for="Contract_id">Contract id *:</label>
+        <input type="text" id="Contract_id" name="Contract_id" value="" placeholder="Enter Contract id" />
+		<input type="button" id="save-Maintenance_request" name="save" value="Submit" hx-post="/maintenance_request" hx-target="#post-response" />
 		<input type="reset" name="reset" value="Reset" />
 	</form>
 	</div>

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	u "github.com/sunshine69/golang-tools/utils"
 	"os"
 	"strings"
 	"time"
@@ -14,16 +15,15 @@ import (
 )
 
 type Tenant struct {
+	Id             int64  `db:"id"`
+	First_name     string `db:"first_name"`
+	Last_name      string `db:"last_name"`
 	Address        string `db:"address"`
 	Contact_number string `db:"contact_number"`
-	Email          string `db:"email"`
-	First_name     string `db:"first_name"`
-	Id             int64  `db:"id"`
+	Email          string `db:"email,unique"`
 	Join_date      string `db:"join_date"`
-	Last_name      string `db:"last_name"`
-	Note           string `db:"note"`
-
-	Where string
+	Note           string `db:"note" form:"ele=textarea"`
+	Where          string `form:"-"`
 }
 
 func NewTenant(email string) Tenant {
@@ -31,8 +31,8 @@ func NewTenant(email string) Tenant {
 	o := Tenant{}
 	if err := DB.Get(&o, "SELECT * FROM tenant WHERE  email = ?", email); errors.Is(err, sql.ErrNoRows) {
 		o.Email = email
-		if o.Join_date == 0 {
-			o.Join_date = time.Now().Unix()
+		if o.Join_date == "" {
+			o.Join_date = time.Now().Format(u.TimeISO8601LayOut)
 		}
 		o.Save()
 	}
@@ -125,7 +125,7 @@ func (o *Tenant) Update(data map[string]interface{}) error {
 
 // Save existing object which is saved it into db
 func (o *Tenant) Save() error {
-	if res, err := DB.NamedExec(`INSERT INTO tenant(join_date,first_name,last_name,address,contact_number,email,note ) VALUES(:join_date,:first_name,:last_name,:address,:contact_number,:email,:note)`, o); err != nil {
+	if res, err := DB.NamedExec(`INSERT INTO tenant(first_name,last_name,address,contact_number,email,join_date,note) VALUES(:first_name,:last_name,:address,:contact_number,:email,:join_date,:note) ON CONFLICT( email) DO UPDATE SET first_name=excluded.first_name,last_name=excluded.last_name,address=excluded.address,contact_number=excluded.contact_number,email=excluded.email,join_date=excluded.join_date,note=excluded.note`, o); err != nil {
 		return err
 	} else {
 		o.Id, _ = res.LastInsertId()
