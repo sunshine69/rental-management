@@ -67,7 +67,7 @@ func DeleteContract(w http.ResponseWriter, r *http.Request) {
 				model.DeleteContractByID(contract.Id)
 				fmt.Fprint(w, `{"status": "OK", "msg": "Contract deleted"}`)
 				return
-			} else if contract.Property_id != 0 && contract.Signed_date != 0 {
+			} else if contract.Property_id != 0 && contract.Signed_date != "" {
 				contract.Delete()
 				fmt.Fprint(w, `{"status": "OK", "msg": "Contract deleted"}`)
 				return

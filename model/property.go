@@ -12,12 +12,11 @@ import (
 )
 
 type Property struct {
-	Address string `db:"address"`
 	Id      int64  `db:"id"`
 	Name    string `db:"name"`
+	Address string `db:"address"`
 	Note    string `db:"note"`
-
-	Where string
+	Where   string `form:"-"`
 }
 
 func NewProperty(name string) Property {
@@ -116,7 +115,7 @@ func (o *Property) Update(data map[string]interface{}) error {
 
 // Save existing object which is saved it into db
 func (o *Property) Save() error {
-	if res, err := DB.NamedExec(`INSERT INTO property(address,name,note ) VALUES(:address,:name,:note)`, o); err != nil {
+	if res, err := DB.NamedExec(`INSERT INTO property(id,name,address,note ) VALUES(:id,:name,:address,:note)`, o); err != nil {
 		return err
 	} else {
 		o.Id, _ = res.LastInsertId()

@@ -30,6 +30,7 @@ func AssertInt64ValueForMap(input map[string]interface{}) map[string]interface{}
 	for k, v := range input {
 		if v, ok := v.(float64); ok {
 			input[k] = int64(v)
+
 		}
 	}
 	return input
@@ -56,9 +57,7 @@ func GenerateClass(sqltext, classTemplateFile string) {
 	fieldmap := map[string]interface{}{}
 	for _, v := range o1 {
 		fieldmap[v[1]] = GotypeLookup(v[2])
-		if v[1] != "id" {
-			fieldsList = append(fieldsList, v[1])
-		}
+		fieldsList = append(fieldsList, v[1])
 	}
 
 	uniqueFieldPtn := regexp.MustCompile(`UNIQUE[ ]*\(([^\)]+)\)`)
@@ -148,7 +147,7 @@ func FormGen(structType any, writeDirectory string) {
 		fieldProp[v] = map[string]any{"display": true, "ele": "<input", "type": "text", "html": ""}
 		tags := sInfo.TagCapture[v]
 		if len(tags) > 1 {
-			if tags[1] == "-" {
+			if tags[1] == "-" || v == "Id" {
 				fieldProp[v]["display"] = false
 			}
 		}

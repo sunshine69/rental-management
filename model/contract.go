@@ -5,26 +5,25 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	u "github.com/sunshine69/golang-tools/utils"
 	"os"
 	"strings"
 	"time"
 
 	_ "github.com/mutecomm/go-sqlcipher/v4"
 	ag "github.com/sunshine69/automation-go/lib"
-	u "github.com/sunshine69/golang-tools/utils"
 )
 
 type Contract struct {
-	End_date            string `db:"end_date"`
 	Id                  int64  `db:"id"`
-	Note                string `db:"note"`
 	Property_id         int64  `db:"property_id"`
 	Property_manager_id int64  `db:"property_manager_id"`
-	Signed_date         string `db:"signed_date"`
-	Start_date          string `db:"start_date"`
 	Tenant_id           int64  `db:"tenant_id"`
-
-	Where string
+	Start_date          string `db:"start_date"`
+	End_date            string `db:"end_date"`
+	Signed_date         string `db:"signed_date"`
+	Note                string `db:"note"`
+	Where               string `form:"-"`
 }
 
 func NewContract(property_id int64, signed_date string) Contract {
@@ -34,13 +33,13 @@ func NewContract(property_id int64, signed_date string) Contract {
 		o.Property_id = property_id
 		o.Signed_date = signed_date
 		if o.Start_date == "" {
-			o.Start_date = time.Now().Format(u.AUTimeLayout)
+			o.Start_date = time.Now().Format(u.TimeISO8601LayOut)
 		}
-		if o.End_date == 0 {
-			o.End_date = time.Now().Unix()
+		if o.End_date == "" {
+			o.End_date = time.Now().Format(u.TimeISO8601LayOut)
 		}
-		if o.Signed_date == 0 {
-			o.Signed_date = time.Now().Unix()
+		if o.Signed_date == "" {
+			o.Signed_date = time.Now().Format(u.TimeISO8601LayOut)
 		}
 		o.Save()
 	}
@@ -133,7 +132,7 @@ func (o *Contract) Update(data map[string]interface{}) error {
 
 // Save existing object which is saved it into db
 func (o *Contract) Save() error {
-	if res, err := DB.NamedExec(`INSERT INTO contract(property_id,property_manager_id,tenant_id,start_date,end_date,signed_date,note ) VALUES(:property_id,:property_manager_id,:tenant_id,:start_date,:end_date,:signed_date,:note)`, o); err != nil {
+	if res, err := DB.NamedExec(`INSERT INTO contract(id,property_id,property_manager_id,tenant_id,start_date,end_date,signed_date,note ) VALUES(:id,:property_id,:property_manager_id,:tenant_id,:start_date,:end_date,:signed_date,:note)`, o); err != nil {
 		return err
 	} else {
 		o.Id, _ = res.LastInsertId()
