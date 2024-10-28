@@ -8,6 +8,7 @@
 		<label for="Note">Note :</label>
         <textarea type="text" id="Note" name="Note" value="" placeholder="Enter Note" ></textarea>
 		<input type="button" id="save-Property" name="save" value="Submit" hx-post="/property" hx-target="#post-response" />
+		<input type="button" id="search-Property" name="search" value="Search" hx-post="/property/search" hx-target="#post-response" />
 		<input type="reset" name="reset" value="Reset" />
 	</form>
 	</div>

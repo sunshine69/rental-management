@@ -16,6 +16,7 @@
 		<label for="Note">Note :</label>
         <textarea type="text" id="Note" name="Note" value="" placeholder="Enter Note" ></textarea>
 		<input type="button" id="save-Tenant" name="save" value="Submit" hx-post="/tenant" hx-target="#post-response" />
+		<input type="button" id="search-Tenant" name="search" value="Search" hx-post="/tenant/search" hx-target="#post-response" />
 		<input type="reset" name="reset" value="Reset" />
 	</form>
 	</div>

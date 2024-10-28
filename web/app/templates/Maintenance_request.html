@@ -14,6 +14,7 @@
 		<label for="Contract_id">Contract id *:</label>
         <input type="text" id="Contract_id" name="Contract_id" value="" placeholder="Enter Contract id" />
 		<input type="button" id="save-Maintenance_request" name="save" value="Submit" hx-post="/maintenance_request" hx-target="#post-response" />
+		<input type="button" id="search-Maintenance_request" name="search" value="Search" hx-post="/maintenance_request/search" hx-target="#post-response" />
 		<input type="reset" name="reset" value="Reset" />
 	</form>
 	</div>

@@ -8,10 +8,14 @@ func {{$objName}}(w http.ResponseWriter, r *http.Request) {
     }
     fmt.Fprint(w, "Data saved")
 }
+func Search{{$objName}}(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprint(w, "TODO")
+}
 {{- end }}
 
 func AddHandler(mux *http.ServeMux, Cfg *configs.Config) {
     {{- range $objName := index . "objs" }}
+    mux.HandleFunc("POST "+Cfg.PathBase+"/{{lower $objName}}/search", Search{{$objName}})
     mux.HandleFunc("POST "+Cfg.PathBase+"/{{lower $objName}}", {{$objName}})
     {{- end }}
 }

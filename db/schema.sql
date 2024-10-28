@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS "invoice" (
     "amount" int,
     "number" varchar(128),
     "issuer" varchar(256),
-    "to" varchar(256),
+    "payer" varchar(256),
     "property_id" int NOT NULL REFERENCES "property" ("id"),
     "due_date" text,
     UNIQUE("number", "issuer")

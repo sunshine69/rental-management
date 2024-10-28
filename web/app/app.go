@@ -322,6 +322,9 @@ func Tenant(w http.ResponseWriter, r *http.Request) {
     }
     fmt.Fprint(w, "Data saved")
 }
+func SearchTenant(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprint(w, "TODO")
+}
 func Property(w http.ResponseWriter, r *http.Request) {
     ProcessPreSteps(w, r, model.Property{})
     if err := FormProperty.Save(); err != nil {
@@ -330,6 +333,9 @@ func Property(w http.ResponseWriter, r *http.Request) {
         return
     }
     fmt.Fprint(w, "Data saved")
+}
+func SearchProperty(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprint(w, "TODO")
 }
 func Account(w http.ResponseWriter, r *http.Request) {
     ProcessPreSteps(w, r, model.Account{})
@@ -340,6 +346,9 @@ func Account(w http.ResponseWriter, r *http.Request) {
     }
     fmt.Fprint(w, "Data saved")
 }
+func SearchAccount(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprint(w, "TODO")
+}
 func Contract(w http.ResponseWriter, r *http.Request) {
     ProcessPreSteps(w, r, model.Contract{})
     if err := FormContract.Save(); err != nil {
@@ -348,6 +357,9 @@ func Contract(w http.ResponseWriter, r *http.Request) {
         return
     }
     fmt.Fprint(w, "Data saved")
+}
+func SearchContract(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprint(w, "TODO")
 }
 func Payment(w http.ResponseWriter, r *http.Request) {
     ProcessPreSteps(w, r, model.Payment{})
@@ -358,6 +370,9 @@ func Payment(w http.ResponseWriter, r *http.Request) {
     }
     fmt.Fprint(w, "Data saved")
 }
+func SearchPayment(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprint(w, "TODO")
+}
 func Maintenance_request(w http.ResponseWriter, r *http.Request) {
     ProcessPreSteps(w, r, model.Maintenance_request{})
     if err := FormMaintenance_request.Save(); err != nil {
@@ -366,6 +381,9 @@ func Maintenance_request(w http.ResponseWriter, r *http.Request) {
         return
     }
     fmt.Fprint(w, "Data saved")
+}
+func SearchMaintenance_request(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprint(w, "TODO")
 }
 func Property_manager(w http.ResponseWriter, r *http.Request) {
     ProcessPreSteps(w, r, model.Property_manager{})
@@ -376,6 +394,9 @@ func Property_manager(w http.ResponseWriter, r *http.Request) {
     }
     fmt.Fprint(w, "Data saved")
 }
+func SearchProperty_manager(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprint(w, "TODO")
+}
 func Invoice(w http.ResponseWriter, r *http.Request) {
     ProcessPreSteps(w, r, model.Invoice{})
     if err := FormInvoice.Save(); err != nil {
@@ -385,15 +406,26 @@ func Invoice(w http.ResponseWriter, r *http.Request) {
     }
     fmt.Fprint(w, "Data saved")
 }
+func SearchInvoice(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprint(w, "TODO")
+}
 
 func AddHandler(mux *http.ServeMux, Cfg *configs.Config) {
+    mux.HandleFunc("POST "+Cfg.PathBase+"/tenant/search", SearchTenant)
     mux.HandleFunc("POST "+Cfg.PathBase+"/tenant", Tenant)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/property/search", SearchProperty)
     mux.HandleFunc("POST "+Cfg.PathBase+"/property", Property)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/account/search", SearchAccount)
     mux.HandleFunc("POST "+Cfg.PathBase+"/account", Account)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/contract/search", SearchContract)
     mux.HandleFunc("POST "+Cfg.PathBase+"/contract", Contract)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/payment/search", SearchPayment)
     mux.HandleFunc("POST "+Cfg.PathBase+"/payment", Payment)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/maintenance_request/search", SearchMaintenance_request)
     mux.HandleFunc("POST "+Cfg.PathBase+"/maintenance_request", Maintenance_request)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/property_manager/search", SearchProperty_manager)
     mux.HandleFunc("POST "+Cfg.PathBase+"/property_manager", Property_manager)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/invoice/search", SearchInvoice)
     mux.HandleFunc("POST "+Cfg.PathBase+"/invoice", Invoice)
 }
 // End app-handler.go.tmpl

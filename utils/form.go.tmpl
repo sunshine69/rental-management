@@ -9,6 +9,7 @@
 		{{ end -}}
 		{{ end -}}
 		<input type="button" id="save-{{$.formName}}" name="save" value="Submit" hx-post="/{{lower $.formName}}" hx-target="#post-response" />
+		<input type="button" id="search-{{$.formName}}" name="search" value="Search" hx-post="/{{lower $.formName}}/search" hx-target="#post-response" />
 		<input type="reset" name="reset" value="Reset" />
 	</form>
 	</div>
