@@ -28,294 +28,121 @@ var (
 )
 
 // Auto generate using app-validation.go.tmpl template
-var (
-	FormTenant              model.Tenant
-	FormProperty            model.Property
-	FormAccount             model.Account
-	FormContract            model.Contract
-	FormPayment             model.Payment
-	FormMaintenance_request model.Maintenance_request
-	FormProperty_manager    model.Property_manager
-	FormInvoice             model.Invoice
-)
 
 func TenantStructLevelValidation(sl validator.StructLevel) {
 	// Change it to suit
 	/* form := sl.Current().Interface().(model.Tenant)
-	  if FormTenant.XXX != "XXX" {
+	  if formTenant.XXX != "XXX" {
 		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
 	} */
 }
 func PropertyStructLevelValidation(sl validator.StructLevel) {
 	// Change it to suit
 	/* form := sl.Current().Interface().(model.Property)
-	  if FormProperty.XXX != "XXX" {
+	  if formProperty.XXX != "XXX" {
 		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
 	} */
 }
 func AccountStructLevelValidation(sl validator.StructLevel) {
 	// Change it to suit
 	/* form := sl.Current().Interface().(model.Account)
-	  if FormAccount.XXX != "XXX" {
+	  if formAccount.XXX != "XXX" {
 		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
 	} */
 }
 func ContractStructLevelValidation(sl validator.StructLevel) {
 	// Change it to suit
 	/* form := sl.Current().Interface().(model.Contract)
-	  if FormContract.XXX != "XXX" {
+	  if formContract.XXX != "XXX" {
 		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
 	} */
 }
 func PaymentStructLevelValidation(sl validator.StructLevel) {
 	// Change it to suit
 	/* form := sl.Current().Interface().(model.Payment)
-	  if FormPayment.XXX != "XXX" {
+	  if formPayment.XXX != "XXX" {
 		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
 	} */
 }
 func Maintenance_requestStructLevelValidation(sl validator.StructLevel) {
 	// Change it to suit
 	/* form := sl.Current().Interface().(model.Maintenance_request)
-	  if FormMaintenance_request.XXX != "XXX" {
+	  if formMaintenance_request.XXX != "XXX" {
 		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
 	} */
 }
 func Property_managerStructLevelValidation(sl validator.StructLevel) {
 	// Change it to suit
 	/* form := sl.Current().Interface().(model.Property_manager)
-	  if FormProperty_manager.XXX != "XXX" {
+	  if formProperty_manager.XXX != "XXX" {
+		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
+	} */
+}
+func InvoiceStructLevelValidation(sl validator.StructLevel) {
+	// Change it to suit
+	/* form := sl.Current().Interface().(model.Invoice)
+	  if formInvoice.XXX != "XXX" {
 		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
 	} */
 }
 
 // Common action for processing all forms.
-func ProcessPreSteps(w http.ResponseWriter, r *http.Request, currentFormType any) {
+func ProcessPreSteps[T any](w http.ResponseWriter, r *http.Request, currentFormType T) (T, error) {
 	fmt.Fprintf(os.Stderr, "[DEBUG] Form of Type '%s'\n", reflect.TypeOf(currentFormType).Name())
 	u.CheckErr(r.ParseForm(), "[ERROR] can not parse form")
 	var err, err1 error
-	// reflect.TypeOf will return a string representing the struct name, such as 'Form1'. Need to pass not using &
-	switch reflect.TypeOf(currentFormType).Name() {
-	case "Tenant":
-		// Now we do type assertion based on string return by reflect to cast it to the original type (from any). This is needed as formDecoder
-		// and validator needs the exact type to bind html for to struct because it needs to see the struct field and tags to collect html form data into it
-
-		err = u.CheckErrNonFatal(formDecoder.Decode(&FormTenant, r.PostForm), "formDecoder.Decode")
-		err1 = validate.Struct(FormTenant)
-
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "[ERROR] Form binding '%s'\n", err.Error())
-			AllTemplate.ExecuteTemplate(w, "error.html", map[string]any{"output": "ERROR form binding please check server log"})
-			return
-		}
-		if err1 != nil { // Check validation so any errors will come out here. Currently it would just display the validation tag string
-			fmt.Fprintf(os.Stderr, "[ERROR] Form validation '%s'\n", err1.Error())
-			AllTemplate.ExecuteTemplate(w, "error.html", map[string]any{
-				"err":    strings.ReplaceAll(err1.Error(), "\n", "<br/>"),
-				"output": "",
-				"action": fmt.Sprintf(`<p>Error</p>
-					<a href="%s">click here to try again</a><br>
-					Exit button to quit the program
-					<div class="button-group">
-						<form action="/quit" method="post">
-						<input type="submit" name="submit" value="Exit">
-						</form>
-					</div>`, "/home"),
-			})
-			return
-		}
-	case "Property":
-		// Now we do type assertion based on string return by reflect to cast it to the original type (from any). This is needed as formDecoder
-		// and validator needs the exact type to bind html for to struct because it needs to see the struct field and tags to collect html form data into it
-
-		err = u.CheckErrNonFatal(formDecoder.Decode(&FormProperty, r.PostForm), "formDecoder.Decode")
-		err1 = validate.Struct(FormProperty)
-
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "[ERROR] Form binding '%s'\n", err.Error())
-			AllTemplate.ExecuteTemplate(w, "error.html", map[string]any{"output": "ERROR form binding please check server log"})
-			return
-		}
-		if err1 != nil { // Check validation so any errors will come out here. Currently it would just display the validation tag string
-			fmt.Fprintf(os.Stderr, "[ERROR] Form validation '%s'\n", err1.Error())
-			AllTemplate.ExecuteTemplate(w, "error.html", map[string]any{
-				"err":    strings.ReplaceAll(err1.Error(), "\n", "<br/>"),
-				"output": "",
-				"action": fmt.Sprintf(`<p>Error</p>
-					<a href="%s">click here to try again</a><br>
-					Exit button to quit the program
-					<div class="button-group">
-						<form action="/quit" method="post">
-						<input type="submit" name="submit" value="Exit">
-						</form>
-					</div>`, "/home"),
-			})
-			return
-		}
-	case "Account":
-		// Now we do type assertion based on string return by reflect to cast it to the original type (from any). This is needed as formDecoder
-		// and validator needs the exact type to bind html for to struct because it needs to see the struct field and tags to collect html form data into it
-
-		err = u.CheckErrNonFatal(formDecoder.Decode(&FormAccount, r.PostForm), "formDecoder.Decode")
-		err1 = validate.Struct(FormAccount)
-
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "[ERROR] Form binding '%s'\n", err.Error())
-			AllTemplate.ExecuteTemplate(w, "error.html", map[string]any{"output": "ERROR form binding please check server log"})
-			return
-		}
-		if err1 != nil { // Check validation so any errors will come out here. Currently it would just display the validation tag string
-			fmt.Fprintf(os.Stderr, "[ERROR] Form validation '%s'\n", err1.Error())
-			AllTemplate.ExecuteTemplate(w, "error.html", map[string]any{
-				"err":    strings.ReplaceAll(err1.Error(), "\n", "<br/>"),
-				"output": "",
-				"action": fmt.Sprintf(`<p>Error</p>
-					<a href="%s">click here to try again</a><br>
-					Exit button to quit the program
-					<div class="button-group">
-						<form action="/quit" method="post">
-						<input type="submit" name="submit" value="Exit">
-						</form>
-					</div>`, "/home"),
-			})
-			return
-		}
-	case "Contract":
-		// Now we do type assertion based on string return by reflect to cast it to the original type (from any). This is needed as formDecoder
-		// and validator needs the exact type to bind html for to struct because it needs to see the struct field and tags to collect html form data into it
-
-		err = u.CheckErrNonFatal(formDecoder.Decode(&FormContract, r.PostForm), "formDecoder.Decode")
-		err1 = validate.Struct(FormContract)
-
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "[ERROR] Form binding '%s'\n", err.Error())
-			AllTemplate.ExecuteTemplate(w, "error.html", map[string]any{"output": "ERROR form binding please check server log"})
-			return
-		}
-		if err1 != nil { // Check validation so any errors will come out here. Currently it would just display the validation tag string
-			fmt.Fprintf(os.Stderr, "[ERROR] Form validation '%s'\n", err1.Error())
-			AllTemplate.ExecuteTemplate(w, "error.html", map[string]any{
-				"err":    strings.ReplaceAll(err1.Error(), "\n", "<br/>"),
-				"output": "",
-				"action": fmt.Sprintf(`<p>Error</p>
-					<a href="%s">click here to try again</a><br>
-					Exit button to quit the program
-					<div class="button-group">
-						<form action="/quit" method="post">
-						<input type="submit" name="submit" value="Exit">
-						</form>
-					</div>`, "/home"),
-			})
-			return
-		}
-	case "Payment":
-		// Now we do type assertion based on string return by reflect to cast it to the original type (from any). This is needed as formDecoder
-		// and validator needs the exact type to bind html for to struct because it needs to see the struct field and tags to collect html form data into it
-
-		err = u.CheckErrNonFatal(formDecoder.Decode(&FormPayment, r.PostForm), "formDecoder.Decode")
-		err1 = validate.Struct(FormPayment)
-
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "[ERROR] Form binding '%s'\n", err.Error())
-			AllTemplate.ExecuteTemplate(w, "error.html", map[string]any{"output": "ERROR form binding please check server log"})
-			return
-		}
-		if err1 != nil { // Check validation so any errors will come out here. Currently it would just display the validation tag string
-			fmt.Fprintf(os.Stderr, "[ERROR] Form validation '%s'\n", err1.Error())
-			AllTemplate.ExecuteTemplate(w, "error.html", map[string]any{
-				"err":    strings.ReplaceAll(err1.Error(), "\n", "<br/>"),
-				"output": "",
-				"action": fmt.Sprintf(`<p>Error</p>
-					<a href="%s">click here to try again</a><br>
-					Exit button to quit the program
-					<div class="button-group">
-						<form action="/quit" method="post">
-						<input type="submit" name="submit" value="Exit">
-						</form>
-					</div>`, "/home"),
-			})
-			return
-		}
-	case "Maintenance_request":
-		// Now we do type assertion based on string return by reflect to cast it to the original type (from any). This is needed as formDecoder
-		// and validator needs the exact type to bind html for to struct because it needs to see the struct field and tags to collect html form data into it
-
-		err = u.CheckErrNonFatal(formDecoder.Decode(&FormMaintenance_request, r.PostForm), "formDecoder.Decode")
-		err1 = validate.Struct(FormMaintenance_request)
-
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "[ERROR] Form binding '%s'\n", err.Error())
-			AllTemplate.ExecuteTemplate(w, "error.html", map[string]any{"output": "ERROR form binding please check server log"})
-			return
-		}
-		if err1 != nil { // Check validation so any errors will come out here. Currently it would just display the validation tag string
-			fmt.Fprintf(os.Stderr, "[ERROR] Form validation '%s'\n", err1.Error())
-			AllTemplate.ExecuteTemplate(w, "error.html", map[string]any{
-				"err":    strings.ReplaceAll(err1.Error(), "\n", "<br/>"),
-				"output": "",
-				"action": fmt.Sprintf(`<p>Error</p>
-					<a href="%s">click here to try again</a><br>
-					Exit button to quit the program
-					<div class="button-group">
-						<form action="/quit" method="post">
-						<input type="submit" name="submit" value="Exit">
-						</form>
-					</div>`, "/home"),
-			})
-			return
-		}
-	case "Property_manager":
-		// Now we do type assertion based on string return by reflect to cast it to the original type (from any). This is needed as formDecoder
-		// and validator needs the exact type to bind html for to struct because it needs to see the struct field and tags to collect html form data into it
-
-		err = u.CheckErrNonFatal(formDecoder.Decode(&FormProperty_manager, r.PostForm), "formDecoder.Decode")
-		err1 = validate.Struct(FormProperty_manager)
-
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "[ERROR] Form binding '%s'\n", err.Error())
-			AllTemplate.ExecuteTemplate(w, "error.html", map[string]any{"output": "ERROR form binding please check server log"})
-			return
-		}
-		if err1 != nil { // Check validation so any errors will come out here. Currently it would just display the validation tag string
-			fmt.Fprintf(os.Stderr, "[ERROR] Form validation '%s'\n", err1.Error())
-			AllTemplate.ExecuteTemplate(w, "error.html", map[string]any{
-				"err":    strings.ReplaceAll(err1.Error(), "\n", "<br/>"),
-				"output": "",
-				"action": fmt.Sprintf(`<p>Error</p>
-					<a href="%s">click here to try again</a><br>
-					Exit button to quit the program
-					<div class="button-group">
-						<form action="/quit" method="post">
-						<input type="submit" name="submit" value="Exit">
-						</form>
-					</div>`, "/home"),
-			})
-			return
-		}
+	var newT T
+	err = u.CheckErrNonFatal(formDecoder.Decode(&newT, r.PostForm), "formDecoder.Decode")
+	err1 = validate.Struct(newT)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "[ERROR] Form binding '%s'\n", err.Error())
+		AllTemplate.ExecuteTemplate(w, "error.html", map[string]any{"output": "ERROR form binding please check server log"})
+		return newT, err
 	}
+	if err1 != nil { // Check validation so any errors will come out here. Currently it would just display the validation tag string
+		fmt.Fprintf(os.Stderr, "[ERROR] Form validation '%s'\n", err1.Error())
+		AllTemplate.ExecuteTemplate(w, "error.html", map[string]any{
+			"err":    strings.ReplaceAll(err1.Error(), "\n", "<br/>"),
+			"output": "",
+			"action": fmt.Sprintf(`<p>Error</p>
+				<a href="%s">click here to try again</a><br>
+				Exit button to quit the program
+				<div class="button-group">
+					<form action="/quit" method="post">
+					<input type="submit" name="submit" value="Exit">
+					</form>
+				</div>`, "/home"),
+		})
+		return newT, err
+	}
+	return newT, nil
 }
 
-func init() {
+func init () {
 	validate = validator.New(validator.WithRequiredStructEnabled())
 	formDecoder = form.NewDecoder()
 
 	// Register validation
-	validate.RegisterStructValidation(TenantStructLevelValidation, FormTenant)
-	validate.RegisterStructValidation(PropertyStructLevelValidation, FormProperty)
-	validate.RegisterStructValidation(AccountStructLevelValidation, FormAccount)
-	validate.RegisterStructValidation(ContractStructLevelValidation, FormContract)
-	validate.RegisterStructValidation(PaymentStructLevelValidation, FormPayment)
-	validate.RegisterStructValidation(Maintenance_requestStructLevelValidation, FormMaintenance_request)
-	validate.RegisterStructValidation(Property_managerStructLevelValidation, FormProperty_manager)
+	validate.RegisterStructValidation(TenantStructLevelValidation, model.Tenant{})
+	validate.RegisterStructValidation(PropertyStructLevelValidation, model.Property{})
+	validate.RegisterStructValidation(AccountStructLevelValidation, model.Account{})
+	validate.RegisterStructValidation(ContractStructLevelValidation, model.Contract{})
+	validate.RegisterStructValidation(PaymentStructLevelValidation, model.Payment{})
+	validate.RegisterStructValidation(Maintenance_requestStructLevelValidation, model.Maintenance_request{})
+	validate.RegisterStructValidation(Property_managerStructLevelValidation, model.Property_manager{})
+	validate.RegisterStructValidation(InvoiceStructLevelValidation, model.Invoice{})
 }
-
 // End app-validation.go.tmpl
 
 // Auto generate using app-handler.go.tmpl template
 
 func Tenant(w http.ResponseWriter, r *http.Request) {
-    ProcessPreSteps(w, r, model.Tenant{})
-    if err := FormTenant.Save(); err != nil {
+    obj, err := ProcessPreSteps(w, r, model.Tenant{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    if err := obj.Save(); err != nil {
         fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
         fmt.Fprintf(os.Stderr, "%s", err.Error())
         return
@@ -326,8 +153,12 @@ func SearchTenant(w http.ResponseWriter, r *http.Request) {
     fmt.Fprint(w, "TODO")
 }
 func Property(w http.ResponseWriter, r *http.Request) {
-    ProcessPreSteps(w, r, model.Property{})
-    if err := FormProperty.Save(); err != nil {
+    obj, err := ProcessPreSteps(w, r, model.Property{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    if err := obj.Save(); err != nil {
         fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
         fmt.Fprintf(os.Stderr, "%s", err.Error())
         return
@@ -338,8 +169,12 @@ func SearchProperty(w http.ResponseWriter, r *http.Request) {
     fmt.Fprint(w, "TODO")
 }
 func Account(w http.ResponseWriter, r *http.Request) {
-    ProcessPreSteps(w, r, model.Account{})
-    if err := FormAccount.Save(); err != nil {
+    obj, err := ProcessPreSteps(w, r, model.Account{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    if err := obj.Save(); err != nil {
         fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
         fmt.Fprintf(os.Stderr, "%s", err.Error())
         return
@@ -350,8 +185,12 @@ func SearchAccount(w http.ResponseWriter, r *http.Request) {
     fmt.Fprint(w, "TODO")
 }
 func Contract(w http.ResponseWriter, r *http.Request) {
-    ProcessPreSteps(w, r, model.Contract{})
-    if err := FormContract.Save(); err != nil {
+    obj, err := ProcessPreSteps(w, r, model.Contract{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    if err := obj.Save(); err != nil {
         fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
         fmt.Fprintf(os.Stderr, "%s", err.Error())
         return
@@ -362,8 +201,12 @@ func SearchContract(w http.ResponseWriter, r *http.Request) {
     fmt.Fprint(w, "TODO")
 }
 func Payment(w http.ResponseWriter, r *http.Request) {
-    ProcessPreSteps(w, r, model.Payment{})
-    if err := FormPayment.Save(); err != nil {
+    obj, err := ProcessPreSteps(w, r, model.Payment{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    if err := obj.Save(); err != nil {
         fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
         fmt.Fprintf(os.Stderr, "%s", err.Error())
         return
@@ -374,8 +217,12 @@ func SearchPayment(w http.ResponseWriter, r *http.Request) {
     fmt.Fprint(w, "TODO")
 }
 func Maintenance_request(w http.ResponseWriter, r *http.Request) {
-    ProcessPreSteps(w, r, model.Maintenance_request{})
-    if err := FormMaintenance_request.Save(); err != nil {
+    obj, err := ProcessPreSteps(w, r, model.Maintenance_request{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    if err := obj.Save(); err != nil {
         fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
         fmt.Fprintf(os.Stderr, "%s", err.Error())
         return
@@ -386,8 +233,12 @@ func SearchMaintenance_request(w http.ResponseWriter, r *http.Request) {
     fmt.Fprint(w, "TODO")
 }
 func Property_manager(w http.ResponseWriter, r *http.Request) {
-    ProcessPreSteps(w, r, model.Property_manager{})
-    if err := FormProperty_manager.Save(); err != nil {
+    obj, err := ProcessPreSteps(w, r, model.Property_manager{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    if err := obj.Save(); err != nil {
         fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
         fmt.Fprintf(os.Stderr, "%s", err.Error())
         return
@@ -398,8 +249,12 @@ func SearchProperty_manager(w http.ResponseWriter, r *http.Request) {
     fmt.Fprint(w, "TODO")
 }
 func Invoice(w http.ResponseWriter, r *http.Request) {
-    ProcessPreSteps(w, r, model.Invoice{})
-    if err := FormInvoice.Save(); err != nil {
+    obj, err := ProcessPreSteps(w, r, model.Invoice{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    if err := obj.Save(); err != nil {
         fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
         fmt.Fprintf(os.Stderr, "%s", err.Error())
         return

@@ -1,7 +1,11 @@
 {{- range $objName := index . "objs" }}
 func {{$objName}}(w http.ResponseWriter, r *http.Request) {
-    ProcessPreSteps(w, r, model.{{$objName}}{})
-    if err := Form{{$objName}}.Save(); err != nil {
+    obj, err := ProcessPreSteps(w, r, model.{{$objName}}{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    if err := obj.Save(); err != nil {
         fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
         fmt.Fprintf(os.Stderr, "%s", err.Error())
         return
