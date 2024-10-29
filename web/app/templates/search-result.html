@@ -1,0 +1,15 @@
+<!-- This is not auto gen -->
+ {{ $fieldList := .fieldList }}
+ {{ $rows := .rows }}
+ <label for="result-table">{{.tableName}}</label>
+ <table border="1">
+    <tr>
+        {{range $f := $fieldList}}<td>{{$f}}</td>{{end}}
+    </tr>
+    {{range $o := $rows}}
+    <tr>
+        {{range $f := $fieldList}}<td>{{ index $o $f }}</td>{{end}}
+    </tr>
+    {{end}}
+ </table>
+

@@ -78,6 +78,9 @@ func GetAccountByID(id int64) *Account {
 // Search func
 func (o *Account) Search() []Account {
 	output := []Account{}
+	if o.Where == "" {
+		o.Where = "contract_id LIKE '%" + string(o.Contract_id) + "%' "
+	}
 	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM account WHERE %s`, o.Where), o); err == nil {
 		defer rows.Close()
 		for rows.Next() {

@@ -13,7 +13,24 @@ func {{$objName}}(w http.ResponseWriter, r *http.Request) {
     fmt.Fprint(w, "Data saved")
 }
 func Search{{$objName}}(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprint(w, "TODO")
+    obj, err := ProcessPreSteps(w, r, model.{{$objName}}{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    out := obj.Search()
+    rows := []map[string]any{}
+	fieldList := []string{}
+	for _, v := range out {
+		_fieldList, r := Convert2Map(v)
+		rows = append(rows, r)
+		fieldList = _fieldList
+	}
+	AllTemplate.ExecuteTemplate(w, "search-result.html", map[string]any{
+		"fieldList": fieldList,
+		"rows":      rows,
+        "tableName": "{{$objName}}",
+	})
 }
 {{- end }}
 

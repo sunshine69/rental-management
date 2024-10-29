@@ -15,7 +15,7 @@ type Property struct {
 	Id      int64  `db:"id"`
 	Name    string `db:"name,unique"`
 	Address string `db:"address"`
-	Note    string `db:"note" form:"ele=textarea"`
+	Note    string `db:"note" form:"Note,ele=textarea"`
 	Where   string `form:"-"`
 }
 
@@ -78,6 +78,9 @@ func GetPropertyByID(id int64) *Property {
 // Search func
 func (o *Property) Search() []Property {
 	output := []Property{}
+	if o.Where == "" {
+		o.Where = "name LIKE '%" + o.Name + "%' "
+	}
 	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM property WHERE %s`, o.Where), o); err == nil {
 		defer rows.Close()
 		for rows.Next() {

@@ -18,6 +18,7 @@ import (
 	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/sunshine69/rental-management/configs"
 	"github.com/sunshine69/rental-management/model"
+	"github.com/sunshine69/rental-management/utils"
 )
 
 var (
@@ -118,7 +119,7 @@ func ProcessPreSteps[T any](w http.ResponseWriter, r *http.Request, currentFormT
 	return newT, nil
 }
 
-func init () {
+func init() {
 	validate = validator.New(validator.WithRequiredStructEnabled())
 	formDecoder = form.NewDecoder()
 
@@ -132,6 +133,7 @@ func init () {
 	validate.RegisterStructValidation(Property_managerStructLevelValidation, model.Property_manager{})
 	validate.RegisterStructValidation(InvoiceStructLevelValidation, model.Invoice{})
 }
+
 // End app-validation.go.tmpl
 
 // Auto generate using app-handler.go.tmpl template
@@ -150,7 +152,24 @@ func Tenant(w http.ResponseWriter, r *http.Request) {
     fmt.Fprint(w, "Data saved")
 }
 func SearchTenant(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprint(w, "TODO")
+    obj, err := ProcessPreSteps(w, r, model.Tenant{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    out := obj.Search()
+    rows := []map[string]any{}
+	fieldList := []string{}
+	for _, v := range out {
+		_fieldList, r := Convert2Map(v)
+		rows = append(rows, r)
+		fieldList = _fieldList
+	}
+	AllTemplate.ExecuteTemplate(w, "search-result.html", map[string]any{
+		"fieldList": fieldList,
+		"rows":      rows,
+        "tableName": "Tenant",
+	})
 }
 func Property(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Property{})
@@ -166,7 +185,24 @@ func Property(w http.ResponseWriter, r *http.Request) {
     fmt.Fprint(w, "Data saved")
 }
 func SearchProperty(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprint(w, "TODO")
+    obj, err := ProcessPreSteps(w, r, model.Property{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    out := obj.Search()
+    rows := []map[string]any{}
+	fieldList := []string{}
+	for _, v := range out {
+		_fieldList, r := Convert2Map(v)
+		rows = append(rows, r)
+		fieldList = _fieldList
+	}
+	AllTemplate.ExecuteTemplate(w, "search-result.html", map[string]any{
+		"fieldList": fieldList,
+		"rows":      rows,
+        "tableName": "Property",
+	})
 }
 func Account(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Account{})
@@ -182,7 +218,24 @@ func Account(w http.ResponseWriter, r *http.Request) {
     fmt.Fprint(w, "Data saved")
 }
 func SearchAccount(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprint(w, "TODO")
+    obj, err := ProcessPreSteps(w, r, model.Account{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    out := obj.Search()
+    rows := []map[string]any{}
+	fieldList := []string{}
+	for _, v := range out {
+		_fieldList, r := Convert2Map(v)
+		rows = append(rows, r)
+		fieldList = _fieldList
+	}
+	AllTemplate.ExecuteTemplate(w, "search-result.html", map[string]any{
+		"fieldList": fieldList,
+		"rows":      rows,
+        "tableName": "Account",
+	})
 }
 func Contract(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Contract{})
@@ -198,7 +251,24 @@ func Contract(w http.ResponseWriter, r *http.Request) {
     fmt.Fprint(w, "Data saved")
 }
 func SearchContract(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprint(w, "TODO")
+    obj, err := ProcessPreSteps(w, r, model.Contract{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    out := obj.Search()
+    rows := []map[string]any{}
+	fieldList := []string{}
+	for _, v := range out {
+		_fieldList, r := Convert2Map(v)
+		rows = append(rows, r)
+		fieldList = _fieldList
+	}
+	AllTemplate.ExecuteTemplate(w, "search-result.html", map[string]any{
+		"fieldList": fieldList,
+		"rows":      rows,
+        "tableName": "Contract",
+	})
 }
 func Payment(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Payment{})
@@ -214,7 +284,24 @@ func Payment(w http.ResponseWriter, r *http.Request) {
     fmt.Fprint(w, "Data saved")
 }
 func SearchPayment(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprint(w, "TODO")
+    obj, err := ProcessPreSteps(w, r, model.Payment{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    out := obj.Search()
+    rows := []map[string]any{}
+	fieldList := []string{}
+	for _, v := range out {
+		_fieldList, r := Convert2Map(v)
+		rows = append(rows, r)
+		fieldList = _fieldList
+	}
+	AllTemplate.ExecuteTemplate(w, "search-result.html", map[string]any{
+		"fieldList": fieldList,
+		"rows":      rows,
+        "tableName": "Payment",
+	})
 }
 func Maintenance_request(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Maintenance_request{})
@@ -230,7 +317,24 @@ func Maintenance_request(w http.ResponseWriter, r *http.Request) {
     fmt.Fprint(w, "Data saved")
 }
 func SearchMaintenance_request(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprint(w, "TODO")
+    obj, err := ProcessPreSteps(w, r, model.Maintenance_request{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    out := obj.Search()
+    rows := []map[string]any{}
+	fieldList := []string{}
+	for _, v := range out {
+		_fieldList, r := Convert2Map(v)
+		rows = append(rows, r)
+		fieldList = _fieldList
+	}
+	AllTemplate.ExecuteTemplate(w, "search-result.html", map[string]any{
+		"fieldList": fieldList,
+		"rows":      rows,
+        "tableName": "Maintenance_request",
+	})
 }
 func Property_manager(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Property_manager{})
@@ -246,7 +350,24 @@ func Property_manager(w http.ResponseWriter, r *http.Request) {
     fmt.Fprint(w, "Data saved")
 }
 func SearchProperty_manager(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprint(w, "TODO")
+    obj, err := ProcessPreSteps(w, r, model.Property_manager{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    out := obj.Search()
+    rows := []map[string]any{}
+	fieldList := []string{}
+	for _, v := range out {
+		_fieldList, r := Convert2Map(v)
+		rows = append(rows, r)
+		fieldList = _fieldList
+	}
+	AllTemplate.ExecuteTemplate(w, "search-result.html", map[string]any{
+		"fieldList": fieldList,
+		"rows":      rows,
+        "tableName": "Property_manager",
+	})
 }
 func Invoice(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Invoice{})
@@ -262,7 +383,24 @@ func Invoice(w http.ResponseWriter, r *http.Request) {
     fmt.Fprint(w, "Data saved")
 }
 func SearchInvoice(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprint(w, "TODO")
+    obj, err := ProcessPreSteps(w, r, model.Invoice{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    out := obj.Search()
+    rows := []map[string]any{}
+	fieldList := []string{}
+	for _, v := range out {
+		_fieldList, r := Convert2Map(v)
+		rows = append(rows, r)
+		fieldList = _fieldList
+	}
+	AllTemplate.ExecuteTemplate(w, "search-result.html", map[string]any{
+		"fieldList": fieldList,
+		"rows":      rows,
+        "tableName": "Invoice",
+	})
 }
 
 func AddHandler(mux *http.ServeMux, Cfg *configs.Config) {
@@ -310,16 +448,20 @@ func loadAllTemplates() *template.Template {
 	return t
 }
 
+var AllForms = []string{
+	"Tenant",
+	"Property",
+	"Account",
+	"Payment",
+	"Contract",
+	"Invoice",
+	"Maintenance_request",
+	"Property_manager",
+}
+
 func Home(w http.ResponseWriter, r *http.Request) {
-	formList := []string{"Tenant",
-		"Property",
-		"Account",
-		"Payment",
-		"Contract",
-		"Invoice",
-		"Maintenance_request",
-		"Property_manager"}
-	AllTemplate.ExecuteTemplate(w, "index.html", map[string]any{"formList": formList})
+
+	AllTemplate.ExecuteTemplate(w, "index.html", map[string]any{"formList": AllForms})
 	// AllTemplate.ExecuteTemplate(w, "index.html", nil)
 }
 
@@ -332,4 +474,14 @@ func StartWebApp(mux *http.ServeMux, Cfg *configs.Config) {
 	mux.Handle(Cfg.PathBase+"/static/", http.StripPrefix(Cfg.PathBase+"/static/", http.FileServer(assetBox.HTTPBox())))
 	mux.HandleFunc("GET "+Cfg.PathBase+"/home", Home)
 	AddHandler(mux, Cfg)
+}
+
+// Convert any model type to a map - useful to render it in template
+func Convert2Map[T any](t T) ([]string, map[string]any) {
+	sInfo := utils.ReflectStruct(t, "")
+	out := map[string]any{}
+	for _, f := range sInfo.FieldName {
+		out[f] = sInfo.FieldValue[f]
+	}
+	return sInfo.FieldName, out
 }

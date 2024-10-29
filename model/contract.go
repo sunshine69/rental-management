@@ -29,7 +29,7 @@ type Contract struct {
 	Water_charged       int64  `db:"water_charged"`
 	Document_file_path  string `db:"document_file_path"`
 	Url                 string `db:"url"`
-	Note                string `db:"note" form:"ele=textarea"`
+	Note                string `db:"note" form:"Note,ele=textarea"`
 	Where               string `form:"-"`
 }
 
@@ -102,6 +102,9 @@ func GetContractByID(id int64) *Contract {
 // Search func
 func (o *Contract) Search() []Contract {
 	output := []Contract{}
+	if o.Where == "" {
+		o.Where = "property_id LIKE '%" + string(o.Property_id) + "%'  AND signed_date LIKE '%" + o.Signed_date + "%' "
+	}
 	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM contract WHERE %s`, o.Where), o); err == nil {
 		defer rows.Close()
 		for rows.Next() {

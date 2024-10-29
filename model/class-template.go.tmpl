@@ -20,7 +20,7 @@ import (
 
 type {{ .typename | title }} struct {
 	{{- range $f := .fieldsList }}
-	 {{ $f | title }} {{ index $.fields $f }} `db:"{{$f}}{{if index $.uniqueFieldsMap $f}},unique{{end}}"{{if eq $f "note"}} form:"ele=textarea"{{end}}`
+	 {{ $f | title }} {{ index $.fields $f }} `db:"{{$f}}{{if index $.uniqueFieldsMap $f}},unique{{end}}"{{if eq $f "note"}} form:"Note,ele=textarea"{{end}}`
 	{{- end }}
 	Where string `form:"-"`
 }
@@ -93,6 +93,9 @@ func Get{{.typename|title}}ByID(id int64) *{{.typename|title}} {
 // Search func
 func (o *{{.typename|title}}) Search() []{{.typename|title}} {
 	output := []{{.typename|title}}{}
+	if o.Where == "" {
+		o.Where = "{{range $idx, $f := .uniqueFields}}{{$f}} LIKE '%"+ {{ if ne (index $.fields $f) "string" }}string({{end}} o.{{$f|title}}{{ if ne (index $.fields $f) "string" }}){{end}} +"%' {{if ne $idx (add ($.uniqueFields|len) -1)}} AND {{end}}{{end}}"
+	}
 	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM {{.typename}} WHERE %s`, o.Where), o); err == nil {
 		defer rows.Close()
 		for rows.Next() {

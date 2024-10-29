@@ -22,7 +22,7 @@ type Tenant struct {
 	Contact_number string `db:"contact_number"`
 	Email          string `db:"email,unique"`
 	Join_date      string `db:"join_date"`
-	Note           string `db:"note" form:"ele=textarea"`
+	Note           string `db:"note" form:"Note,ele=textarea"`
 	Where          string `form:"-"`
 }
 
@@ -88,6 +88,9 @@ func GetTenantByID(id int64) *Tenant {
 // Search func
 func (o *Tenant) Search() []Tenant {
 	output := []Tenant{}
+	if o.Where == "" {
+		o.Where = "email LIKE '%" + o.Email + "%' "
+	}
 	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM tenant WHERE %s`, o.Where), o); err == nil {
 		defer rows.Close()
 		for rows.Next() {

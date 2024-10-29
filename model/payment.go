@@ -87,6 +87,9 @@ func GetPaymentByID(id int64) *Payment {
 // Search func
 func (o *Payment) Search() []Payment {
 	output := []Payment{}
+	if o.Where == "" {
+		o.Where = "account_id LIKE '%" + string(o.Account_id) + "%'  AND pay_date LIKE '%" + o.Pay_date + "%' "
+	}
 	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM payment WHERE %s`, o.Where), o); err == nil {
 		defer rows.Close()
 		for rows.Next() {

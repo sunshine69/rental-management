@@ -22,7 +22,7 @@ type Property_manager struct {
 	Contact_number string `db:"contact_number"`
 	Email          string `db:"email,unique"`
 	Join_date      string `db:"join_date"`
-	Note           string `db:"note" form:"ele=textarea"`
+	Note           string `db:"note" form:"Note,ele=textarea"`
 	Where          string `form:"-"`
 }
 
@@ -88,6 +88,9 @@ func GetProperty_managerByID(id int64) *Property_manager {
 // Search func
 func (o *Property_manager) Search() []Property_manager {
 	output := []Property_manager{}
+	if o.Where == "" {
+		o.Where = "email LIKE '%" + o.Email + "%' "
+	}
 	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM property_manager WHERE %s`, o.Where), o); err == nil {
 		defer rows.Close()
 		for rows.Next() {
