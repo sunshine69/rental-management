@@ -32,11 +32,27 @@ func Search{{$objName}}(w http.ResponseWriter, r *http.Request) {
         "tableName": "{{$objName}}",
 	})
 }
+func Delete{{$objName}}(w http.ResponseWriter, r *http.Request) {
+    id := r.PathValue("id")
+    Id, err := strconv.ParseInt(id, 10, 64)
+    if err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
+        return
+    }
+    if err := model.Delete{{$objName}}ByID(Id); err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+        return
+    }
+    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+}
 {{- end }}
 
 func AddHandler(mux *http.ServeMux, Cfg *configs.Config) {
     {{- range $objName := index . "objs" }}
     mux.HandleFunc("POST "+Cfg.PathBase+"/{{lower $objName}}/search", Search{{$objName}})
+    mux.HandleFunc("POST "+Cfg.PathBase+"/{{lower $objName}}/delete/{id}", Delete{{$objName}})
     mux.HandleFunc("POST "+Cfg.PathBase+"/{{lower $objName}}", {{$objName}})
     {{- end }}
 }

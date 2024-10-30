@@ -1,14 +1,15 @@
 <!-- This is not auto gen -->
  {{ $fieldList := .fieldList }}
  {{ $rows := .rows }}
- <label for="result-table">{{.tableName}}</label>
- <table border="1">
-    <tr>
-        {{range $f := $fieldList}}<td>{{$f}}</td>{{end}}
+ {{ $objectType := .tableName }}
+ <label for="result-table">{{$objectType}}</label>
+ <table cellpadding="2" cellspacing="2" style="width: 100%;" >
+    <tr bgcolor="#66ff99">
+        {{range $f := $fieldList}}<th>{{if eq $f "Where"}}Delete{{else}}{{$f}}{{end}}</th>{{end}}
     </tr>
     {{range $o := $rows}}
-    <tr>
-        {{range $f := $fieldList}}<td>{{ index $o $f }}</td>{{end}}
+    <tr bgcolor="#FFFFFF" onMouseOver="this.bgColor='#E0FFE0';" onMouseOut="this.bgColor='#FFFFFF';">
+        {{range $idx, $f := $fieldList}}<td>{{if ne $idx (add ($fieldList|len) -1)}}{{ index $o $f }}{{else}}<button type="button" hx-post="/{{lower $objectType}}/delete/{{index $o "Id"}}">Delete</button>{{end}}</td>{{end}}
     </tr>
     {{end}}
  </table>

@@ -3,14 +3,6 @@ package app
 import (
 	"bytes"
 	"fmt"
-	"html/template"
-	"io/fs"
-	"net/http"
-	"os"
-	"path/filepath"
-	"reflect"
-	"strings"
-
 	rice "github.com/GeertJohan/go.rice"
 	"github.com/go-playground/form/v4"
 	"github.com/go-playground/validator/v10"
@@ -19,6 +11,14 @@ import (
 	"github.com/sunshine69/rental-management/configs"
 	"github.com/sunshine69/rental-management/model"
 	"github.com/sunshine69/rental-management/utils"
+	"html/template"
+	"io/fs"
+	"net/http"
+	"os"
+	"path/filepath"
+	"reflect"
+	"strconv"
+	"strings"
 )
 
 var (
@@ -171,6 +171,21 @@ func SearchTenant(w http.ResponseWriter, r *http.Request) {
         "tableName": "Tenant",
 	})
 }
+func DeleteTenant(w http.ResponseWriter, r *http.Request) {
+    id := r.PathValue("id")
+    Id, err := strconv.ParseInt(id, 10, 64)
+    if err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
+        return
+    }
+    if err := model.DeleteTenantByID(Id); err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+        return
+    }
+    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+}
 func Property(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Property{})
     if err != nil {
@@ -203,6 +218,21 @@ func SearchProperty(w http.ResponseWriter, r *http.Request) {
 		"rows":      rows,
         "tableName": "Property",
 	})
+}
+func DeleteProperty(w http.ResponseWriter, r *http.Request) {
+    id := r.PathValue("id")
+    Id, err := strconv.ParseInt(id, 10, 64)
+    if err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
+        return
+    }
+    if err := model.DeletePropertyByID(Id); err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+        return
+    }
+    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
 }
 func Account(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Account{})
@@ -237,6 +267,21 @@ func SearchAccount(w http.ResponseWriter, r *http.Request) {
         "tableName": "Account",
 	})
 }
+func DeleteAccount(w http.ResponseWriter, r *http.Request) {
+    id := r.PathValue("id")
+    Id, err := strconv.ParseInt(id, 10, 64)
+    if err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
+        return
+    }
+    if err := model.DeleteAccountByID(Id); err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+        return
+    }
+    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+}
 func Contract(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Contract{})
     if err != nil {
@@ -269,6 +314,21 @@ func SearchContract(w http.ResponseWriter, r *http.Request) {
 		"rows":      rows,
         "tableName": "Contract",
 	})
+}
+func DeleteContract(w http.ResponseWriter, r *http.Request) {
+    id := r.PathValue("id")
+    Id, err := strconv.ParseInt(id, 10, 64)
+    if err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
+        return
+    }
+    if err := model.DeleteContractByID(Id); err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+        return
+    }
+    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
 }
 func Payment(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Payment{})
@@ -303,6 +363,21 @@ func SearchPayment(w http.ResponseWriter, r *http.Request) {
         "tableName": "Payment",
 	})
 }
+func DeletePayment(w http.ResponseWriter, r *http.Request) {
+    id := r.PathValue("id")
+    Id, err := strconv.ParseInt(id, 10, 64)
+    if err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
+        return
+    }
+    if err := model.DeletePaymentByID(Id); err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+        return
+    }
+    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+}
 func Maintenance_request(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Maintenance_request{})
     if err != nil {
@@ -335,6 +410,21 @@ func SearchMaintenance_request(w http.ResponseWriter, r *http.Request) {
 		"rows":      rows,
         "tableName": "Maintenance_request",
 	})
+}
+func DeleteMaintenance_request(w http.ResponseWriter, r *http.Request) {
+    id := r.PathValue("id")
+    Id, err := strconv.ParseInt(id, 10, 64)
+    if err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
+        return
+    }
+    if err := model.DeleteMaintenance_requestByID(Id); err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+        return
+    }
+    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
 }
 func Property_manager(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Property_manager{})
@@ -369,6 +459,21 @@ func SearchProperty_manager(w http.ResponseWriter, r *http.Request) {
         "tableName": "Property_manager",
 	})
 }
+func DeleteProperty_manager(w http.ResponseWriter, r *http.Request) {
+    id := r.PathValue("id")
+    Id, err := strconv.ParseInt(id, 10, 64)
+    if err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
+        return
+    }
+    if err := model.DeleteProperty_managerByID(Id); err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+        return
+    }
+    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+}
 func Invoice(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Invoice{})
     if err != nil {
@@ -402,23 +507,46 @@ func SearchInvoice(w http.ResponseWriter, r *http.Request) {
         "tableName": "Invoice",
 	})
 }
+func DeleteInvoice(w http.ResponseWriter, r *http.Request) {
+    id := r.PathValue("id")
+    Id, err := strconv.ParseInt(id, 10, 64)
+    if err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
+        return
+    }
+    if err := model.DeleteInvoiceByID(Id); err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+        return
+    }
+    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+}
 
 func AddHandler(mux *http.ServeMux, Cfg *configs.Config) {
     mux.HandleFunc("POST "+Cfg.PathBase+"/tenant/search", SearchTenant)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/tenant/delete/{id}", DeleteTenant)
     mux.HandleFunc("POST "+Cfg.PathBase+"/tenant", Tenant)
     mux.HandleFunc("POST "+Cfg.PathBase+"/property/search", SearchProperty)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/property/delete/{id}", DeleteProperty)
     mux.HandleFunc("POST "+Cfg.PathBase+"/property", Property)
     mux.HandleFunc("POST "+Cfg.PathBase+"/account/search", SearchAccount)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/account/delete/{id}", DeleteAccount)
     mux.HandleFunc("POST "+Cfg.PathBase+"/account", Account)
     mux.HandleFunc("POST "+Cfg.PathBase+"/contract/search", SearchContract)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/contract/delete/{id}", DeleteContract)
     mux.HandleFunc("POST "+Cfg.PathBase+"/contract", Contract)
     mux.HandleFunc("POST "+Cfg.PathBase+"/payment/search", SearchPayment)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/payment/delete/{id}", DeletePayment)
     mux.HandleFunc("POST "+Cfg.PathBase+"/payment", Payment)
     mux.HandleFunc("POST "+Cfg.PathBase+"/maintenance_request/search", SearchMaintenance_request)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/maintenance_request/delete/{id}", DeleteMaintenance_request)
     mux.HandleFunc("POST "+Cfg.PathBase+"/maintenance_request", Maintenance_request)
     mux.HandleFunc("POST "+Cfg.PathBase+"/property_manager/search", SearchProperty_manager)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/property_manager/delete/{id}", DeleteProperty_manager)
     mux.HandleFunc("POST "+Cfg.PathBase+"/property_manager", Property_manager)
     mux.HandleFunc("POST "+Cfg.PathBase+"/invoice/search", SearchInvoice)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/invoice/delete/{id}", DeleteInvoice)
     mux.HandleFunc("POST "+Cfg.PathBase+"/invoice", Invoice)
 }
 // End app-handler.go.tmpl
