@@ -6,13 +6,14 @@ import (
 	"net/http"
 
 	"github.com/R167/go-sets"
+	ag "github.com/sunshine69/automation-go/lib"
 	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/sunshine69/rental-management/model"
 	"github.com/sunshine69/rental-management/utils"
 )
 
 func CreateProperty(w http.ResponseWriter, r *http.Request) {
-	if property := utils.ParseJSON[model.Property](r); property != nil {
+	if property := ag.ParseJsonReqBodyToStruct[model.Property](r); property != nil {
 		if err := property.Save(); err != nil {
 			fmt.Fprintf(w, `{"status": "ERROR", "msg": "%s"}`, err.Error())
 		}
@@ -22,7 +23,7 @@ func CreateProperty(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateProperty(w http.ResponseWriter, r *http.Request) {
-	o := utils.ParseJSONToMap(r)
+	o := ag.ParseJsonReqBodyToMap(r)
 	if id := utils.ParseID(r); id != 0 {
 		tn := model.GetPropertyByID(id)
 		if tn == nil {
@@ -62,7 +63,7 @@ func DeleteProperty(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	} else {
-		property := utils.ParseJSON[model.Property](r)
+		property := ag.ParseJsonReqBodyToStruct[model.Property](r)
 		if property != nil {
 			if property.Id != 0 {
 				model.DeletePropertyByID(property.Id)

@@ -6,13 +6,14 @@ import (
 	"net/http"
 
 	"github.com/R167/go-sets"
+	ag "github.com/sunshine69/automation-go/lib"
 	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/sunshine69/rental-management/model"
 	"github.com/sunshine69/rental-management/utils"
 )
 
 func CreatePayment(w http.ResponseWriter, r *http.Request) {
-	if payment := utils.ParseJSON[model.Payment](r); payment != nil {
+	if payment := ag.ParseJsonReqBodyToStruct[model.Payment](r); payment != nil {
 		if err := payment.Save(); err != nil {
 			fmt.Fprintf(w, `{"status": "ERROR", "msg": "%s"}`, err.Error())
 		}
@@ -22,7 +23,7 @@ func CreatePayment(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdatePayment(w http.ResponseWriter, r *http.Request) {
-	o := utils.ParseJSONToMap(r)
+	o := ag.ParseJsonReqBodyToMap(r)
 	if id := utils.ParseID(r); id != 0 {
 		tn := model.GetPaymentByID(id)
 		if tn == nil {
@@ -62,7 +63,7 @@ func DeletePayment(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	} else {
-		payment := utils.ParseJSON[model.Payment](r)
+		payment := ag.ParseJsonReqBodyToStruct[model.Payment](r)
 		if payment != nil {
 			if payment.Id != 0 {
 				model.DeletePaymentByID(payment.Id)

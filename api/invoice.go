@@ -6,13 +6,14 @@ import (
 	"net/http"
 
 	"github.com/R167/go-sets"
+	ag "github.com/sunshine69/automation-go/lib"
 	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/sunshine69/rental-management/model"
 	"github.com/sunshine69/rental-management/utils"
 )
 
 func CreateInvoice(w http.ResponseWriter, r *http.Request) {
-	if invoice := utils.ParseJSON[model.Invoice](r); invoice != nil {
+	if invoice := ag.ParseJsonReqBodyToStruct[model.Invoice](r); invoice != nil {
 		if err := invoice.Save(); err != nil {
 			fmt.Fprintf(w, `{"status": "ERROR", "msg": "%s"}`, err.Error())
 		}
@@ -22,7 +23,7 @@ func CreateInvoice(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateInvoice(w http.ResponseWriter, r *http.Request) {
-	o := utils.ParseJSONToMap(r)
+	o := ag.ParseJsonReqBodyToMap(r)
 	if id := utils.ParseID(r); id != 0 {
 		tn := model.GetInvoiceByID(id)
 		if tn == nil {
@@ -62,7 +63,7 @@ func DeleteInvoice(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	} else {
-		invoice := utils.ParseJSON[model.Invoice](r)
+		invoice := ag.ParseJsonReqBodyToStruct[model.Invoice](r)
 		if invoice != nil {
 			if invoice.Id != 0 {
 				model.DeleteInvoiceByID(invoice.Id)

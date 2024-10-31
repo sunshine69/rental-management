@@ -6,13 +6,14 @@ import (
 	"net/http"
 
 	"github.com/R167/go-sets"
+	ag "github.com/sunshine69/automation-go/lib"
 	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/sunshine69/rental-management/model"
 	"github.com/sunshine69/rental-management/utils"
 )
 
 func CreateProperty_manager(w http.ResponseWriter, r *http.Request) {
-	if property_manager := utils.ParseJSON[model.Property_manager](r); property_manager != nil {
+	if property_manager := ag.ParseJsonReqBodyToStruct[model.Property_manager](r); property_manager != nil {
 		if err := property_manager.Save(); err != nil {
 			fmt.Fprintf(w, `{"status": "ERROR", "msg": "%s"}`, err.Error())
 		}
@@ -22,7 +23,7 @@ func CreateProperty_manager(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateProperty_manager(w http.ResponseWriter, r *http.Request) {
-	o := utils.ParseJSONToMap(r)
+	o := ag.ParseJsonReqBodyToMap(r)
 	if id := utils.ParseID(r); id != 0 {
 		tn := model.GetProperty_managerByID(id)
 		if tn == nil {
@@ -62,7 +63,7 @@ func DeleteProperty_manager(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	} else {
-		property_manager := utils.ParseJSON[model.Property_manager](r)
+		property_manager := ag.ParseJsonReqBodyToStruct[model.Property_manager](r)
 		if property_manager != nil {
 			if property_manager.Id != 0 {
 				model.DeleteProperty_managerByID(property_manager.Id)

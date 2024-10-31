@@ -6,13 +6,14 @@ import (
 	"net/http"
 
 	"github.com/R167/go-sets"
+	ag "github.com/sunshine69/automation-go/lib"
 	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/sunshine69/rental-management/model"
 	"github.com/sunshine69/rental-management/utils"
 )
 
 func CreateMaintenance_request(w http.ResponseWriter, r *http.Request) {
-	if maintenance_request := utils.ParseJSON[model.Maintenance_request](r); maintenance_request != nil {
+	if maintenance_request := ag.ParseJsonReqBodyToStruct[model.Maintenance_request](r); maintenance_request != nil {
 		if err := maintenance_request.Save(); err != nil {
 			fmt.Fprintf(w, `{"status": "ERROR", "msg": "%s"}`, err.Error())
 		}
@@ -22,7 +23,7 @@ func CreateMaintenance_request(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateMaintenance_request(w http.ResponseWriter, r *http.Request) {
-	o := utils.ParseJSONToMap(r)
+	o := ag.ParseJsonReqBodyToMap(r)
 	if id := utils.ParseID(r); id != 0 {
 		tn := model.GetMaintenance_requestByID(id)
 		if tn == nil {
@@ -62,7 +63,7 @@ func DeleteMaintenance_request(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	} else {
-		maintenance_request := utils.ParseJSON[model.Maintenance_request](r)
+		maintenance_request := ag.ParseJsonReqBodyToStruct[model.Maintenance_request](r)
 		if maintenance_request != nil {
 			if maintenance_request.Id != 0 {
 				model.DeleteMaintenance_requestByID(maintenance_request.Id)

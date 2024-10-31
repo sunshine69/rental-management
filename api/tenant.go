@@ -6,13 +6,14 @@ import (
 	"net/http"
 
 	"github.com/R167/go-sets"
+	ag "github.com/sunshine69/automation-go/lib"
 	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/sunshine69/rental-management/model"
 	"github.com/sunshine69/rental-management/utils"
 )
 
 func CreateTenant(w http.ResponseWriter, r *http.Request) {
-	if tenant := utils.ParseJSON[model.Tenant](r); tenant != nil {
+	if tenant := ag.ParseJsonReqBodyToStruct[model.Tenant](r); tenant != nil {
 		if err := tenant.Save(); err != nil {
 			fmt.Fprintf(w, `{"status": "ERROR", "msg": "%s"}`, err.Error())
 		}
@@ -22,7 +23,7 @@ func CreateTenant(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateTenant(w http.ResponseWriter, r *http.Request) {
-	o := utils.ParseJSONToMap(r)
+	o := ag.ParseJsonReqBodyToMap(r)
 	if id := utils.ParseID(r); id != 0 {
 		tn := model.GetTenantByID(id)
 		if tn == nil {
@@ -62,7 +63,7 @@ func DeleteTenant(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	} else {
-		tenant := utils.ParseJSON[model.Tenant](r)
+		tenant := ag.ParseJsonReqBodyToStruct[model.Tenant](r)
 		if tenant != nil {
 			if tenant.Id != 0 {
 				model.DeleteTenantByID(tenant.Id)
