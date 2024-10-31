@@ -32,10 +32,10 @@ CREATE TABLE IF NOT EXISTS "property" (
 
 CREATE TABLE IF NOT EXISTS "contract" (
     "id" integer NOT NULL PRIMARY KEY,
-    "property_id" int NOT NULL REFERENCES "property" ("id"),
-    "property_manager_id" int NOT NULL REFERENCES "property_manager" ("id"),
-    "tenant_id_main" int NOT NULL REFERENCES "tenant" ("id"),
-    "tenant_ids" jsonb,
+    "property" int NOT NULL REFERENCES "property" ("name"),
+    "property_manager" int NOT NULL REFERENCES "property_manager" ("email"),
+    "tenant_main" int NOT NULL REFERENCES "tenant" ("email"),
+    "tenants" jsonb,
     "start_date" text NOT NULL,
     "end_date" text NOT NULL,
     "signed_date" text NOT NULL,
@@ -47,23 +47,24 @@ CREATE TABLE IF NOT EXISTS "contract" (
     "document_file_path" text,
     "url" text,
     "note" text,
-    UNIQUE("property_id", "signed_date")
+    UNIQUE("property", "signed_date")
 );
 
 CREATE TABLE IF NOT EXISTS "account" (
     "id" integer NOT NULL PRIMARY KEY,
-    "type" varchar(128),
     "balance" int,
     "contract_id" int NOT NULL REFERENCES "contract" ("id"),
+    "tenant_main" int NOT NULL REFERENCES "tenant" ("email"),
+    "note" text,
     UNIQUE("contract_id")
 );
 
 CREATE TABLE IF NOT EXISTS "payment" (
     "id" integer NOT NULL PRIMARY KEY,
     "account_id" int NOT NULL REFERENCES "account" ("id"),
+    "tenant" int NOT NULL REFERENCES "tenant" ("email"),
     "amount" int,
     "pay_date" text,
-    "contract_id" int NOT NULL REFERENCES "contract" ("id"),
     "reference" varchar(256),
     UNIQUE("account_id", "pay_date")
 );
@@ -76,7 +77,7 @@ CREATE TABLE IF NOT EXISTS "invoice" (
     "number" varchar(128),
     "issuer" varchar(256),
     "payer" varchar(256),
-    "property_id" int NOT NULL REFERENCES "property" ("id"),
+    "property" int NOT NULL REFERENCES "property" ("name"),
     "due_date" text,
     UNIQUE("number", "issuer")
 );

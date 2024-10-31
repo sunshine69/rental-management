@@ -39,7 +39,7 @@ func UpdateContract(w http.ResponseWriter, r *http.Request) {
 		return
 	} else {
 		inputSet := sets.FromMap(o)
-		keySet := sets.New("property_id", "signed_date")
+		keySet := sets.New("property", "signed_date")
 		if !inputSet.Superset(keySet) {
 			fmt.Fprint(w, `{"status": "ERROR", "msg": "Contract no key value not provided"}`)
 			return
@@ -69,7 +69,7 @@ func DeleteContract(w http.ResponseWriter, r *http.Request) {
 				model.DeleteContractByID(contract.Id)
 				fmt.Fprint(w, `{"status": "OK", "msg": "Contract deleted"}`)
 				return
-			} else if contract.Property_id != 0 && contract.Signed_date != "" {
+			} else if contract.Property != 0 && contract.Signed_date != "" {
 				contract.Delete()
 				fmt.Fprint(w, `{"status": "OK", "msg": "Contract deleted"}`)
 				return

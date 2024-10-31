@@ -22,7 +22,7 @@ type Invoice struct {
 	Number      string `db:"number,unique"`
 	Issuer      string `db:"issuer,unique"`
 	Payer       string `db:"payer"`
-	Property_id int64  `db:"property_id"`
+	Property    int64  `db:"property"`
 	Due_date    string `db:"due_date"`
 	Where       string `form:"-"`
 }
@@ -94,8 +94,9 @@ func GetInvoiceByID(id int64) *Invoice {
 func (o *Invoice) Search() []Invoice {
 	output := []Invoice{}
 	if o.Where == "" {
-		o.Where = "number LIKE '%" + o.Number + "%'  AND issuer LIKE '%" + o.Issuer + "%' "
+		o.Where = "number LIKE '%" + o.Number + "%'issuer LIKE '%" + o.Issuer + "%'"
 	}
+	fmt.Println(o.Where)
 	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM invoice WHERE %s`, o.Where), o); err == nil {
 		defer rows.Close()
 		for rows.Next() {
@@ -133,7 +134,7 @@ func (o *Invoice) Update(data map[string]interface{}) error {
 
 // Save existing object which is saved it into db
 func (o *Invoice) Save() error {
-	if res, err := DB.NamedExec(`INSERT INTO invoice(date,description,amount,number,issuer,payer,property_id,due_date) VALUES(:date,:description,:amount,:number,:issuer,:payer,:property_id,:due_date) ON CONFLICT( number,issuer) DO UPDATE SET date=excluded.date,description=excluded.description,amount=excluded.amount,number=excluded.number,issuer=excluded.issuer,payer=excluded.payer,property_id=excluded.property_id,due_date=excluded.due_date`, o); err != nil {
+	if res, err := DB.NamedExec(`INSERT INTO invoice(date,description,amount,number,issuer,payer,property,due_date) VALUES(:date,:description,:amount,:number,:issuer,:payer,:property,:due_date) ON CONFLICT( number,issuer) DO UPDATE SET date=excluded.date,description=excluded.description,amount=excluded.amount,number=excluded.number,issuer=excluded.issuer,payer=excluded.payer,property=excluded.property,due_date=excluded.due_date`, o); err != nil {
 		return err
 	} else {
 		o.Id, _ = res.LastInsertId()

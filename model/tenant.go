@@ -89,8 +89,9 @@ func GetTenantByID(id int64) *Tenant {
 func (o *Tenant) Search() []Tenant {
 	output := []Tenant{}
 	if o.Where == "" {
-		o.Where = "email LIKE '%" + o.Email + "%' "
+		o.Where = "email LIKE '%" + o.Email + "%'"
 	}
+	fmt.Println(o.Where)
 	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM tenant WHERE %s`, o.Where), o); err == nil {
 		defer rows.Close()
 		for rows.Next() {

@@ -89,8 +89,9 @@ func GetProperty_managerByID(id int64) *Property_manager {
 func (o *Property_manager) Search() []Property_manager {
 	output := []Property_manager{}
 	if o.Where == "" {
-		o.Where = "email LIKE '%" + o.Email + "%' "
+		o.Where = "email LIKE '%" + o.Email + "%'"
 	}
+	fmt.Println(o.Where)
 	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM property_manager WHERE %s`, o.Where), o); err == nil {
 		defer rows.Close()
 		for rows.Next() {

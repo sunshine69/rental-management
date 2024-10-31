@@ -15,30 +15,30 @@ import (
 )
 
 type Contract struct {
-	Id                  int64  `db:"id"`
-	Property_id         int64  `db:"property_id,unique"`
-	Property_manager_id int64  `db:"property_manager_id"`
-	Tenant_id_main      int64  `db:"tenant_id_main"`
-	Tenant_ids          string `db:"tenant_ids"`
-	Start_date          string `db:"start_date"`
-	End_date            string `db:"end_date"`
-	Signed_date         string `db:"signed_date,unique"`
-	Term                string `db:"term"`
-	Rent                int64  `db:"rent"`
-	Rent_period         string `db:"rent_period"`
-	Rent_paid_on        string `db:"rent_paid_on"`
-	Water_charged       int64  `db:"water_charged"`
-	Document_file_path  string `db:"document_file_path"`
-	Url                 string `db:"url"`
-	Note                string `db:"note" form:"Note,ele=textarea"`
-	Where               string `form:"-"`
+	Id                 int64  `db:"id"`
+	Property           int64  `db:"property,unique"`
+	Property_manager   int64  `db:"property_manager"`
+	Tenant_main        int64  `db:"tenant_main"`
+	Tenants            string `db:"tenants"`
+	Start_date         string `db:"start_date"`
+	End_date           string `db:"end_date"`
+	Signed_date        string `db:"signed_date,unique"`
+	Term               string `db:"term"`
+	Rent               int64  `db:"rent"`
+	Rent_period        string `db:"rent_period"`
+	Rent_paid_on       string `db:"rent_paid_on"`
+	Water_charged      int64  `db:"water_charged"`
+	Document_file_path string `db:"document_file_path"`
+	Url                string `db:"url"`
+	Note               string `db:"note" form:"Note,ele=textarea"`
+	Where              string `form:"-"`
 }
 
-func NewContract(property_id int64, signed_date string) Contract {
+func NewContract(property int64, signed_date string) Contract {
 
 	o := Contract{}
-	if err := DB.Get(&o, "SELECT * FROM contract WHERE  property_id = ? AND  signed_date = ?", property_id, signed_date); errors.Is(err, sql.ErrNoRows) {
-		o.Property_id = property_id
+	if err := DB.Get(&o, "SELECT * FROM contract WHERE  property = ? AND  signed_date = ?", property, signed_date); errors.Is(err, sql.ErrNoRows) {
+		o.Property = property
 		o.Signed_date = signed_date
 		if o.Start_date == "" {
 			o.Start_date = time.Now().Format(u.TimeISO8601LayOut)
@@ -57,7 +57,7 @@ func NewContract(property_id int64, signed_date string) Contract {
 
 func GetContractByCompositeKeyOrNew(data map[string]interface{}) *Contract {
 	data = ParseDatetimeFieldOfMapData(data)
-	if rows, err := DB.NamedQuery(`SELECT * FROM contract WHERE property_id=:property_id  AND signed_date=:signed_date `, data); err == nil {
+	if rows, err := DB.NamedQuery(`SELECT * FROM contract WHERE property=:property  AND signed_date=:signed_date `, data); err == nil {
 		defer rows.Close()
 		for rows.Next() {
 			tn := Contract{}
@@ -69,7 +69,7 @@ func GetContractByCompositeKeyOrNew(data map[string]interface{}) *Contract {
 			}
 		}
 		// create new one
-		tn := NewContract(data["property_id"].(int64), data["signed_date"].(string))
+		tn := NewContract(data["property"].(int64), data["signed_date"].(string))
 		tn.Update(data)
 		return &tn
 	} else {
@@ -78,10 +78,10 @@ func GetContractByCompositeKeyOrNew(data map[string]interface{}) *Contract {
 	return nil
 }
 
-func GetContract(property_id int64, signed_date string) *Contract {
+func GetContract(property int64, signed_date string) *Contract {
 	o := Contract{
-		Property_id: property_id, Signed_date: signed_date,
-		Where: "property_id=:property_id , signed_date=:signed_date "}
+		Property: property, Signed_date: signed_date,
+		Where: "property=:property , signed_date=:signed_date "}
 	if r := o.Search(); len(r) > 0 {
 		return &r[0]
 	} else {
@@ -104,8 +104,9 @@ func GetContractByID(id int64) *Contract {
 func (o *Contract) Search() []Contract {
 	output := []Contract{}
 	if o.Where == "" {
-		o.Where = "property_id LIKE '%" + string(o.Property_id) + "%'  AND signed_date LIKE '%" + o.Signed_date + "%' "
+		o.Where = "signed_date LIKE '%" + o.Signed_date + "%'"
 	}
+	fmt.Println(o.Where)
 	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM contract WHERE %s`, o.Where), o); err == nil {
 		defer rows.Close()
 		for rows.Next() {
@@ -127,7 +128,7 @@ func (o *Contract) Search() []Contract {
 func (o *Contract) Update(data map[string]interface{}) error {
 	fields := ag.MapKeysToSlice(data)
 	fieldsWithoutKey := ag.SliceMap(fields, func(s string) *string {
-		if s != "id" && s != "property_id" && s != "signed_date" {
+		if s != "id" && s != "property" && s != "signed_date" {
 			return &s
 		}
 		return nil
@@ -143,7 +144,7 @@ func (o *Contract) Update(data map[string]interface{}) error {
 
 // Save existing object which is saved it into db
 func (o *Contract) Save() error {
-	if res, err := DB.NamedExec(`INSERT INTO contract(property_id,property_manager_id,tenant_id_main,tenant_ids,start_date,end_date,signed_date,term,rent,rent_period,rent_paid_on,water_charged,document_file_path,url,note) VALUES(:property_id,:property_manager_id,:tenant_id_main,:tenant_ids,:start_date,:end_date,:signed_date,:term,:rent,:rent_period,:rent_paid_on,:water_charged,:document_file_path,:url,:note) ON CONFLICT( property_id,signed_date) DO UPDATE SET property_id=excluded.property_id,property_manager_id=excluded.property_manager_id,tenant_id_main=excluded.tenant_id_main,tenant_ids=excluded.tenant_ids,start_date=excluded.start_date,end_date=excluded.end_date,signed_date=excluded.signed_date,term=excluded.term,rent=excluded.rent,rent_period=excluded.rent_period,rent_paid_on=excluded.rent_paid_on,water_charged=excluded.water_charged,document_file_path=excluded.document_file_path,url=excluded.url,note=excluded.note`, o); err != nil {
+	if res, err := DB.NamedExec(`INSERT INTO contract(property,property_manager,tenant_main,tenants,start_date,end_date,signed_date,term,rent,rent_period,rent_paid_on,water_charged,document_file_path,url,note) VALUES(:property,:property_manager,:tenant_main,:tenants,:start_date,:end_date,:signed_date,:term,:rent,:rent_period,:rent_paid_on,:water_charged,:document_file_path,:url,:note) ON CONFLICT( property,signed_date) DO UPDATE SET property=excluded.property,property_manager=excluded.property_manager,tenant_main=excluded.tenant_main,tenants=excluded.tenants,start_date=excluded.start_date,end_date=excluded.end_date,signed_date=excluded.signed_date,term=excluded.term,rent=excluded.rent,rent_period=excluded.rent_period,rent_paid_on=excluded.rent_paid_on,water_charged=excluded.water_charged,document_file_path=excluded.document_file_path,url=excluded.url,note=excluded.note`, o); err != nil {
 		return err
 	} else {
 		o.Id, _ = res.LastInsertId()
@@ -153,7 +154,7 @@ func (o *Contract) Save() error {
 
 // Delete one object
 func (o *Contract) Delete() error {
-	if res, err := DB.NamedExec(`DELETE FROM contract WHERE property_id=:property_id , signed_date=:signed_date `, o); err != nil {
+	if res, err := DB.NamedExec(`DELETE FROM contract WHERE property=:property , signed_date=:signed_date `, o); err != nil {
 		return err
 	} else {
 		r, err := res.RowsAffected()

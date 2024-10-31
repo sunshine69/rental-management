@@ -3,12 +3,12 @@
 	<form>
 		<label for="Account_id">Account id *:</label>
         <input type="text" id="Account_id" name="Account_id" value="" placeholder="Enter Account id" />
+		<label for="Tenant">Tenant :</label>
+        <input type="text" id="Tenant" name="Tenant" value="" placeholder="Enter Tenant" />
 		<label for="Amount">Amount :</label>
         <input type="text" id="Amount" name="Amount" value="" placeholder="Enter Amount" />
 		<label for="Pay_date">Pay date *:</label>
         <input type="text" id="Pay_date" name="Pay_date" value="" placeholder="Enter Pay date" />
-		<label for="Contract_id">Contract id :</label>
-        <input type="text" id="Contract_id" name="Contract_id" value="" placeholder="Enter Contract id" />
 		<label for="Reference">Reference :</label>
         <input type="text" id="Reference" name="Reference" value="" placeholder="Enter Reference" />
 		<input type="button" id="save-Payment" name="save" value="Submit" hx-post="/payment" hx-target="#post-response" />

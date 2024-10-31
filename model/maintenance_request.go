@@ -89,8 +89,9 @@ func GetMaintenance_requestByID(id int64) *Maintenance_request {
 func (o *Maintenance_request) Search() []Maintenance_request {
 	output := []Maintenance_request{}
 	if o.Where == "" {
-		o.Where = "contract_id LIKE '%" + string(o.Contract_id) + "%'  AND request_date LIKE '%" + o.Request_date + "%' "
+		o.Where = "request_date LIKE '%" + o.Request_date + "%'"
 	}
+	fmt.Println(o.Where)
 	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM maintenance_request WHERE %s`, o.Where), o); err == nil {
 		defer rows.Close()
 		for rows.Next() {

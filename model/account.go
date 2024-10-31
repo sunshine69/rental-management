@@ -13,9 +13,10 @@ import (
 
 type Account struct {
 	Id          int64  `db:"id"`
-	Type        string `db:"type"`
 	Balance     int64  `db:"balance"`
 	Contract_id int64  `db:"contract_id,unique"`
+	Tenant_main int64  `db:"tenant_main"`
+	Note        string `db:"note" form:"Note,ele=textarea"`
 	Where       string `form:"-"`
 }
 
@@ -79,8 +80,9 @@ func GetAccountByID(id int64) *Account {
 func (o *Account) Search() []Account {
 	output := []Account{}
 	if o.Where == "" {
-		o.Where = "contract_id LIKE '%" + string(o.Contract_id) + "%' "
+		o.Where = ""
 	}
+	fmt.Println(o.Where)
 	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM account WHERE %s`, o.Where), o); err == nil {
 		defer rows.Close()
 		for rows.Next() {
@@ -118,7 +120,7 @@ func (o *Account) Update(data map[string]interface{}) error {
 
 // Save existing object which is saved it into db
 func (o *Account) Save() error {
-	if res, err := DB.NamedExec(`INSERT INTO account(type,balance,contract_id) VALUES(:type,:balance,:contract_id) ON CONFLICT( contract_id) DO UPDATE SET type=excluded.type,balance=excluded.balance,contract_id=excluded.contract_id`, o); err != nil {
+	if res, err := DB.NamedExec(`INSERT INTO account(balance,contract_id,tenant_main,note) VALUES(:balance,:contract_id,:tenant_main,:note) ON CONFLICT( contract_id) DO UPDATE SET balance=excluded.balance,contract_id=excluded.contract_id,tenant_main=excluded.tenant_main,note=excluded.note`, o); err != nil {
 		return err
 	} else {
 		o.Id, _ = res.LastInsertId()

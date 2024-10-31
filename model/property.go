@@ -79,8 +79,9 @@ func GetPropertyByID(id int64) *Property {
 func (o *Property) Search() []Property {
 	output := []Property{}
 	if o.Where == "" {
-		o.Where = "name LIKE '%" + o.Name + "%' "
+		o.Where = "name LIKE '%" + o.Name + "%'"
 	}
+	fmt.Println(o.Where)
 	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM property WHERE %s`, o.Where), o); err == nil {
 		defer rows.Close()
 		for rows.Next() {

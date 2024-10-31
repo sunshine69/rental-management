@@ -119,7 +119,7 @@ func ProcessPreSteps[T any](w http.ResponseWriter, r *http.Request, currentFormT
 	return newT, nil
 }
 
-func init() {
+func init () {
 	validate = validator.New(validator.WithRequiredStructEnabled())
 	formDecoder = form.NewDecoder()
 
@@ -133,32 +133,31 @@ func init() {
 	validate.RegisterStructValidation(Property_managerStructLevelValidation, model.Property_manager{})
 	validate.RegisterStructValidation(InvoiceStructLevelValidation, model.Invoice{})
 }
-
 // End app-validation.go.tmpl
 
 // Auto generate using app-handler.go.tmpl template
 
 func Tenant(w http.ResponseWriter, r *http.Request) {
-	obj, err := ProcessPreSteps(w, r, model.Tenant{})
-	if err != nil {
-		fmt.Fprintf(w, "%s", err.Error())
-		return
-	}
-	if err := obj.Save(); err != nil {
-		fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
-		fmt.Fprintf(os.Stderr, "%s", err.Error())
-		return
-	}
-	fmt.Fprint(w, "Data saved")
+    obj, err := ProcessPreSteps(w, r, model.Tenant{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    if err := obj.Save(); err != nil {
+        fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
+        fmt.Fprintf(os.Stderr, "%s", err.Error())
+        return
+    }
+    fmt.Fprint(w, "Data saved")
 }
 func SearchTenant(w http.ResponseWriter, r *http.Request) {
-	obj, err := ProcessPreSteps(w, r, model.Tenant{})
-	if err != nil {
-		fmt.Fprintf(w, "%s", err.Error())
-		return
-	}
-	out := obj.Search()
-	rows := []map[string]any{}
+    obj, err := ProcessPreSteps(w, r, model.Tenant{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    out := obj.Search()
+    rows := []map[string]any{}
 	fieldList := []string{}
 	for _, v := range out {
 		_fieldList, r := ag.ConvertStruct2Map(v)
@@ -168,45 +167,45 @@ func SearchTenant(w http.ResponseWriter, r *http.Request) {
 	AllTemplate.ExecuteTemplate(w, "search-result.html", map[string]any{
 		"fieldList": fieldList,
 		"rows":      rows,
-		"tableName": "Tenant",
+        "tableName": "Tenant",
 	})
 }
 func DeleteTenant(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
-	Id, err := strconv.ParseInt(id, 10, 64)
-	if err != nil {
-		fmt.Fprint(w, "[ERROR]")
-		fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
-		return
-	}
-	if err := model.DeleteTenantByID(Id); err != nil {
-		fmt.Fprint(w, "[ERROR]")
-		fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
-		return
-	}
-	fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    id := r.PathValue("id")
+    Id, err := strconv.ParseInt(id, 10, 64)
+    if err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
+        return
+    }
+    if err := model.DeleteTenantByID(Id); err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+        return
+    }
+    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
 }
 func Property(w http.ResponseWriter, r *http.Request) {
-	obj, err := ProcessPreSteps(w, r, model.Property{})
-	if err != nil {
-		fmt.Fprintf(w, "%s", err.Error())
-		return
-	}
-	if err := obj.Save(); err != nil {
-		fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
-		fmt.Fprintf(os.Stderr, "%s", err.Error())
-		return
-	}
-	fmt.Fprint(w, "Data saved")
+    obj, err := ProcessPreSteps(w, r, model.Property{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    if err := obj.Save(); err != nil {
+        fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
+        fmt.Fprintf(os.Stderr, "%s", err.Error())
+        return
+    }
+    fmt.Fprint(w, "Data saved")
 }
 func SearchProperty(w http.ResponseWriter, r *http.Request) {
-	obj, err := ProcessPreSteps(w, r, model.Property{})
-	if err != nil {
-		fmt.Fprintf(w, "%s", err.Error())
-		return
-	}
-	out := obj.Search()
-	rows := []map[string]any{}
+    obj, err := ProcessPreSteps(w, r, model.Property{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    out := obj.Search()
+    rows := []map[string]any{}
 	fieldList := []string{}
 	for _, v := range out {
 		_fieldList, r := ag.ConvertStruct2Map(v)
@@ -216,45 +215,45 @@ func SearchProperty(w http.ResponseWriter, r *http.Request) {
 	AllTemplate.ExecuteTemplate(w, "search-result.html", map[string]any{
 		"fieldList": fieldList,
 		"rows":      rows,
-		"tableName": "Property",
+        "tableName": "Property",
 	})
 }
 func DeleteProperty(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
-	Id, err := strconv.ParseInt(id, 10, 64)
-	if err != nil {
-		fmt.Fprint(w, "[ERROR]")
-		fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
-		return
-	}
-	if err := model.DeletePropertyByID(Id); err != nil {
-		fmt.Fprint(w, "[ERROR]")
-		fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
-		return
-	}
-	fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    id := r.PathValue("id")
+    Id, err := strconv.ParseInt(id, 10, 64)
+    if err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
+        return
+    }
+    if err := model.DeletePropertyByID(Id); err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+        return
+    }
+    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
 }
 func Account(w http.ResponseWriter, r *http.Request) {
-	obj, err := ProcessPreSteps(w, r, model.Account{})
-	if err != nil {
-		fmt.Fprintf(w, "%s", err.Error())
-		return
-	}
-	if err := obj.Save(); err != nil {
-		fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
-		fmt.Fprintf(os.Stderr, "%s", err.Error())
-		return
-	}
-	fmt.Fprint(w, "Data saved")
+    obj, err := ProcessPreSteps(w, r, model.Account{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    if err := obj.Save(); err != nil {
+        fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
+        fmt.Fprintf(os.Stderr, "%s", err.Error())
+        return
+    }
+    fmt.Fprint(w, "Data saved")
 }
 func SearchAccount(w http.ResponseWriter, r *http.Request) {
-	obj, err := ProcessPreSteps(w, r, model.Account{})
-	if err != nil {
-		fmt.Fprintf(w, "%s", err.Error())
-		return
-	}
-	out := obj.Search()
-	rows := []map[string]any{}
+    obj, err := ProcessPreSteps(w, r, model.Account{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    out := obj.Search()
+    rows := []map[string]any{}
 	fieldList := []string{}
 	for _, v := range out {
 		_fieldList, r := ag.ConvertStruct2Map(v)
@@ -264,45 +263,45 @@ func SearchAccount(w http.ResponseWriter, r *http.Request) {
 	AllTemplate.ExecuteTemplate(w, "search-result.html", map[string]any{
 		"fieldList": fieldList,
 		"rows":      rows,
-		"tableName": "Account",
+        "tableName": "Account",
 	})
 }
 func DeleteAccount(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
-	Id, err := strconv.ParseInt(id, 10, 64)
-	if err != nil {
-		fmt.Fprint(w, "[ERROR]")
-		fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
-		return
-	}
-	if err := model.DeleteAccountByID(Id); err != nil {
-		fmt.Fprint(w, "[ERROR]")
-		fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
-		return
-	}
-	fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    id := r.PathValue("id")
+    Id, err := strconv.ParseInt(id, 10, 64)
+    if err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
+        return
+    }
+    if err := model.DeleteAccountByID(Id); err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+        return
+    }
+    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
 }
 func Contract(w http.ResponseWriter, r *http.Request) {
-	obj, err := ProcessPreSteps(w, r, model.Contract{})
-	if err != nil {
-		fmt.Fprintf(w, "%s", err.Error())
-		return
-	}
-	if err := obj.Save(); err != nil {
-		fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
-		fmt.Fprintf(os.Stderr, "%s", err.Error())
-		return
-	}
-	fmt.Fprint(w, "Data saved")
+    obj, err := ProcessPreSteps(w, r, model.Contract{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    if err := obj.Save(); err != nil {
+        fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
+        fmt.Fprintf(os.Stderr, "%s", err.Error())
+        return
+    }
+    fmt.Fprint(w, "Data saved")
 }
 func SearchContract(w http.ResponseWriter, r *http.Request) {
-	obj, err := ProcessPreSteps(w, r, model.Contract{})
-	if err != nil {
-		fmt.Fprintf(w, "%s", err.Error())
-		return
-	}
-	out := obj.Search()
-	rows := []map[string]any{}
+    obj, err := ProcessPreSteps(w, r, model.Contract{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    out := obj.Search()
+    rows := []map[string]any{}
 	fieldList := []string{}
 	for _, v := range out {
 		_fieldList, r := ag.ConvertStruct2Map(v)
@@ -312,45 +311,45 @@ func SearchContract(w http.ResponseWriter, r *http.Request) {
 	AllTemplate.ExecuteTemplate(w, "search-result.html", map[string]any{
 		"fieldList": fieldList,
 		"rows":      rows,
-		"tableName": "Contract",
+        "tableName": "Contract",
 	})
 }
 func DeleteContract(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
-	Id, err := strconv.ParseInt(id, 10, 64)
-	if err != nil {
-		fmt.Fprint(w, "[ERROR]")
-		fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
-		return
-	}
-	if err := model.DeleteContractByID(Id); err != nil {
-		fmt.Fprint(w, "[ERROR]")
-		fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
-		return
-	}
-	fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    id := r.PathValue("id")
+    Id, err := strconv.ParseInt(id, 10, 64)
+    if err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
+        return
+    }
+    if err := model.DeleteContractByID(Id); err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+        return
+    }
+    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
 }
 func Payment(w http.ResponseWriter, r *http.Request) {
-	obj, err := ProcessPreSteps(w, r, model.Payment{})
-	if err != nil {
-		fmt.Fprintf(w, "%s", err.Error())
-		return
-	}
-	if err := obj.Save(); err != nil {
-		fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
-		fmt.Fprintf(os.Stderr, "%s", err.Error())
-		return
-	}
-	fmt.Fprint(w, "Data saved")
+    obj, err := ProcessPreSteps(w, r, model.Payment{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    if err := obj.Save(); err != nil {
+        fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
+        fmt.Fprintf(os.Stderr, "%s", err.Error())
+        return
+    }
+    fmt.Fprint(w, "Data saved")
 }
 func SearchPayment(w http.ResponseWriter, r *http.Request) {
-	obj, err := ProcessPreSteps(w, r, model.Payment{})
-	if err != nil {
-		fmt.Fprintf(w, "%s", err.Error())
-		return
-	}
-	out := obj.Search()
-	rows := []map[string]any{}
+    obj, err := ProcessPreSteps(w, r, model.Payment{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    out := obj.Search()
+    rows := []map[string]any{}
 	fieldList := []string{}
 	for _, v := range out {
 		_fieldList, r := ag.ConvertStruct2Map(v)
@@ -360,45 +359,45 @@ func SearchPayment(w http.ResponseWriter, r *http.Request) {
 	AllTemplate.ExecuteTemplate(w, "search-result.html", map[string]any{
 		"fieldList": fieldList,
 		"rows":      rows,
-		"tableName": "Payment",
+        "tableName": "Payment",
 	})
 }
 func DeletePayment(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
-	Id, err := strconv.ParseInt(id, 10, 64)
-	if err != nil {
-		fmt.Fprint(w, "[ERROR]")
-		fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
-		return
-	}
-	if err := model.DeletePaymentByID(Id); err != nil {
-		fmt.Fprint(w, "[ERROR]")
-		fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
-		return
-	}
-	fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    id := r.PathValue("id")
+    Id, err := strconv.ParseInt(id, 10, 64)
+    if err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
+        return
+    }
+    if err := model.DeletePaymentByID(Id); err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+        return
+    }
+    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
 }
 func Maintenance_request(w http.ResponseWriter, r *http.Request) {
-	obj, err := ProcessPreSteps(w, r, model.Maintenance_request{})
-	if err != nil {
-		fmt.Fprintf(w, "%s", err.Error())
-		return
-	}
-	if err := obj.Save(); err != nil {
-		fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
-		fmt.Fprintf(os.Stderr, "%s", err.Error())
-		return
-	}
-	fmt.Fprint(w, "Data saved")
+    obj, err := ProcessPreSteps(w, r, model.Maintenance_request{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    if err := obj.Save(); err != nil {
+        fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
+        fmt.Fprintf(os.Stderr, "%s", err.Error())
+        return
+    }
+    fmt.Fprint(w, "Data saved")
 }
 func SearchMaintenance_request(w http.ResponseWriter, r *http.Request) {
-	obj, err := ProcessPreSteps(w, r, model.Maintenance_request{})
-	if err != nil {
-		fmt.Fprintf(w, "%s", err.Error())
-		return
-	}
-	out := obj.Search()
-	rows := []map[string]any{}
+    obj, err := ProcessPreSteps(w, r, model.Maintenance_request{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    out := obj.Search()
+    rows := []map[string]any{}
 	fieldList := []string{}
 	for _, v := range out {
 		_fieldList, r := ag.ConvertStruct2Map(v)
@@ -408,45 +407,45 @@ func SearchMaintenance_request(w http.ResponseWriter, r *http.Request) {
 	AllTemplate.ExecuteTemplate(w, "search-result.html", map[string]any{
 		"fieldList": fieldList,
 		"rows":      rows,
-		"tableName": "Maintenance_request",
+        "tableName": "Maintenance_request",
 	})
 }
 func DeleteMaintenance_request(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
-	Id, err := strconv.ParseInt(id, 10, 64)
-	if err != nil {
-		fmt.Fprint(w, "[ERROR]")
-		fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
-		return
-	}
-	if err := model.DeleteMaintenance_requestByID(Id); err != nil {
-		fmt.Fprint(w, "[ERROR]")
-		fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
-		return
-	}
-	fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    id := r.PathValue("id")
+    Id, err := strconv.ParseInt(id, 10, 64)
+    if err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
+        return
+    }
+    if err := model.DeleteMaintenance_requestByID(Id); err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+        return
+    }
+    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
 }
 func Property_manager(w http.ResponseWriter, r *http.Request) {
-	obj, err := ProcessPreSteps(w, r, model.Property_manager{})
-	if err != nil {
-		fmt.Fprintf(w, "%s", err.Error())
-		return
-	}
-	if err := obj.Save(); err != nil {
-		fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
-		fmt.Fprintf(os.Stderr, "%s", err.Error())
-		return
-	}
-	fmt.Fprint(w, "Data saved")
+    obj, err := ProcessPreSteps(w, r, model.Property_manager{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    if err := obj.Save(); err != nil {
+        fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
+        fmt.Fprintf(os.Stderr, "%s", err.Error())
+        return
+    }
+    fmt.Fprint(w, "Data saved")
 }
 func SearchProperty_manager(w http.ResponseWriter, r *http.Request) {
-	obj, err := ProcessPreSteps(w, r, model.Property_manager{})
-	if err != nil {
-		fmt.Fprintf(w, "%s", err.Error())
-		return
-	}
-	out := obj.Search()
-	rows := []map[string]any{}
+    obj, err := ProcessPreSteps(w, r, model.Property_manager{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    out := obj.Search()
+    rows := []map[string]any{}
 	fieldList := []string{}
 	for _, v := range out {
 		_fieldList, r := ag.ConvertStruct2Map(v)
@@ -456,45 +455,45 @@ func SearchProperty_manager(w http.ResponseWriter, r *http.Request) {
 	AllTemplate.ExecuteTemplate(w, "search-result.html", map[string]any{
 		"fieldList": fieldList,
 		"rows":      rows,
-		"tableName": "Property_manager",
+        "tableName": "Property_manager",
 	})
 }
 func DeleteProperty_manager(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
-	Id, err := strconv.ParseInt(id, 10, 64)
-	if err != nil {
-		fmt.Fprint(w, "[ERROR]")
-		fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
-		return
-	}
-	if err := model.DeleteProperty_managerByID(Id); err != nil {
-		fmt.Fprint(w, "[ERROR]")
-		fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
-		return
-	}
-	fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    id := r.PathValue("id")
+    Id, err := strconv.ParseInt(id, 10, 64)
+    if err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
+        return
+    }
+    if err := model.DeleteProperty_managerByID(Id); err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+        return
+    }
+    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
 }
 func Invoice(w http.ResponseWriter, r *http.Request) {
-	obj, err := ProcessPreSteps(w, r, model.Invoice{})
-	if err != nil {
-		fmt.Fprintf(w, "%s", err.Error())
-		return
-	}
-	if err := obj.Save(); err != nil {
-		fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
-		fmt.Fprintf(os.Stderr, "%s", err.Error())
-		return
-	}
-	fmt.Fprint(w, "Data saved")
+    obj, err := ProcessPreSteps(w, r, model.Invoice{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    if err := obj.Save(); err != nil {
+        fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
+        fmt.Fprintf(os.Stderr, "%s", err.Error())
+        return
+    }
+    fmt.Fprint(w, "Data saved")
 }
 func SearchInvoice(w http.ResponseWriter, r *http.Request) {
-	obj, err := ProcessPreSteps(w, r, model.Invoice{})
-	if err != nil {
-		fmt.Fprintf(w, "%s", err.Error())
-		return
-	}
-	out := obj.Search()
-	rows := []map[string]any{}
+    obj, err := ProcessPreSteps(w, r, model.Invoice{})
+    if err != nil {
+        fmt.Fprintf(w, "%s", err.Error())
+        return
+    }
+    out := obj.Search()
+    rows := []map[string]any{}
 	fieldList := []string{}
 	for _, v := range out {
 		_fieldList, r := ag.ConvertStruct2Map(v)
@@ -504,52 +503,51 @@ func SearchInvoice(w http.ResponseWriter, r *http.Request) {
 	AllTemplate.ExecuteTemplate(w, "search-result.html", map[string]any{
 		"fieldList": fieldList,
 		"rows":      rows,
-		"tableName": "Invoice",
+        "tableName": "Invoice",
 	})
 }
 func DeleteInvoice(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
-	Id, err := strconv.ParseInt(id, 10, 64)
-	if err != nil {
-		fmt.Fprint(w, "[ERROR]")
-		fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
-		return
-	}
-	if err := model.DeleteInvoiceByID(Id); err != nil {
-		fmt.Fprint(w, "[ERROR]")
-		fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
-		return
-	}
-	fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    id := r.PathValue("id")
+    Id, err := strconv.ParseInt(id, 10, 64)
+    if err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
+        return
+    }
+    if err := model.DeleteInvoiceByID(Id); err != nil {
+        fmt.Fprint(w, "[ERROR]")
+        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+        return
+    }
+    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
 }
 
 func AddHandler(mux *http.ServeMux, Cfg *configs.Config) {
-	mux.HandleFunc("POST "+Cfg.PathBase+"/tenant/search", SearchTenant)
-	mux.HandleFunc("POST "+Cfg.PathBase+"/tenant/delete/{id}", DeleteTenant)
-	mux.HandleFunc("POST "+Cfg.PathBase+"/tenant", Tenant)
-	mux.HandleFunc("POST "+Cfg.PathBase+"/property/search", SearchProperty)
-	mux.HandleFunc("POST "+Cfg.PathBase+"/property/delete/{id}", DeleteProperty)
-	mux.HandleFunc("POST "+Cfg.PathBase+"/property", Property)
-	mux.HandleFunc("POST "+Cfg.PathBase+"/account/search", SearchAccount)
-	mux.HandleFunc("POST "+Cfg.PathBase+"/account/delete/{id}", DeleteAccount)
-	mux.HandleFunc("POST "+Cfg.PathBase+"/account", Account)
-	mux.HandleFunc("POST "+Cfg.PathBase+"/contract/search", SearchContract)
-	mux.HandleFunc("POST "+Cfg.PathBase+"/contract/delete/{id}", DeleteContract)
-	mux.HandleFunc("POST "+Cfg.PathBase+"/contract", Contract)
-	mux.HandleFunc("POST "+Cfg.PathBase+"/payment/search", SearchPayment)
-	mux.HandleFunc("POST "+Cfg.PathBase+"/payment/delete/{id}", DeletePayment)
-	mux.HandleFunc("POST "+Cfg.PathBase+"/payment", Payment)
-	mux.HandleFunc("POST "+Cfg.PathBase+"/maintenance_request/search", SearchMaintenance_request)
-	mux.HandleFunc("POST "+Cfg.PathBase+"/maintenance_request/delete/{id}", DeleteMaintenance_request)
-	mux.HandleFunc("POST "+Cfg.PathBase+"/maintenance_request", Maintenance_request)
-	mux.HandleFunc("POST "+Cfg.PathBase+"/property_manager/search", SearchProperty_manager)
-	mux.HandleFunc("POST "+Cfg.PathBase+"/property_manager/delete/{id}", DeleteProperty_manager)
-	mux.HandleFunc("POST "+Cfg.PathBase+"/property_manager", Property_manager)
-	mux.HandleFunc("POST "+Cfg.PathBase+"/invoice/search", SearchInvoice)
-	mux.HandleFunc("POST "+Cfg.PathBase+"/invoice/delete/{id}", DeleteInvoice)
-	mux.HandleFunc("POST "+Cfg.PathBase+"/invoice", Invoice)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/tenant/search", SearchTenant)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/tenant/delete/{id}", DeleteTenant)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/tenant", Tenant)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/property/search", SearchProperty)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/property/delete/{id}", DeleteProperty)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/property", Property)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/account/search", SearchAccount)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/account/delete/{id}", DeleteAccount)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/account", Account)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/contract/search", SearchContract)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/contract/delete/{id}", DeleteContract)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/contract", Contract)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/payment/search", SearchPayment)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/payment/delete/{id}", DeletePayment)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/payment", Payment)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/maintenance_request/search", SearchMaintenance_request)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/maintenance_request/delete/{id}", DeleteMaintenance_request)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/maintenance_request", Maintenance_request)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/property_manager/search", SearchProperty_manager)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/property_manager/delete/{id}", DeleteProperty_manager)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/property_manager", Property_manager)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/invoice/search", SearchInvoice)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/invoice/delete/{id}", DeleteInvoice)
+    mux.HandleFunc("POST "+Cfg.PathBase+"/invoice", Invoice)
 }
-
 // End app-handler.go.tmpl
 
 func loadAllTemplates() *template.Template {

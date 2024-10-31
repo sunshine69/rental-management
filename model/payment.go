@@ -15,13 +15,13 @@ import (
 )
 
 type Payment struct {
-	Id          int64  `db:"id"`
-	Account_id  int64  `db:"account_id,unique"`
-	Amount      int64  `db:"amount"`
-	Pay_date    string `db:"pay_date,unique"`
-	Contract_id int64  `db:"contract_id"`
-	Reference   string `db:"reference"`
-	Where       string `form:"-"`
+	Id         int64  `db:"id"`
+	Account_id int64  `db:"account_id,unique"`
+	Tenant     int64  `db:"tenant"`
+	Amount     int64  `db:"amount"`
+	Pay_date   string `db:"pay_date,unique"`
+	Reference  string `db:"reference"`
+	Where      string `form:"-"`
 }
 
 func NewPayment(account_id int64, pay_date string) Payment {
@@ -88,8 +88,9 @@ func GetPaymentByID(id int64) *Payment {
 func (o *Payment) Search() []Payment {
 	output := []Payment{}
 	if o.Where == "" {
-		o.Where = "account_id LIKE '%" + string(o.Account_id) + "%'  AND pay_date LIKE '%" + o.Pay_date + "%' "
+		o.Where = "pay_date LIKE '%" + o.Pay_date + "%'"
 	}
+	fmt.Println(o.Where)
 	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM payment WHERE %s`, o.Where), o); err == nil {
 		defer rows.Close()
 		for rows.Next() {
@@ -127,7 +128,7 @@ func (o *Payment) Update(data map[string]interface{}) error {
 
 // Save existing object which is saved it into db
 func (o *Payment) Save() error {
-	if res, err := DB.NamedExec(`INSERT INTO payment(account_id,amount,pay_date,contract_id,reference) VALUES(:account_id,:amount,:pay_date,:contract_id,:reference) ON CONFLICT( account_id,pay_date) DO UPDATE SET account_id=excluded.account_id,amount=excluded.amount,pay_date=excluded.pay_date,contract_id=excluded.contract_id,reference=excluded.reference`, o); err != nil {
+	if res, err := DB.NamedExec(`INSERT INTO payment(account_id,tenant,amount,pay_date,reference) VALUES(:account_id,:tenant,:amount,:pay_date,:reference) ON CONFLICT( account_id,pay_date) DO UPDATE SET account_id=excluded.account_id,tenant=excluded.tenant,amount=excluded.amount,pay_date=excluded.pay_date,reference=excluded.reference`, o); err != nil {
 		return err
 	} else {
 		o.Id, _ = res.LastInsertId()
