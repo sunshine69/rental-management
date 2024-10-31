@@ -119,7 +119,7 @@ func ProcessPreSteps[T any](w http.ResponseWriter, r *http.Request, currentFormT
 	return newT, nil
 }
 
-func init() {
+func init () {
 	validate = validator.New(validator.WithRequiredStructEnabled())
 	formDecoder = form.NewDecoder()
 
@@ -133,7 +133,6 @@ func init() {
 	validate.RegisterStructValidation(Property_managerStructLevelValidation, model.Property_manager{})
 	validate.RegisterStructValidation(InvoiceStructLevelValidation, model.Invoice{})
 }
-
 // End app-validation.go.tmpl
 
 // Auto generate using app-handler.go.tmpl template
@@ -161,7 +160,7 @@ func SearchTenant(w http.ResponseWriter, r *http.Request) {
     rows := []map[string]any{}
 	fieldList := []string{}
 	for _, v := range out {
-		_fieldList, r := Convert2Map(v)
+		_fieldList, r := utils.Convert2Map(v)
 		rows = append(rows, r)
 		fieldList = _fieldList
 	}
@@ -209,7 +208,7 @@ func SearchProperty(w http.ResponseWriter, r *http.Request) {
     rows := []map[string]any{}
 	fieldList := []string{}
 	for _, v := range out {
-		_fieldList, r := Convert2Map(v)
+		_fieldList, r := utils.Convert2Map(v)
 		rows = append(rows, r)
 		fieldList = _fieldList
 	}
@@ -257,7 +256,7 @@ func SearchAccount(w http.ResponseWriter, r *http.Request) {
     rows := []map[string]any{}
 	fieldList := []string{}
 	for _, v := range out {
-		_fieldList, r := Convert2Map(v)
+		_fieldList, r := utils.Convert2Map(v)
 		rows = append(rows, r)
 		fieldList = _fieldList
 	}
@@ -305,7 +304,7 @@ func SearchContract(w http.ResponseWriter, r *http.Request) {
     rows := []map[string]any{}
 	fieldList := []string{}
 	for _, v := range out {
-		_fieldList, r := Convert2Map(v)
+		_fieldList, r := utils.Convert2Map(v)
 		rows = append(rows, r)
 		fieldList = _fieldList
 	}
@@ -353,7 +352,7 @@ func SearchPayment(w http.ResponseWriter, r *http.Request) {
     rows := []map[string]any{}
 	fieldList := []string{}
 	for _, v := range out {
-		_fieldList, r := Convert2Map(v)
+		_fieldList, r := utils.Convert2Map(v)
 		rows = append(rows, r)
 		fieldList = _fieldList
 	}
@@ -401,7 +400,7 @@ func SearchMaintenance_request(w http.ResponseWriter, r *http.Request) {
     rows := []map[string]any{}
 	fieldList := []string{}
 	for _, v := range out {
-		_fieldList, r := Convert2Map(v)
+		_fieldList, r := utils.Convert2Map(v)
 		rows = append(rows, r)
 		fieldList = _fieldList
 	}
@@ -449,7 +448,7 @@ func SearchProperty_manager(w http.ResponseWriter, r *http.Request) {
     rows := []map[string]any{}
 	fieldList := []string{}
 	for _, v := range out {
-		_fieldList, r := Convert2Map(v)
+		_fieldList, r := utils.Convert2Map(v)
 		rows = append(rows, r)
 		fieldList = _fieldList
 	}
@@ -497,7 +496,7 @@ func SearchInvoice(w http.ResponseWriter, r *http.Request) {
     rows := []map[string]any{}
 	fieldList := []string{}
 	for _, v := range out {
-		_fieldList, r := Convert2Map(v)
+		_fieldList, r := utils.Convert2Map(v)
 		rows = append(rows, r)
 		fieldList = _fieldList
 	}
@@ -602,14 +601,4 @@ func StartWebApp(mux *http.ServeMux, Cfg *configs.Config) {
 	mux.Handle(Cfg.PathBase+"/static/", http.StripPrefix(Cfg.PathBase+"/static/", http.FileServer(assetBox.HTTPBox())))
 	mux.HandleFunc("GET "+Cfg.PathBase+"/home", Home)
 	AddHandler(mux, Cfg)
-}
-
-// Convert any model type to a map - useful to render it in template
-func Convert2Map[T any](t T) ([]string, map[string]any) {
-	sInfo := utils.ReflectStruct(t, "")
-	out := map[string]any{}
-	for _, f := range sInfo.FieldName {
-		out[f] = sInfo.FieldValue[f]
-	}
-	return sInfo.FieldName, out
 }

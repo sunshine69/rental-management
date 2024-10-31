@@ -8,10 +8,11 @@ import (
 	"github.com/R167/go-sets"
 	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/sunshine69/rental-management/model"
+	"github.com/sunshine69/rental-management/utils"
 )
 
 func CreatePayment(w http.ResponseWriter, r *http.Request) {
-	if payment := ParseJSON[model.Payment](r); payment != nil {
+	if payment := utils.ParseJSON[model.Payment](r); payment != nil {
 		if err := payment.Save(); err != nil {
 			fmt.Fprintf(w, `{"status": "ERROR", "msg": "%s"}`, err.Error())
 		}
@@ -21,8 +22,8 @@ func CreatePayment(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdatePayment(w http.ResponseWriter, r *http.Request) {
-	o := ParseJSONToMap(r)
-	if id := ParseID(r); id != 0 {
+	o := utils.ParseJSONToMap(r)
+	if id := utils.ParseID(r); id != 0 {
 		tn := model.GetPaymentByID(id)
 		if tn == nil {
 			fmt.Fprint(w, `{"status": "ERROR", "msg": "Payment not found with this id"}`)
@@ -53,7 +54,7 @@ func UpdatePayment(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeletePayment(w http.ResponseWriter, r *http.Request) {
-	if id := ParseID(r); id != 0 {
+	if id := utils.ParseID(r); id != 0 {
 		if err := model.DeletePaymentByID(id); err == nil {
 			fmt.Fprint(w, `{"status": "OK", "msg": "Payment deleted"}`)
 		} else {
@@ -61,7 +62,7 @@ func DeletePayment(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	} else {
-		payment := ParseJSON[model.Payment](r)
+		payment := utils.ParseJSON[model.Payment](r)
 		if payment != nil {
 			if payment.Id != 0 {
 				model.DeletePaymentByID(payment.Id)
@@ -83,7 +84,7 @@ func DeletePayment(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetPayment(w http.ResponseWriter, r *http.Request) {
-	if id := ParseID(r); id == 0 {
+	if id := utils.ParseID(r); id == 0 {
 		if where := r.PathValue("where"); where != "" {
 			o := model.Payment{Where: where}
 			os := o.Search()

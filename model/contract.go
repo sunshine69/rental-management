@@ -18,7 +18,8 @@ type Contract struct {
 	Id                  int64  `db:"id"`
 	Property_id         int64  `db:"property_id,unique"`
 	Property_manager_id int64  `db:"property_manager_id"`
-	Tenant_id           int64  `db:"tenant_id"`
+	Tenant_id_main      int64  `db:"tenant_id_main"`
+	Tenant_ids          string `db:"tenant_ids"`
 	Start_date          string `db:"start_date"`
 	End_date            string `db:"end_date"`
 	Signed_date         string `db:"signed_date,unique"`
@@ -142,7 +143,7 @@ func (o *Contract) Update(data map[string]interface{}) error {
 
 // Save existing object which is saved it into db
 func (o *Contract) Save() error {
-	if res, err := DB.NamedExec(`INSERT INTO contract(property_id,property_manager_id,tenant_id,start_date,end_date,signed_date,term,rent,rent_period,rent_paid_on,water_charged,document_file_path,url,note) VALUES(:property_id,:property_manager_id,:tenant_id,:start_date,:end_date,:signed_date,:term,:rent,:rent_period,:rent_paid_on,:water_charged,:document_file_path,:url,:note) ON CONFLICT( property_id,signed_date) DO UPDATE SET property_id=excluded.property_id,property_manager_id=excluded.property_manager_id,tenant_id=excluded.tenant_id,start_date=excluded.start_date,end_date=excluded.end_date,signed_date=excluded.signed_date,term=excluded.term,rent=excluded.rent,rent_period=excluded.rent_period,rent_paid_on=excluded.rent_paid_on,water_charged=excluded.water_charged,document_file_path=excluded.document_file_path,url=excluded.url,note=excluded.note`, o); err != nil {
+	if res, err := DB.NamedExec(`INSERT INTO contract(property_id,property_manager_id,tenant_id_main,tenant_ids,start_date,end_date,signed_date,term,rent,rent_period,rent_paid_on,water_charged,document_file_path,url,note) VALUES(:property_id,:property_manager_id,:tenant_id_main,:tenant_ids,:start_date,:end_date,:signed_date,:term,:rent,:rent_period,:rent_paid_on,:water_charged,:document_file_path,:url,:note) ON CONFLICT( property_id,signed_date) DO UPDATE SET property_id=excluded.property_id,property_manager_id=excluded.property_manager_id,tenant_id_main=excluded.tenant_id_main,tenant_ids=excluded.tenant_ids,start_date=excluded.start_date,end_date=excluded.end_date,signed_date=excluded.signed_date,term=excluded.term,rent=excluded.rent,rent_period=excluded.rent_period,rent_paid_on=excluded.rent_paid_on,water_charged=excluded.water_charged,document_file_path=excluded.document_file_path,url=excluded.url,note=excluded.note`, o); err != nil {
 		return err
 	} else {
 		o.Id, _ = res.LastInsertId()

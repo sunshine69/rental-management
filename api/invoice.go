@@ -8,10 +8,11 @@ import (
 	"github.com/R167/go-sets"
 	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/sunshine69/rental-management/model"
+	"github.com/sunshine69/rental-management/utils"
 )
 
 func CreateInvoice(w http.ResponseWriter, r *http.Request) {
-	if invoice := ParseJSON[model.Invoice](r); invoice != nil {
+	if invoice := utils.ParseJSON[model.Invoice](r); invoice != nil {
 		if err := invoice.Save(); err != nil {
 			fmt.Fprintf(w, `{"status": "ERROR", "msg": "%s"}`, err.Error())
 		}
@@ -21,8 +22,8 @@ func CreateInvoice(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateInvoice(w http.ResponseWriter, r *http.Request) {
-	o := ParseJSONToMap(r)
-	if id := ParseID(r); id != 0 {
+	o := utils.ParseJSONToMap(r)
+	if id := utils.ParseID(r); id != 0 {
 		tn := model.GetInvoiceByID(id)
 		if tn == nil {
 			fmt.Fprint(w, `{"status": "ERROR", "msg": "Invoice not found with this id"}`)
@@ -53,7 +54,7 @@ func UpdateInvoice(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteInvoice(w http.ResponseWriter, r *http.Request) {
-	if id := ParseID(r); id != 0 {
+	if id := utils.ParseID(r); id != 0 {
 		if err := model.DeleteInvoiceByID(id); err == nil {
 			fmt.Fprint(w, `{"status": "OK", "msg": "Invoice deleted"}`)
 		} else {
@@ -61,7 +62,7 @@ func DeleteInvoice(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	} else {
-		invoice := ParseJSON[model.Invoice](r)
+		invoice := utils.ParseJSON[model.Invoice](r)
 		if invoice != nil {
 			if invoice.Id != 0 {
 				model.DeleteInvoiceByID(invoice.Id)
@@ -83,7 +84,7 @@ func DeleteInvoice(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetInvoice(w http.ResponseWriter, r *http.Request) {
-	if id := ParseID(r); id == 0 {
+	if id := utils.ParseID(r); id == 0 {
 		if where := r.PathValue("where"); where != "" {
 			o := model.Invoice{Where: where}
 			os := o.Search()

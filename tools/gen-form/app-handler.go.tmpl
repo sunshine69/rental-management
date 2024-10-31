@@ -22,7 +22,7 @@ func Search{{$objName}}(w http.ResponseWriter, r *http.Request) {
     rows := []map[string]any{}
 	fieldList := []string{}
 	for _, v := range out {
-		_fieldList, r := Convert2Map(v)
+		_fieldList, r := utils.Convert2Map(v)
 		rows = append(rows, r)
 		fieldList = _fieldList
 	}

@@ -8,10 +8,11 @@ import (
 	"github.com/R167/go-sets"
 	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/sunshine69/rental-management/model"
+	"github.com/sunshine69/rental-management/utils"
 )
 
 func CreateAccount(w http.ResponseWriter, r *http.Request) {
-	if account := ParseJSON[model.Account](r); account != nil {
+	if account := utils.ParseJSON[model.Account](r); account != nil {
 		if err := account.Save(); err != nil {
 			fmt.Fprintf(w, `{"status": "ERROR", "msg": "%s"}`, err.Error())
 		}
@@ -21,8 +22,8 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateAccount(w http.ResponseWriter, r *http.Request) {
-	o := ParseJSONToMap(r)
-	if id := ParseID(r); id != 0 {
+	o := utils.ParseJSONToMap(r)
+	if id := utils.ParseID(r); id != 0 {
 		tn := model.GetAccountByID(id)
 		if tn == nil {
 			fmt.Fprint(w, `{"status": "ERROR", "msg": "Account not found with this id"}`)
@@ -53,7 +54,7 @@ func UpdateAccount(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteAccount(w http.ResponseWriter, r *http.Request) {
-	if id := ParseID(r); id != 0 {
+	if id := utils.ParseID(r); id != 0 {
 		if err := model.DeleteAccountByID(id); err == nil {
 			fmt.Fprint(w, `{"status": "OK", "msg": "Account deleted"}`)
 		} else {
@@ -61,7 +62,7 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	} else {
-		account := ParseJSON[model.Account](r)
+		account := utils.ParseJSON[model.Account](r)
 		if account != nil {
 			if account.Id != 0 {
 				model.DeleteAccountByID(account.Id)
@@ -83,7 +84,7 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAccount(w http.ResponseWriter, r *http.Request) {
-	if id := ParseID(r); id == 0 {
+	if id := utils.ParseID(r); id == 0 {
 		if where := r.PathValue("where"); where != "" {
 			o := model.Account{Where: where}
 			os := o.Search()

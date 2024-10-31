@@ -8,10 +8,11 @@ import (
 	"github.com/R167/go-sets"
 	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/sunshine69/rental-management/model"
+	"github.com/sunshine69/rental-management/utils"
 )
 
 func CreateTenant(w http.ResponseWriter, r *http.Request) {
-	if tenant := ParseJSON[model.Tenant](r); tenant != nil {
+	if tenant := utils.ParseJSON[model.Tenant](r); tenant != nil {
 		if err := tenant.Save(); err != nil {
 			fmt.Fprintf(w, `{"status": "ERROR", "msg": "%s"}`, err.Error())
 		}
@@ -21,8 +22,8 @@ func CreateTenant(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateTenant(w http.ResponseWriter, r *http.Request) {
-	o := ParseJSONToMap(r)
-	if id := ParseID(r); id != 0 {
+	o := utils.ParseJSONToMap(r)
+	if id := utils.ParseID(r); id != 0 {
 		tn := model.GetTenantByID(id)
 		if tn == nil {
 			fmt.Fprint(w, `{"status": "ERROR", "msg": "Tenant not found with this id"}`)
@@ -53,7 +54,7 @@ func UpdateTenant(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteTenant(w http.ResponseWriter, r *http.Request) {
-	if id := ParseID(r); id != 0 {
+	if id := utils.ParseID(r); id != 0 {
 		if err := model.DeleteTenantByID(id); err == nil {
 			fmt.Fprint(w, `{"status": "OK", "msg": "Tenant deleted"}`)
 		} else {
@@ -61,7 +62,7 @@ func DeleteTenant(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	} else {
-		tenant := ParseJSON[model.Tenant](r)
+		tenant := utils.ParseJSON[model.Tenant](r)
 		if tenant != nil {
 			if tenant.Id != 0 {
 				model.DeleteTenantByID(tenant.Id)
@@ -83,7 +84,7 @@ func DeleteTenant(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetTenant(w http.ResponseWriter, r *http.Request) {
-	if id := ParseID(r); id == 0 {
+	if id := utils.ParseID(r); id == 0 {
 		if where := r.PathValue("where"); where != "" {
 			o := model.Tenant{Where: where}
 			os := o.Search()

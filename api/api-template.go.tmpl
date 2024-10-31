@@ -8,10 +8,11 @@ import (
 	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/R167/go-sets"
 	"github.com/sunshine69/rental-management/model"
+	"github.com/sunshine69/rental-management/utils"
 )
 
 func Create{{.typename|title}}(w http.ResponseWriter, r *http.Request) {
-	if {{.typename}} := ParseJSON[model.{{.typename|title}}](r); {{.typename}} != nil {
+	if {{.typename}} := utils.ParseJSON[model.{{.typename|title}}](r); {{.typename}} != nil {
 		if err := {{.typename}}.Save(); err != nil {
 			fmt.Fprintf(w, `{"status": "ERROR", "msg": "%s"}`, err.Error())
 		}
@@ -21,8 +22,8 @@ func Create{{.typename|title}}(w http.ResponseWriter, r *http.Request) {
 }
 
 func Update{{.typename|title}}(w http.ResponseWriter, r *http.Request) {
-	o := ParseJSONToMap(r)
-	if id := ParseID(r); id != 0 {
+	o := utils.ParseJSONToMap(r)
+	if id := utils.ParseID(r); id != 0 {
 		tn := model.Get{{.typename|title}}ByID(id)
 		if tn == nil {
 			fmt.Fprint(w, `{"status": "ERROR", "msg": "{{.typename|title}} not found with this id"}`)
@@ -42,7 +43,7 @@ func Update{{.typename|title}}(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, `{"status": "ERROR", "msg": "{{.typename|title}} no key value not provided"}`)
 			return
 		}
-		tn := model.Get{{.typename|title}}ByCompositeKeyOrNew(o)		
+		tn := model.Get{{.typename|title}}ByCompositeKeyOrNew(o)
 		if err := tn.Update(o); err == nil {
 			fmt.Fprint(w, `{"status": "OK", "msg": "{{.typename|title}} updated"}`)
 		} else {
@@ -53,7 +54,7 @@ func Update{{.typename|title}}(w http.ResponseWriter, r *http.Request) {
 }
 
 func Delete{{.typename|title}}(w http.ResponseWriter, r *http.Request) {
-	if id := ParseID(r); id != 0 {
+	if id := utils.ParseID(r); id != 0 {
 		if err := model.Delete{{.typename|title}}ByID(id); err == nil {
 			fmt.Fprint(w, `{"status": "OK", "msg": "{{.typename|title}} deleted"}`)
 		} else {
@@ -61,7 +62,7 @@ func Delete{{.typename|title}}(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	} else {
-		{{.typename}} := ParseJSON[model.{{.typename|title}}](r)
+		{{.typename}} := utils.ParseJSON[model.{{.typename|title}}](r)
 		if {{.typename}} != nil {
 			if {{.typename}}.Id != 0 {
 				model.Delete{{.typename|title}}ByID({{.typename}}.Id)
@@ -83,7 +84,7 @@ func Delete{{.typename|title}}(w http.ResponseWriter, r *http.Request) {
 }
 
 func Get{{.typename|title}}(w http.ResponseWriter, r *http.Request) {
-	if id := ParseID(r); id == 0 {
+	if id := utils.ParseID(r); id == 0 {
 		if where := r.PathValue("where"); where != "" {
 			o := model.{{.typename|title}}{Where: where}
 			os := o.Search()

@@ -8,10 +8,11 @@ import (
 	"github.com/R167/go-sets"
 	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/sunshine69/rental-management/model"
+	"github.com/sunshine69/rental-management/utils"
 )
 
 func CreateProperty_manager(w http.ResponseWriter, r *http.Request) {
-	if property_manager := ParseJSON[model.Property_manager](r); property_manager != nil {
+	if property_manager := utils.ParseJSON[model.Property_manager](r); property_manager != nil {
 		if err := property_manager.Save(); err != nil {
 			fmt.Fprintf(w, `{"status": "ERROR", "msg": "%s"}`, err.Error())
 		}
@@ -21,8 +22,8 @@ func CreateProperty_manager(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateProperty_manager(w http.ResponseWriter, r *http.Request) {
-	o := ParseJSONToMap(r)
-	if id := ParseID(r); id != 0 {
+	o := utils.ParseJSONToMap(r)
+	if id := utils.ParseID(r); id != 0 {
 		tn := model.GetProperty_managerByID(id)
 		if tn == nil {
 			fmt.Fprint(w, `{"status": "ERROR", "msg": "Property_manager not found with this id"}`)
@@ -53,7 +54,7 @@ func UpdateProperty_manager(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteProperty_manager(w http.ResponseWriter, r *http.Request) {
-	if id := ParseID(r); id != 0 {
+	if id := utils.ParseID(r); id != 0 {
 		if err := model.DeleteProperty_managerByID(id); err == nil {
 			fmt.Fprint(w, `{"status": "OK", "msg": "Property_manager deleted"}`)
 		} else {
@@ -61,7 +62,7 @@ func DeleteProperty_manager(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	} else {
-		property_manager := ParseJSON[model.Property_manager](r)
+		property_manager := utils.ParseJSON[model.Property_manager](r)
 		if property_manager != nil {
 			if property_manager.Id != 0 {
 				model.DeleteProperty_managerByID(property_manager.Id)
@@ -83,7 +84,7 @@ func DeleteProperty_manager(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetProperty_manager(w http.ResponseWriter, r *http.Request) {
-	if id := ParseID(r); id == 0 {
+	if id := utils.ParseID(r); id == 0 {
 		if where := r.PathValue("where"); where != "" {
 			o := model.Property_manager{Where: where}
 			os := o.Search()

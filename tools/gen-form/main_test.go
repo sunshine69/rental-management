@@ -1,4 +1,4 @@
-package utils
+package main
 
 import (
 	"fmt"
@@ -6,28 +6,19 @@ import (
 	"testing"
 
 	ag "github.com/sunshine69/automation-go/lib"
-	u "github.com/sunshine69/golang-tools/utils"
-	"github.com/sunshine69/rental-management/model"
 )
 
-func GetTemplateData() (data map[string]any) {
-	data = map[string]any{}
-	objs := []string{}
-
+func TestFormGen(t *testing.T) {
+	os.Chdir("../../")
 	for _, it := range AllModelObjects {
-		sInfo := ReflectStruct(it, `form:"([^"]+)"`)
-		objs = append(objs, sInfo.Name)
-		data[sInfo.Name] = sInfo
+		FormGen(it, "web/app/templates")
 	}
-
-	data["objs"] = objs
-	return
 }
 
 func TestAppValidationGen(t *testing.T) {
-	os.Chdir("../")
+	os.Chdir("../../")
 	fmt.Println("Started tests")
-	appGoB, _ := os.ReadFile("utils/app-validation.go.tmpl")
+	appGoB, _ := os.ReadFile("tools/gen-form/app-validation.go.tmpl")
 	data := GetTemplateData()
 
 	code := ag.GoTemplateString(string(appGoB), data)
@@ -35,16 +26,11 @@ func TestAppValidationGen(t *testing.T) {
 }
 
 func TestAppHanderGen(t *testing.T) {
-	os.Chdir("../")
+	os.Chdir("../../")
 	fmt.Println("Started tests")
-	appGoB, _ := os.ReadFile("utils/app-handler.go.tmpl")
+	appGoB, _ := os.ReadFile("tools/gen-form/app-handler.go.tmpl")
 	data := GetTemplateData()
 
 	code := ag.GoTemplateString(string(appGoB), data)
 	ag.BlockInFile("web/app/app.go", []string{}, []string{`// End app-handler.go.tmpl`}, []string{`// Auto generate using app-handler.go.tmpl template`}, code, true, true)
-}
-
-func TestReflect(t *testing.T) {
-	o := ReflectStruct(model.Tenant{}, "")
-	fmt.Printf("%s\n", u.JsonDump(o, ""))
 }

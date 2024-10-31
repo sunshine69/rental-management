@@ -8,10 +8,11 @@ import (
 	"github.com/R167/go-sets"
 	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/sunshine69/rental-management/model"
+	"github.com/sunshine69/rental-management/utils"
 )
 
 func CreateProperty(w http.ResponseWriter, r *http.Request) {
-	if property := ParseJSON[model.Property](r); property != nil {
+	if property := utils.ParseJSON[model.Property](r); property != nil {
 		if err := property.Save(); err != nil {
 			fmt.Fprintf(w, `{"status": "ERROR", "msg": "%s"}`, err.Error())
 		}
@@ -21,8 +22,8 @@ func CreateProperty(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateProperty(w http.ResponseWriter, r *http.Request) {
-	o := ParseJSONToMap(r)
-	if id := ParseID(r); id != 0 {
+	o := utils.ParseJSONToMap(r)
+	if id := utils.ParseID(r); id != 0 {
 		tn := model.GetPropertyByID(id)
 		if tn == nil {
 			fmt.Fprint(w, `{"status": "ERROR", "msg": "Property not found with this id"}`)
@@ -53,7 +54,7 @@ func UpdateProperty(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteProperty(w http.ResponseWriter, r *http.Request) {
-	if id := ParseID(r); id != 0 {
+	if id := utils.ParseID(r); id != 0 {
 		if err := model.DeletePropertyByID(id); err == nil {
 			fmt.Fprint(w, `{"status": "OK", "msg": "Property deleted"}`)
 		} else {
@@ -61,7 +62,7 @@ func DeleteProperty(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	} else {
-		property := ParseJSON[model.Property](r)
+		property := utils.ParseJSON[model.Property](r)
 		if property != nil {
 			if property.Id != 0 {
 				model.DeletePropertyByID(property.Id)
@@ -83,7 +84,7 @@ func DeleteProperty(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetProperty(w http.ResponseWriter, r *http.Request) {
-	if id := ParseID(r); id == 0 {
+	if id := utils.ParseID(r); id == 0 {
 		if where := r.PathValue("where"); where != "" {
 			o := model.Property{Where: where}
 			os := o.Search()

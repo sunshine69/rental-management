@@ -8,10 +8,11 @@ import (
 	"github.com/R167/go-sets"
 	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/sunshine69/rental-management/model"
+	"github.com/sunshine69/rental-management/utils"
 )
 
 func CreateContract(w http.ResponseWriter, r *http.Request) {
-	if contract := ParseJSON[model.Contract](r); contract != nil {
+	if contract := utils.ParseJSON[model.Contract](r); contract != nil {
 		if err := contract.Save(); err != nil {
 			fmt.Fprintf(w, `{"status": "ERROR", "msg": "%s"}`, err.Error())
 		}
@@ -21,8 +22,8 @@ func CreateContract(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateContract(w http.ResponseWriter, r *http.Request) {
-	o := ParseJSONToMap(r)
-	if id := ParseID(r); id != 0 {
+	o := utils.ParseJSONToMap(r)
+	if id := utils.ParseID(r); id != 0 {
 		tn := model.GetContractByID(id)
 		if tn == nil {
 			fmt.Fprint(w, `{"status": "ERROR", "msg": "Contract not found with this id"}`)
@@ -53,7 +54,7 @@ func UpdateContract(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteContract(w http.ResponseWriter, r *http.Request) {
-	if id := ParseID(r); id != 0 {
+	if id := utils.ParseID(r); id != 0 {
 		if err := model.DeleteContractByID(id); err == nil {
 			fmt.Fprint(w, `{"status": "OK", "msg": "Contract deleted"}`)
 		} else {
@@ -61,7 +62,7 @@ func DeleteContract(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	} else {
-		contract := ParseJSON[model.Contract](r)
+		contract := utils.ParseJSON[model.Contract](r)
 		if contract != nil {
 			if contract.Id != 0 {
 				model.DeleteContractByID(contract.Id)
@@ -83,7 +84,7 @@ func DeleteContract(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetContract(w http.ResponseWriter, r *http.Request) {
-	if id := ParseID(r); id == 0 {
+	if id := utils.ParseID(r); id == 0 {
 		if where := r.PathValue("where"); where != "" {
 			o := model.Contract{Where: where}
 			os := o.Search()
