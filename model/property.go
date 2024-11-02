@@ -13,17 +13,17 @@ import (
 
 type Property struct {
 	Id      int64  `db:"id"`
-	Name    string `db:"name,unique"`
+	Code    string `db:"code,unique"`
 	Address string `db:"address"`
 	Note    string `db:"note" form:"Note,ele=textarea"`
 	Where   string `form:"-"`
 }
 
-func NewProperty(name string) Property {
+func NewProperty(code string) Property {
 
 	o := Property{}
-	if err := DB.Get(&o, "SELECT * FROM property WHERE  name = ?", name); errors.Is(err, sql.ErrNoRows) {
-		o.Name = name
+	if err := DB.Get(&o, "SELECT * FROM property WHERE  code = ?", code); errors.Is(err, sql.ErrNoRows) {
+		o.Code = code
 		o.Save()
 	}
 	// get one and test if exists return as it is
@@ -32,7 +32,7 @@ func NewProperty(name string) Property {
 
 func GetPropertyByCompositeKeyOrNew(data map[string]interface{}) *Property {
 	data = ParseDatetimeFieldOfMapData(data)
-	if rows, err := DB.NamedQuery(`SELECT * FROM property WHERE name=:name `, data); err == nil {
+	if rows, err := DB.NamedQuery(`SELECT * FROM property WHERE code=:code `, data); err == nil {
 		defer rows.Close()
 		for rows.Next() {
 			tn := Property{}
@@ -44,7 +44,7 @@ func GetPropertyByCompositeKeyOrNew(data map[string]interface{}) *Property {
 			}
 		}
 		// create new one
-		tn := NewProperty(data["name"].(string))
+		tn := NewProperty(data["code"].(string))
 		tn.Update(data)
 		return &tn
 	} else {
@@ -53,10 +53,10 @@ func GetPropertyByCompositeKeyOrNew(data map[string]interface{}) *Property {
 	return nil
 }
 
-func GetProperty(name string) *Property {
+func GetProperty(code string) *Property {
 	o := Property{
-		Name:  name,
-		Where: "name=:name "}
+		Code:  code,
+		Where: "code=:code "}
 	if r := o.Search(); len(r) > 0 {
 		return &r[0]
 	} else {
@@ -79,7 +79,7 @@ func GetPropertyByID(id int64) *Property {
 func (o *Property) Search() []Property {
 	output := []Property{}
 	if o.Where == "" {
-		o.Where = "name LIKE '%" + o.Name + "%'"
+		o.Where = "code LIKE '%" + o.Code + "%'"
 	}
 	fmt.Println(o.Where)
 	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM property WHERE %s`, o.Where), o); err == nil {
@@ -103,7 +103,7 @@ func (o *Property) Search() []Property {
 func (o *Property) Update(data map[string]interface{}) error {
 	fields := ag.MapKeysToSlice(data)
 	fieldsWithoutKey := ag.SliceMap(fields, func(s string) *string {
-		if s != "id" && s != "name" {
+		if s != "id" && s != "code" {
 			return &s
 		}
 		return nil
@@ -119,7 +119,7 @@ func (o *Property) Update(data map[string]interface{}) error {
 
 // Save existing object which is saved it into db
 func (o *Property) Save() error {
-	if res, err := DB.NamedExec(`INSERT INTO property(name,address,note) VALUES(:name,:address,:note) ON CONFLICT( name) DO UPDATE SET name=excluded.name,address=excluded.address,note=excluded.note`, o); err != nil {
+	if res, err := DB.NamedExec(`INSERT INTO property(code,address,note) VALUES(:code,:address,:note) ON CONFLICT( code) DO UPDATE SET code=excluded.code,address=excluded.address,note=excluded.note`, o); err != nil {
 		return err
 	} else {
 		o.Id, _ = res.LastInsertId()
@@ -129,7 +129,7 @@ func (o *Property) Save() error {
 
 // Delete one object
 func (o *Property) Delete() error {
-	if res, err := DB.NamedExec(`DELETE FROM property WHERE name=:name `, o); err != nil {
+	if res, err := DB.NamedExec(`DELETE FROM property WHERE code=:code `, o); err != nil {
 		return err
 	} else {
 		r, err := res.RowsAffected()

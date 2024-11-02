@@ -22,7 +22,7 @@ type Invoice struct {
 	Number      string `db:"number,unique"`
 	Issuer      string `db:"issuer,unique"`
 	Payer       string `db:"payer"`
-	Property    int64  `db:"property"`
+	Property    string `db:"property"`
 	Due_date    string `db:"due_date"`
 	Where       string `form:"-"`
 }

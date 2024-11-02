@@ -39,7 +39,7 @@ func UpdateProperty(w http.ResponseWriter, r *http.Request) {
 		return
 	} else {
 		inputSet := sets.FromMap(o)
-		keySet := sets.New("name")
+		keySet := sets.New("code")
 		if !inputSet.Superset(keySet) {
 			fmt.Fprint(w, `{"status": "ERROR", "msg": "Property no key value not provided"}`)
 			return
@@ -69,7 +69,7 @@ func DeleteProperty(w http.ResponseWriter, r *http.Request) {
 				model.DeletePropertyByID(property.Id)
 				fmt.Fprint(w, `{"status": "OK", "msg": "Property deleted"}`)
 				return
-			} else if property.Name != "" {
+			} else if property.Code != "" {
 				property.Delete()
 				fmt.Fprint(w, `{"status": "OK", "msg": "Property deleted"}`)
 				return

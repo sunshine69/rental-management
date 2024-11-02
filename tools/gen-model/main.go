@@ -23,12 +23,13 @@ func GotypeLookup(sqltype string) string {
 	}
 }
 
+var sqlCommentPtn *regexp.Regexp = regexp.MustCompile(`^[\s]*\-\-`)
+
 func CodeGen(templateFile string) {
 	if sqlb, err := os.ReadFile("db/schema.sql"); err == nil {
 		sqls := ag.SplitTextByPattern(string(sqlb), `(?m)^CREATE TABLE IF NOT EXISTS .*`, true)
 		// fmt.Printf("%s\n", u.JsonDump(sqls, "  "))
 		for _, sqltext := range sqls {
-			fmt.Println(sqltext)
 			GenerateClass(sqltext, templateFile)
 		}
 	} else {
@@ -37,6 +38,7 @@ func CodeGen(templateFile string) {
 }
 
 func GenerateClass(sqltext, classTemplateFile string) {
+	fmt.Println("DEBUG " + sqltext)
 	typenamePtn := regexp.MustCompile(`CREATE TABLE .* ["]?([^\s"]+)["]? \(`)
 	o := typenamePtn.FindStringSubmatch(sqltext)
 

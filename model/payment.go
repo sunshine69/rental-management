@@ -17,7 +17,7 @@ import (
 type Payment struct {
 	Id         int64  `db:"id"`
 	Account_id int64  `db:"account_id,unique"`
-	Tenant     int64  `db:"tenant"`
+	Tenant     string `db:"tenant"`
 	Amount     int64  `db:"amount"`
 	Pay_date   string `db:"pay_date,unique"`
 	Reference  string `db:"reference"`

@@ -24,17 +24,17 @@ CREATE TABLE IF NOT EXISTS "property_manager" (
 
 CREATE TABLE IF NOT EXISTS "property" (
     "id" integer NOT NULL PRIMARY KEY,
-    "name" varchar(128) NOT NULL,
+    "code" varchar(128) NOT NULL,
     "address" varchar(254) NOT NULL,
     "note" text,
-    UNIQUE("name")
+    UNIQUE("code")
 );
 
 CREATE TABLE IF NOT EXISTS "contract" (
     "id" integer NOT NULL PRIMARY KEY,
-    "property" int NOT NULL REFERENCES "property" ("name"),
-    "property_manager" int NOT NULL REFERENCES "property_manager" ("email"),
-    "tenant_main" int NOT NULL REFERENCES "tenant" ("email"),
+    "property" text NOT NULL REFERENCES "property" ("code"),
+    "property_manager" text NOT NULL REFERENCES "property_manager" ("email"),
+    "tenant_main" text NOT NULL REFERENCES "tenant" ("email"),
     "tenants" jsonb,
     "start_date" text NOT NULL,
     "end_date" text NOT NULL,
@@ -47,14 +47,15 @@ CREATE TABLE IF NOT EXISTS "contract" (
     "document_file_path" text,
     "url" text,
     "note" text,
-    UNIQUE("property", "signed_date")
+    -- sign_date might be better but parsing it in the e signature is a bit harder. Use start_date
+    UNIQUE("property", "start_date", "tenant_main")
 );
 
 CREATE TABLE IF NOT EXISTS "account" (
     "id" integer NOT NULL PRIMARY KEY,
     "balance" int,
     "contract_id" int NOT NULL REFERENCES "contract" ("id"),
-    "tenant_main" int NOT NULL REFERENCES "tenant" ("email"),
+    "tenant_main" text NOT NULL REFERENCES "tenant" ("email"),
     "note" text,
     UNIQUE("contract_id")
 );
@@ -62,7 +63,7 @@ CREATE TABLE IF NOT EXISTS "account" (
 CREATE TABLE IF NOT EXISTS "payment" (
     "id" integer NOT NULL PRIMARY KEY,
     "account_id" int NOT NULL REFERENCES "account" ("id"),
-    "tenant" int NOT NULL REFERENCES "tenant" ("email"),
+    "tenant" text NOT NULL REFERENCES "tenant" ("email"),
     "amount" int,
     "pay_date" text,
     "reference" varchar(256),
@@ -77,7 +78,7 @@ CREATE TABLE IF NOT EXISTS "invoice" (
     "number" varchar(128),
     "issuer" varchar(256),
     "payer" varchar(256),
-    "property" int NOT NULL REFERENCES "property" ("name"),
+    "property" text NOT NULL REFERENCES "property" ("code"),
     "due_date" text,
     UNIQUE("number", "issuer")
 );

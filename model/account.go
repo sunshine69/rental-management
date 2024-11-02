@@ -15,7 +15,7 @@ type Account struct {
 	Id          int64  `db:"id"`
 	Balance     int64  `db:"balance"`
 	Contract_id int64  `db:"contract_id,unique"`
-	Tenant_main int64  `db:"tenant_main"`
+	Tenant_main string `db:"tenant_main"`
 	Note        string `db:"note" form:"Note,ele=textarea"`
 	Where       string `form:"-"`
 }

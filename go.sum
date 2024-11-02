@@ -98,6 +98,16 @@ github.com/stvoidit/gosmtp v1.0.7 h1:zGpj3OLLGjky0bdMwE25b8aMaPuIxGoJFtQpKV7maJs
 github.com/stvoidit/gosmtp v1.0.7/go.mod h1:PYNIJYxbFMCjQduAgVsh6L/fyGxxcsLCz2UGvPHoZ18=
 github.com/sunshine69/automation-go v0.0.0-20241031113026-5a7992209067 h1:1NqfkBFAs7aZ//RuTl63HN0WMenvdiKelldL+GzRL1k=
 github.com/sunshine69/automation-go v0.0.0-20241031113026-5a7992209067/go.mod h1:eCPzKrklaRR2bnoB4hqO2t0yLjMgx77fs9dFyM3899s=
+github.com/sunshine69/automation-go v0.0.0-20241102071432-6d54d73c2b0c h1:AbRx3W6FSABwWJifELTVe8jtTNblm6wtEvuk3aGKbe0=
+github.com/sunshine69/automation-go v0.0.0-20241102071432-6d54d73c2b0c/go.mod h1:eCPzKrklaRR2bnoB4hqO2t0yLjMgx77fs9dFyM3899s=
+github.com/sunshine69/automation-go v0.0.0-20241102071709-a49b19af9bb3 h1:qdmprLMJRWKH7ifBsBbHymiuabCgHwCXhhSitgnHDFs=
+github.com/sunshine69/automation-go v0.0.0-20241102071709-a49b19af9bb3/go.mod h1:eCPzKrklaRR2bnoB4hqO2t0yLjMgx77fs9dFyM3899s=
+github.com/sunshine69/automation-go v0.0.0-20241102110651-735a5598ed18 h1:e7p2Y+t87iDjeGOuqQrzIk+FnMwua9Kptkg+NkkH5iI=
+github.com/sunshine69/automation-go v0.0.0-20241102110651-735a5598ed18/go.mod h1:eCPzKrklaRR2bnoB4hqO2t0yLjMgx77fs9dFyM3899s=
+github.com/sunshine69/automation-go v0.0.0-20241102120903-aa27623828d4 h1:cPTeTIDXz3XmDkQhMQQ291XWaBhvRa7ikHmus25++Xo=
+github.com/sunshine69/automation-go v0.0.0-20241102120903-aa27623828d4/go.mod h1:eCPzKrklaRR2bnoB4hqO2t0yLjMgx77fs9dFyM3899s=
+github.com/sunshine69/automation-go v0.0.0-20241102122254-1fa4b6b91cd9 h1:QgxrwvJpQNnDGdR/LI8sPM3ly3ZMLt4bguuUUOY/hqs=
+github.com/sunshine69/automation-go v0.0.0-20241102122254-1fa4b6b91cd9/go.mod h1:eCPzKrklaRR2bnoB4hqO2t0yLjMgx77fs9dFyM3899s=
 github.com/sunshine69/golang-tools/utils v0.0.0-20240926103530-7d97bcbdbc85 h1:4vTjXGwzGqBY+qQbwJOCvuu3tz4cBh4/ag/lxqrCA6Y=
 github.com/sunshine69/golang-tools/utils v0.0.0-20240926103530-7d97bcbdbc85/go.mod h1:TZu9lXtwd8Yy4ATES49zWlrq5hFu7YmGRt47LuMGc6E=
 github.com/tidwall/gjson v1.18.0 h1:FIDeeyB800efLX89e5a8Y0BNH+LOngJyGrIWxG2FKQY=
