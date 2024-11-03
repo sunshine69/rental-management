@@ -14,17 +14,17 @@
     <h2>Menu</h2>
     <ul>
       {{- range $f, $obj := . }}
-      <li onclick="showForm('Form{{$f}}')">{{$f}}</li>
+      <li onclick="showForm('Form{{$f}}')">{{replace $f "_" " "}}</li>
       {{- end }}
     </ul>
   </div>
 
   <!-- Right Column (Form Content) -->
   <div class="content">
-    <h2 id="form-title">Tenant</h2>
+    <h2 id="form-title">Tenant Management System</h2>
     <div id="form-container">
       {{- range $f, $obj := . }}
-      <!-- {{$f}} (Default). Example of passing a var to a filter func - Need to be like this to work, can not quote string around the var.
+      <!-- {{replace $f "_" " "}} (Default). Example of passing a var to a filter func - Need to be like this to work, can not quote string around the var.
        go 'template <NAME>' does not suport dynamic <NAME> as a variable. -->
       {{- CallTemplate $f $obj }}
       {{- end }}
@@ -46,7 +46,7 @@
       // Update the title
       const formTitleMap = {
         {{- range $f, $obj := . }}
-        'Form{{$f}}': '{{$f}}',
+        'Form{{$f}}': '{{replace $f "_" " "}}',
         {{- end }}
       };
       document.getElementById('form-title').innerText = formTitleMap[formId];
