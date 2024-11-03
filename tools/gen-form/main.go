@@ -8,13 +8,11 @@ import (
 	"github.com/sunshine69/rental-management/model"
 )
 
-var AllModelObjects []any = []any{model.Tenant{}, model.Property{}, model.Account{}, model.Contract{}, model.Payment{}, model.Maintenance_request{}, model.Property_manager{}, model.Invoice{}}
-
 func GetTemplateData() (data map[string]any) {
 	data = map[string]any{}
 	objs := []string{}
 
-	for _, it := range AllModelObjects {
+	for _, it := range model.AllModelObjects {
 		sInfo := ag.ReflectStruct(it, `form:"([^"]+)"`)
 		objs = append(objs, sInfo.Name)
 		data[sInfo.Name] = sInfo
@@ -56,7 +54,7 @@ func FormGen(structType any, writeDirectory string) {
 	}
 	ag.GoTemplateFile("tools/gen-form/form.go.tmpl", destFile, data, 0640)
 	formNameList := []string{}
-	for _, f := range AllModelObjects {
+	for _, f := range model.AllModelObjects {
 		sInfo := ag.ReflectStruct(f, `form:"([^"]+)"`)
 		formNameList = append(formNameList, sInfo.Name)
 	}

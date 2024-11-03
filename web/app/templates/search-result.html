@@ -8,7 +8,7 @@
         {{range $f := $fieldList}}<th>{{if eq $f "Where"}}Delete{{else}}{{$f}}{{end}}</th>{{end}}
     </tr>
     {{range $o := $rows}}
-    <tr bgcolor="#FFFFFF" onMouseOver="this.bgColor='#E0FFE0';" onMouseOut="this.bgColor='#FFFFFF';">
+    <tr bgcolor="#FFFFFF" onMouseOver="this.bgColor='#E0FFE0';" onMouseOut="this.bgColor='#FFFFFF';" hx-get="/{{lower $objectType}}/get/{{index $o "Id"}}" hx-target="#Form{{$objectType}}" hx-swap="innerHTML">
         {{range $idx, $f := $fieldList}}<td>{{if ne $idx (add ($fieldList|len) -1)}}{{ index $o $f }}{{else}}<button type="button" hx-post="/{{lower $objectType}}/delete/{{index $o "Id"}}">Delete</button>{{end}}</td>{{end}}
     </tr>
     {{end}}

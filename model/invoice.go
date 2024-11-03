@@ -94,7 +94,7 @@ func GetInvoiceByID(id int64) *Invoice {
 func (o *Invoice) Search() []Invoice {
 	output := []Invoice{}
 	if o.Where == "" {
-		o.Where = "number LIKE '%" + o.Number + "%'issuer LIKE '%" + o.Issuer + "%'"
+		o.Where = "number LIKE '%" + o.Number + "%' AND issuer LIKE '%" + o.Issuer + "%'"
 	}
 	fmt.Println(o.Where)
 	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM invoice WHERE %s`, o.Where), o); err == nil {

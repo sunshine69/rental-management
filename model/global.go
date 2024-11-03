@@ -35,3 +35,19 @@ func ParseDatetimeFieldOfMapData(input map[string]interface{}) map[string]interf
 	}
 	return input
 }
+
+// Auto generate AllModelObjects
+var AllForms = map[string]any{
+
+	"Tenant":              Tenant{},
+	"Property_manager":    Property_manager{},
+	"Property":            Property{},
+	"Contract":            Contract{},
+	"Account":             Account{},
+	"Payment":             Payment{},
+	"Invoice":             Invoice{},
+	"Maintenance_request": Maintenance_request{},
+}
+var AllModelObjects []any = []any{Tenant{}, Property_manager{}, Property{}, Contract{}, Account{}, Payment{}, Invoice{}, Maintenance_request{}}
+
+// End generate AllModelObjects

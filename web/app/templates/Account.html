@@ -1,17 +1,17 @@
-{{ define "FormAccount" }}
-	<div id="FormAccount" class="form-group" style="display:none;">
+{{ block "FormAccount"  .}}
+	{{if not .Id }}<div id="FormAccount" class="form-group" style="display:none;">{{end}}
 	<form>
 		<label for="Balance">Balance :</label>
-        <input type="text" id="Balance" name="Balance" value="" placeholder="Enter Balance" />
+        <input type="text" id="Balance" name="Balance" value="{{ or .Balance "" }}" placeholder="Enter Balance" />
 		<label for="Contract_id">Contract id *:</label>
-        <input type="text" id="Contract_id" name="Contract_id" value="" placeholder="Enter Contract id" />
+        <input type="text" id="Contract_id" name="Contract_id" value="{{ or .Contract_id "" }}" placeholder="Enter Contract id" />
 		<label for="Tenant_main">Tenant main :</label>
-        <input type="text" id="Tenant_main" name="Tenant_main" value="" placeholder="Enter Tenant main" />
+        <input type="text" id="Tenant_main" name="Tenant_main" value="{{ or .Tenant_main "" }}" placeholder="Enter Tenant main" />
 		<label for="Note">Note :</label>
-        <textarea type="text" id="Note" name="Note" value="" placeholder="Enter Note" ></textarea>
+        <textarea type="text" id="Note" name="Note" value="{{ or .Note "" }}" placeholder="Enter Note" ></textarea>
 		<input type="button" id="save-Account" name="save" value="Submit" hx-post="/account" hx-target="#post-response" />
 		<input type="button" id="search-Account" name="search" value="Search" hx-post="/account/search" hx-target="#post-response" />
 		<input type="reset" name="reset" value="Reset" />
 	</form>
-	</div>
+	{{if not .Id }}</div>{{end}}
 {{ end }}

@@ -6,11 +6,12 @@ import (
 	"testing"
 
 	ag "github.com/sunshine69/automation-go/lib"
+	"github.com/sunshine69/rental-management/model"
 )
 
 func TestFormGen(t *testing.T) {
 	os.Chdir("../../")
-	for _, it := range AllModelObjects {
+	for _, it := range model.AllModelObjects {
 		FormGen(it, "web/app/templates")
 	}
 }

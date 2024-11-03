@@ -94,7 +94,7 @@ func Get{{.typename|title}}ByID(id int64) *{{.typename|title}} {
 func (o *{{.typename|title}}) Search() []{{.typename|title}} {
 	output := []{{.typename|title}}{}
 	if o.Where == "" {
-		o.Where = "{{range $idx, $f := .uniqueFields}}{{if eq (index $.fields $f) "string"}}{{$f}} LIKE '%"+o.{{$f|title}}+"%'{{end}}{{if ne $idx (add ($.uniqueFields|len) -1)}}{{if ne $idx 0}}AND {{end}}{{end}}{{end}}"
+		o.Where = "{{range $idx, $f := .uniqueStringFields}}{{$f}} LIKE '%"+o.{{$f|title}}+"%'{{if ne $idx (add ($.uniqueStringFields|len) -1)}} AND {{end}}{{end}}"
 	}
 	fmt.Println(o.Where)
 	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM {{.typename}} WHERE %s`, o.Where), o); err == nil {

@@ -13,7 +13,7 @@
   <div class="menu">
     <h2>Menu</h2>
     <ul>
-      {{- range $f := .formList }}
+      {{- range $f, $obj := . }}
       <li onclick="showForm('Form{{$f}}')">{{$f}}</li>
       {{- end }}
     </ul>
@@ -23,9 +23,10 @@
   <div class="content">
     <h2 id="form-title">Tenant</h2>
     <div id="form-container">
-      {{- range $f := .formList }}
-      <!-- {{$f}} (Default). Example of passing a var to a filter func - Need to be like this to work, can not quote string around the var -->
-      {{- CallTemplate $f . }}
+      {{- range $f, $obj := . }}
+      <!-- {{$f}} (Default). Example of passing a var to a filter func - Need to be like this to work, can not quote string around the var.
+       go 'template <NAME>' does not suport dynamic <NAME> as a variable. -->
+      {{- CallTemplate $f $obj }}
       {{- end }}
       <hr>
       <div id="post-response"></div>
@@ -36,7 +37,7 @@
     function showForm(formId) {
       // Hide all forms
       // Got no idea why if I put the dash before the range the whole page is empty . Put dash after is fine. Only this section, not the above
-      {{ range $f := .formList }}
+      {{ range $f, $obj := . }}
       document.getElementById('Form{{$f}}').style.display = 'none';
       {{- end }}
       // Show the selected form
@@ -44,7 +45,7 @@
 
       // Update the title
       const formTitleMap = {
-        {{- range $f := .formList }}
+        {{- range $f, $obj := . }}
         'Form{{$f}}': '{{$f}}',
         {{- end }}
       };

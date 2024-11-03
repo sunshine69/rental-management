@@ -105,7 +105,7 @@ func GetContractByID(id int64) *Contract {
 func (o *Contract) Search() []Contract {
 	output := []Contract{}
 	if o.Where == "" {
-		o.Where = "property LIKE '%" + o.Property + "%'start_date LIKE '%" + o.Start_date + "%'AND tenant_main LIKE '%" + o.Tenant_main + "%'"
+		o.Where = "property LIKE '%" + o.Property + "%' AND start_date LIKE '%" + o.Start_date + "%' AND tenant_main LIKE '%" + o.Tenant_main + "%'"
 	}
 	fmt.Println(o.Where)
 	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM contract WHERE %s`, o.Where), o); err == nil {

@@ -37,17 +37,17 @@ func TenantStructLevelValidation(sl validator.StructLevel) {
 		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
 	} */
 }
+func Property_managerStructLevelValidation(sl validator.StructLevel) {
+	// Change it to suit
+	/* form := sl.Current().Interface().(model.Property_manager)
+	  if formProperty_manager.XXX != "XXX" {
+		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
+	} */
+}
 func PropertyStructLevelValidation(sl validator.StructLevel) {
 	// Change it to suit
 	/* form := sl.Current().Interface().(model.Property)
 	  if formProperty.XXX != "XXX" {
-		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
-	} */
-}
-func AccountStructLevelValidation(sl validator.StructLevel) {
-	// Change it to suit
-	/* form := sl.Current().Interface().(model.Account)
-	  if formAccount.XXX != "XXX" {
 		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
 	} */
 }
@@ -58,6 +58,13 @@ func ContractStructLevelValidation(sl validator.StructLevel) {
 		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
 	} */
 }
+func AccountStructLevelValidation(sl validator.StructLevel) {
+	// Change it to suit
+	/* form := sl.Current().Interface().(model.Account)
+	  if formAccount.XXX != "XXX" {
+		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
+	} */
+}
 func PaymentStructLevelValidation(sl validator.StructLevel) {
 	// Change it to suit
 	/* form := sl.Current().Interface().(model.Payment)
@@ -65,24 +72,17 @@ func PaymentStructLevelValidation(sl validator.StructLevel) {
 		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
 	} */
 }
-func Maintenance_requestStructLevelValidation(sl validator.StructLevel) {
-	// Change it to suit
-	/* form := sl.Current().Interface().(model.Maintenance_request)
-	  if formMaintenance_request.XXX != "XXX" {
-		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
-	} */
-}
-func Property_managerStructLevelValidation(sl validator.StructLevel) {
-	// Change it to suit
-	/* form := sl.Current().Interface().(model.Property_manager)
-	  if formProperty_manager.XXX != "XXX" {
-		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
-	} */
-}
 func InvoiceStructLevelValidation(sl validator.StructLevel) {
 	// Change it to suit
 	/* form := sl.Current().Interface().(model.Invoice)
 	  if formInvoice.XXX != "XXX" {
+		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
+	} */
+}
+func Maintenance_requestStructLevelValidation(sl validator.StructLevel) {
+	// Change it to suit
+	/* form := sl.Current().Interface().(model.Maintenance_request)
+	  if formMaintenance_request.XXX != "XXX" {
 		sl.ReportError(form.XXX, "XXX", "XXX", "XXX_Should_Not_Be_Set_When_XXX", "")
 	} */
 }
@@ -125,13 +125,13 @@ func init () {
 
 	// Register validation
 	validate.RegisterStructValidation(TenantStructLevelValidation, model.Tenant{})
-	validate.RegisterStructValidation(PropertyStructLevelValidation, model.Property{})
-	validate.RegisterStructValidation(AccountStructLevelValidation, model.Account{})
-	validate.RegisterStructValidation(ContractStructLevelValidation, model.Contract{})
-	validate.RegisterStructValidation(PaymentStructLevelValidation, model.Payment{})
-	validate.RegisterStructValidation(Maintenance_requestStructLevelValidation, model.Maintenance_request{})
 	validate.RegisterStructValidation(Property_managerStructLevelValidation, model.Property_manager{})
+	validate.RegisterStructValidation(PropertyStructLevelValidation, model.Property{})
+	validate.RegisterStructValidation(ContractStructLevelValidation, model.Contract{})
+	validate.RegisterStructValidation(AccountStructLevelValidation, model.Account{})
+	validate.RegisterStructValidation(PaymentStructLevelValidation, model.Payment{})
 	validate.RegisterStructValidation(InvoiceStructLevelValidation, model.Invoice{})
+	validate.RegisterStructValidation(Maintenance_requestStructLevelValidation, model.Maintenance_request{})
 }
 // End app-validation.go.tmpl
 
@@ -171,19 +171,29 @@ func SearchTenant(w http.ResponseWriter, r *http.Request) {
 	})
 }
 func DeleteTenant(w http.ResponseWriter, r *http.Request) {
-    id := r.PathValue("id")
-    Id, err := strconv.ParseInt(id, 10, 64)
-    if err != nil {
-        fmt.Fprint(w, "[ERROR]")
-        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
-        return
+    if Id := ParseIdFromRequest(r); Id != -1 {
+        if err := model.DeleteTenantByID(Id); err != nil {
+            fmt.Fprint(w, "[ERROR]")
+            fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+            return
+        }
+        fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    } else {
+        fmt.Fprint(w, "[ERROR] ParseIdFromRequest Delete")
     }
-    if err := model.DeleteTenantByID(Id); err != nil {
-        fmt.Fprint(w, "[ERROR]")
-        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
-        return
+}
+func GetTenantById(w http.ResponseWriter, r *http.Request) {
+    if Id := ParseIdFromRequest(r); Id != -1 {
+        if obj := model.GetTenantByID(Id); obj != nil {
+            AllTemplate.ExecuteTemplate(w, "Tenant.html", obj)
+            return
+        } else {
+            fmt.Fprint(w, "[ERROR] Not found")
+        }
+    } else {
+        fmt.Fprint(w, "[ERROR] ParseIdFromRequest GetTenantById")
     }
-    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    return
 }
 func Property(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Property{})
@@ -219,19 +229,29 @@ func SearchProperty(w http.ResponseWriter, r *http.Request) {
 	})
 }
 func DeleteProperty(w http.ResponseWriter, r *http.Request) {
-    id := r.PathValue("id")
-    Id, err := strconv.ParseInt(id, 10, 64)
-    if err != nil {
-        fmt.Fprint(w, "[ERROR]")
-        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
-        return
+    if Id := ParseIdFromRequest(r); Id != -1 {
+        if err := model.DeletePropertyByID(Id); err != nil {
+            fmt.Fprint(w, "[ERROR]")
+            fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+            return
+        }
+        fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    } else {
+        fmt.Fprint(w, "[ERROR] ParseIdFromRequest Delete")
     }
-    if err := model.DeletePropertyByID(Id); err != nil {
-        fmt.Fprint(w, "[ERROR]")
-        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
-        return
+}
+func GetPropertyById(w http.ResponseWriter, r *http.Request) {
+    if Id := ParseIdFromRequest(r); Id != -1 {
+        if obj := model.GetPropertyByID(Id); obj != nil {
+            AllTemplate.ExecuteTemplate(w, "Property.html", obj)
+            return
+        } else {
+            fmt.Fprint(w, "[ERROR] Not found")
+        }
+    } else {
+        fmt.Fprint(w, "[ERROR] ParseIdFromRequest GetPropertyById")
     }
-    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    return
 }
 func Account(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Account{})
@@ -267,19 +287,29 @@ func SearchAccount(w http.ResponseWriter, r *http.Request) {
 	})
 }
 func DeleteAccount(w http.ResponseWriter, r *http.Request) {
-    id := r.PathValue("id")
-    Id, err := strconv.ParseInt(id, 10, 64)
-    if err != nil {
-        fmt.Fprint(w, "[ERROR]")
-        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
-        return
+    if Id := ParseIdFromRequest(r); Id != -1 {
+        if err := model.DeleteAccountByID(Id); err != nil {
+            fmt.Fprint(w, "[ERROR]")
+            fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+            return
+        }
+        fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    } else {
+        fmt.Fprint(w, "[ERROR] ParseIdFromRequest Delete")
     }
-    if err := model.DeleteAccountByID(Id); err != nil {
-        fmt.Fprint(w, "[ERROR]")
-        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
-        return
+}
+func GetAccountById(w http.ResponseWriter, r *http.Request) {
+    if Id := ParseIdFromRequest(r); Id != -1 {
+        if obj := model.GetAccountByID(Id); obj != nil {
+            AllTemplate.ExecuteTemplate(w, "Account.html", obj)
+            return
+        } else {
+            fmt.Fprint(w, "[ERROR] Not found")
+        }
+    } else {
+        fmt.Fprint(w, "[ERROR] ParseIdFromRequest GetAccountById")
     }
-    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    return
 }
 func Contract(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Contract{})
@@ -315,19 +345,29 @@ func SearchContract(w http.ResponseWriter, r *http.Request) {
 	})
 }
 func DeleteContract(w http.ResponseWriter, r *http.Request) {
-    id := r.PathValue("id")
-    Id, err := strconv.ParseInt(id, 10, 64)
-    if err != nil {
-        fmt.Fprint(w, "[ERROR]")
-        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
-        return
+    if Id := ParseIdFromRequest(r); Id != -1 {
+        if err := model.DeleteContractByID(Id); err != nil {
+            fmt.Fprint(w, "[ERROR]")
+            fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+            return
+        }
+        fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    } else {
+        fmt.Fprint(w, "[ERROR] ParseIdFromRequest Delete")
     }
-    if err := model.DeleteContractByID(Id); err != nil {
-        fmt.Fprint(w, "[ERROR]")
-        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
-        return
+}
+func GetContractById(w http.ResponseWriter, r *http.Request) {
+    if Id := ParseIdFromRequest(r); Id != -1 {
+        if obj := model.GetContractByID(Id); obj != nil {
+            AllTemplate.ExecuteTemplate(w, "Contract.html", obj)
+            return
+        } else {
+            fmt.Fprint(w, "[ERROR] Not found")
+        }
+    } else {
+        fmt.Fprint(w, "[ERROR] ParseIdFromRequest GetContractById")
     }
-    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    return
 }
 func Payment(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Payment{})
@@ -363,19 +403,29 @@ func SearchPayment(w http.ResponseWriter, r *http.Request) {
 	})
 }
 func DeletePayment(w http.ResponseWriter, r *http.Request) {
-    id := r.PathValue("id")
-    Id, err := strconv.ParseInt(id, 10, 64)
-    if err != nil {
-        fmt.Fprint(w, "[ERROR]")
-        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
-        return
+    if Id := ParseIdFromRequest(r); Id != -1 {
+        if err := model.DeletePaymentByID(Id); err != nil {
+            fmt.Fprint(w, "[ERROR]")
+            fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+            return
+        }
+        fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    } else {
+        fmt.Fprint(w, "[ERROR] ParseIdFromRequest Delete")
     }
-    if err := model.DeletePaymentByID(Id); err != nil {
-        fmt.Fprint(w, "[ERROR]")
-        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
-        return
+}
+func GetPaymentById(w http.ResponseWriter, r *http.Request) {
+    if Id := ParseIdFromRequest(r); Id != -1 {
+        if obj := model.GetPaymentByID(Id); obj != nil {
+            AllTemplate.ExecuteTemplate(w, "Payment.html", obj)
+            return
+        } else {
+            fmt.Fprint(w, "[ERROR] Not found")
+        }
+    } else {
+        fmt.Fprint(w, "[ERROR] ParseIdFromRequest GetPaymentById")
     }
-    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    return
 }
 func Maintenance_request(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Maintenance_request{})
@@ -411,19 +461,29 @@ func SearchMaintenance_request(w http.ResponseWriter, r *http.Request) {
 	})
 }
 func DeleteMaintenance_request(w http.ResponseWriter, r *http.Request) {
-    id := r.PathValue("id")
-    Id, err := strconv.ParseInt(id, 10, 64)
-    if err != nil {
-        fmt.Fprint(w, "[ERROR]")
-        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
-        return
+    if Id := ParseIdFromRequest(r); Id != -1 {
+        if err := model.DeleteMaintenance_requestByID(Id); err != nil {
+            fmt.Fprint(w, "[ERROR]")
+            fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+            return
+        }
+        fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    } else {
+        fmt.Fprint(w, "[ERROR] ParseIdFromRequest Delete")
     }
-    if err := model.DeleteMaintenance_requestByID(Id); err != nil {
-        fmt.Fprint(w, "[ERROR]")
-        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
-        return
+}
+func GetMaintenance_requestById(w http.ResponseWriter, r *http.Request) {
+    if Id := ParseIdFromRequest(r); Id != -1 {
+        if obj := model.GetMaintenance_requestByID(Id); obj != nil {
+            AllTemplate.ExecuteTemplate(w, "Maintenance_request.html", obj)
+            return
+        } else {
+            fmt.Fprint(w, "[ERROR] Not found")
+        }
+    } else {
+        fmt.Fprint(w, "[ERROR] ParseIdFromRequest GetMaintenance_requestById")
     }
-    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    return
 }
 func Property_manager(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Property_manager{})
@@ -459,19 +519,29 @@ func SearchProperty_manager(w http.ResponseWriter, r *http.Request) {
 	})
 }
 func DeleteProperty_manager(w http.ResponseWriter, r *http.Request) {
-    id := r.PathValue("id")
-    Id, err := strconv.ParseInt(id, 10, 64)
-    if err != nil {
-        fmt.Fprint(w, "[ERROR]")
-        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
-        return
+    if Id := ParseIdFromRequest(r); Id != -1 {
+        if err := model.DeleteProperty_managerByID(Id); err != nil {
+            fmt.Fprint(w, "[ERROR]")
+            fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+            return
+        }
+        fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    } else {
+        fmt.Fprint(w, "[ERROR] ParseIdFromRequest Delete")
     }
-    if err := model.DeleteProperty_managerByID(Id); err != nil {
-        fmt.Fprint(w, "[ERROR]")
-        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
-        return
+}
+func GetProperty_managerById(w http.ResponseWriter, r *http.Request) {
+    if Id := ParseIdFromRequest(r); Id != -1 {
+        if obj := model.GetProperty_managerByID(Id); obj != nil {
+            AllTemplate.ExecuteTemplate(w, "Property_manager.html", obj)
+            return
+        } else {
+            fmt.Fprint(w, "[ERROR] Not found")
+        }
+    } else {
+        fmt.Fprint(w, "[ERROR] ParseIdFromRequest GetProperty_managerById")
     }
-    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    return
 }
 func Invoice(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Invoice{})
@@ -507,46 +577,74 @@ func SearchInvoice(w http.ResponseWriter, r *http.Request) {
 	})
 }
 func DeleteInvoice(w http.ResponseWriter, r *http.Request) {
-    id := r.PathValue("id")
-    Id, err := strconv.ParseInt(id, 10, 64)
-    if err != nil {
-        fmt.Fprint(w, "[ERROR]")
-        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
-        return
+    if Id := ParseIdFromRequest(r); Id != -1 {
+        if err := model.DeleteInvoiceByID(Id); err != nil {
+            fmt.Fprint(w, "[ERROR]")
+            fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+            return
+        }
+        fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    } else {
+        fmt.Fprint(w, "[ERROR] ParseIdFromRequest Delete")
     }
-    if err := model.DeleteInvoiceByID(Id); err != nil {
-        fmt.Fprint(w, "[ERROR]")
-        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
-        return
+}
+func GetInvoiceById(w http.ResponseWriter, r *http.Request) {
+    if Id := ParseIdFromRequest(r); Id != -1 {
+        if obj := model.GetInvoiceByID(Id); obj != nil {
+            AllTemplate.ExecuteTemplate(w, "Invoice.html", obj)
+            return
+        } else {
+            fmt.Fprint(w, "[ERROR] Not found")
+        }
+    } else {
+        fmt.Fprint(w, "[ERROR] ParseIdFromRequest GetInvoiceById")
     }
-    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    return
 }
 
 func AddHandler(mux *http.ServeMux, Cfg *configs.Config) {
     mux.HandleFunc("POST "+Cfg.PathBase+"/tenant/search", SearchTenant)
     mux.HandleFunc("POST "+Cfg.PathBase+"/tenant/delete/{id}", DeleteTenant)
+    mux.HandleFunc("GET "+Cfg.PathBase+"/tenant/get/{id}", GetTenantById)
     mux.HandleFunc("POST "+Cfg.PathBase+"/tenant", Tenant)
     mux.HandleFunc("POST "+Cfg.PathBase+"/property/search", SearchProperty)
     mux.HandleFunc("POST "+Cfg.PathBase+"/property/delete/{id}", DeleteProperty)
+    mux.HandleFunc("GET "+Cfg.PathBase+"/property/get/{id}", GetPropertyById)
     mux.HandleFunc("POST "+Cfg.PathBase+"/property", Property)
     mux.HandleFunc("POST "+Cfg.PathBase+"/account/search", SearchAccount)
     mux.HandleFunc("POST "+Cfg.PathBase+"/account/delete/{id}", DeleteAccount)
+    mux.HandleFunc("GET "+Cfg.PathBase+"/account/get/{id}", GetAccountById)
     mux.HandleFunc("POST "+Cfg.PathBase+"/account", Account)
     mux.HandleFunc("POST "+Cfg.PathBase+"/contract/search", SearchContract)
     mux.HandleFunc("POST "+Cfg.PathBase+"/contract/delete/{id}", DeleteContract)
+    mux.HandleFunc("GET "+Cfg.PathBase+"/contract/get/{id}", GetContractById)
     mux.HandleFunc("POST "+Cfg.PathBase+"/contract", Contract)
     mux.HandleFunc("POST "+Cfg.PathBase+"/payment/search", SearchPayment)
     mux.HandleFunc("POST "+Cfg.PathBase+"/payment/delete/{id}", DeletePayment)
+    mux.HandleFunc("GET "+Cfg.PathBase+"/payment/get/{id}", GetPaymentById)
     mux.HandleFunc("POST "+Cfg.PathBase+"/payment", Payment)
     mux.HandleFunc("POST "+Cfg.PathBase+"/maintenance_request/search", SearchMaintenance_request)
     mux.HandleFunc("POST "+Cfg.PathBase+"/maintenance_request/delete/{id}", DeleteMaintenance_request)
+    mux.HandleFunc("GET "+Cfg.PathBase+"/maintenance_request/get/{id}", GetMaintenance_requestById)
     mux.HandleFunc("POST "+Cfg.PathBase+"/maintenance_request", Maintenance_request)
     mux.HandleFunc("POST "+Cfg.PathBase+"/property_manager/search", SearchProperty_manager)
     mux.HandleFunc("POST "+Cfg.PathBase+"/property_manager/delete/{id}", DeleteProperty_manager)
+    mux.HandleFunc("GET "+Cfg.PathBase+"/property_manager/get/{id}", GetProperty_managerById)
     mux.HandleFunc("POST "+Cfg.PathBase+"/property_manager", Property_manager)
     mux.HandleFunc("POST "+Cfg.PathBase+"/invoice/search", SearchInvoice)
     mux.HandleFunc("POST "+Cfg.PathBase+"/invoice/delete/{id}", DeleteInvoice)
+    mux.HandleFunc("GET "+Cfg.PathBase+"/invoice/get/{id}", GetInvoiceById)
     mux.HandleFunc("POST "+Cfg.PathBase+"/invoice", Invoice)
+}
+
+func ParseIdFromRequest(r *http.Request) int64 {
+    id := r.PathValue("id")
+    Id, err := strconv.ParseInt(id, 10, 64)
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
+        return -1
+    }
+    return Id
 }
 // End app-handler.go.tmpl
 
@@ -575,20 +673,8 @@ func loadAllTemplates() *template.Template {
 	return t
 }
 
-var AllForms = []string{
-	"Tenant",
-	"Property",
-	"Account",
-	"Payment",
-	"Contract",
-	"Invoice",
-	"Maintenance_request",
-	"Property_manager",
-}
-
 func Home(w http.ResponseWriter, r *http.Request) {
-
-	AllTemplate.ExecuteTemplate(w, "index.html", map[string]any{"formList": AllForms})
+	AllTemplate.ExecuteTemplate(w, "index.html", model.AllForms)
 	// AllTemplate.ExecuteTemplate(w, "index.html", nil)
 }
 

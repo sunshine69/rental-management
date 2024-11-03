@@ -1,21 +1,21 @@
-{{ define "FormMaintenance_request" }}
-	<div id="FormMaintenance_request" class="form-group" style="display:none;">
+{{ block "FormMaintenance_request"  .}}
+	{{if not .Id }}<div id="FormMaintenance_request" class="form-group" style="display:none;">{{end}}
 	<form>
 		<label for="Request_date">Request date *:</label>
-        <input type="text" id="Request_date" name="Request_date" value="" placeholder="Enter Request date" />
+        <input type="text" id="Request_date" name="Request_date" value="{{ or .Request_date "" }}" placeholder="Enter Request date" />
 		<label for="Type">Type :</label>
-        <input type="text" id="Type" name="Type" value="" placeholder="Enter Type" />
+        <input type="text" id="Type" name="Type" value="{{ or .Type "" }}" placeholder="Enter Type" />
 		<label for="Status">Status :</label>
-        <input type="text" id="Status" name="Status" value="" placeholder="Enter Status" />
+        <input type="text" id="Status" name="Status" value="{{ or .Status "" }}" placeholder="Enter Status" />
 		<label for="Cost">Cost :</label>
-        <input type="text" id="Cost" name="Cost" value="" placeholder="Enter Cost" />
+        <input type="text" id="Cost" name="Cost" value="{{ or .Cost "" }}" placeholder="Enter Cost" />
 		<label for="Invoice_id">Invoice id :</label>
-        <input type="text" id="Invoice_id" name="Invoice_id" value="" placeholder="Enter Invoice id" />
+        <input type="text" id="Invoice_id" name="Invoice_id" value="{{ or .Invoice_id "" }}" placeholder="Enter Invoice id" />
 		<label for="Contract_id">Contract id *:</label>
-        <input type="text" id="Contract_id" name="Contract_id" value="" placeholder="Enter Contract id" />
+        <input type="text" id="Contract_id" name="Contract_id" value="{{ or .Contract_id "" }}" placeholder="Enter Contract id" />
 		<input type="button" id="save-Maintenance_request" name="save" value="Submit" hx-post="/maintenance_request" hx-target="#post-response" />
 		<input type="button" id="search-Maintenance_request" name="search" value="Search" hx-post="/maintenance_request/search" hx-target="#post-response" />
 		<input type="reset" name="reset" value="Reset" />
 	</form>
-	</div>
+	{{if not .Id }}</div>{{end}}
 {{ end }}

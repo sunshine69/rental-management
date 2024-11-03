@@ -33,19 +33,29 @@ func Search{{$objName}}(w http.ResponseWriter, r *http.Request) {
 	})
 }
 func Delete{{$objName}}(w http.ResponseWriter, r *http.Request) {
-    id := r.PathValue("id")
-    Id, err := strconv.ParseInt(id, 10, 64)
-    if err != nil {
-        fmt.Fprint(w, "[ERROR]")
-        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
-        return
+    if Id := ParseIdFromRequest(r); Id != -1 {
+        if err := model.Delete{{$objName}}ByID(Id); err != nil {
+            fmt.Fprint(w, "[ERROR]")
+            fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
+            return
+        }
+        fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    } else {
+        fmt.Fprint(w, "[ERROR] ParseIdFromRequest Delete")
     }
-    if err := model.Delete{{$objName}}ByID(Id); err != nil {
-        fmt.Fprint(w, "[ERROR]")
-        fmt.Fprintf(os.Stderr, "[ERROR] deleting %s\n", err.Error())
-        return
+}
+func Get{{$objName}}ById(w http.ResponseWriter, r *http.Request) {
+    if Id := ParseIdFromRequest(r); Id != -1 {
+        if obj := model.Get{{$objName}}ByID(Id); obj != nil {
+            AllTemplate.ExecuteTemplate(w, "{{$objName}}.html", obj)
+            return
+        } else {
+            fmt.Fprint(w, "[ERROR] Not found")
+        }
+    } else {
+        fmt.Fprint(w, "[ERROR] ParseIdFromRequest Get{{$objName}}ById")
     }
-    fmt.Fprint(w, "[OK] Deleted. Refresh the search button to get new rows to display")
+    return
 }
 {{- end }}
 
@@ -53,6 +63,17 @@ func AddHandler(mux *http.ServeMux, Cfg *configs.Config) {
     {{- range $objName := index . "objs" }}
     mux.HandleFunc("POST "+Cfg.PathBase+"/{{lower $objName}}/search", Search{{$objName}})
     mux.HandleFunc("POST "+Cfg.PathBase+"/{{lower $objName}}/delete/{id}", Delete{{$objName}})
+    mux.HandleFunc("GET "+Cfg.PathBase+"/{{lower $objName}}/get/{id}", Get{{$objName}}ById)
     mux.HandleFunc("POST "+Cfg.PathBase+"/{{lower $objName}}", {{$objName}})
     {{- end }}
+}
+
+func ParseIdFromRequest(r *http.Request) int64 {
+    id := r.PathValue("id")
+    Id, err := strconv.ParseInt(id, 10, 64)
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "[ERROR] Parse ID %s | %s\n", id, err.Error())
+        return -1
+    }
+    return Id
 }
