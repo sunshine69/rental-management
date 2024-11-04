@@ -2,11 +2,9 @@
 	{{if not .Id }}<div id="FormProperty" class="form-group" style="display:none;">{{end}}
 	<form>
 		<label for="Code">Code *:</label>
-        <input type="text" id="Code" name="Code" value="{{ or .Code "" }}" placeholder="Enter Code" />
-		<label for="Address">Address :</label>
-        <input type="text" id="Address" name="Address" value="{{ or .Address "" }}" placeholder="Enter Address" />
-		<label for="Note">Note :</label>
-        <textarea type="text" id="Note" name="Note" value="{{ or .Note "" }}" placeholder="Enter Note" ></textarea>
+		<input id="Code" name="Code" value="{{ or .Code "" }}" placeholder="Enter Code">		<label for="Address">Address :</label>
+		<input id="Address" name="Address" value="{{ or .Address "" }}" placeholder="Enter Address">		<label for="Note">Note :</label>
+		<textarea id="Note" name="Note" value="" placeholder="Enter Note">{{ or .Note "" }}</textarea>
 		<input type="button" id="save-Property" name="save" value="Submit" hx-post="/property" hx-target="#post-response" />
 		<input type="button" id="search-Property" name="search" value="Search" hx-post="/property/search" hx-target="#post-response" />
 		<input type="reset" name="reset" value="Reset" />

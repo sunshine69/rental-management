@@ -1,0 +1,16 @@
+{{"{{"}} block "Form{{formName}}" {{" .}}"}}
+	{{"{{if not .Id }}"}}<div id="Form{{formName}}" class="{{formClass}}" style="display:none;">{{"{{end}}"}}
+	<form>
+		{% for fName in fList %}
+		{% set fp = fieldProp[fName] %}
+		{% if fp and fp["display"] %}
+		<label for="{{fName}}">{{fName|replace("_"," ")}} {{fp["label"]}}:</label>
+		<{{ fp["ele"] }} id="{{fName}}" name="{{fName}}" value="{% if fp["ele"] != "textarea" %}{{"{{ or ."}}{{fName}}{{" \"\" }}"}}{% endif %}" placeholder="Enter {{fName|replace("_", " ")}}">{% if fp["ele"] == "textarea" %}{{"{{ or ."}}{{fName}}{{" \"\" }}"}}{% endif %}{% if fp["ele"] == "textarea" %}</textarea>{% endif %}
+		{% endif %}
+		{% endfor %}
+		<input type="button" id="save-{{formName}}" name="save" value="Submit" hx-post="/{{formName|lower}}" hx-target="#post-response" />
+		<input type="button" id="search-{{formName}}" name="search" value="Search" hx-post="/{{formName|lower}}/search" hx-target="#post-response" />
+		<input type="reset" name="reset" value="Reset" />
+	</form>
+	{{"{{if not .Id }}"}}</div>{{"{{end}}"}}
+{{"{{"}} end {{"}}"}}
