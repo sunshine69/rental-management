@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	ag "github.com/sunshine69/automation-go/lib"
-	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/sunshine69/rental-management/model"
 )
 
@@ -41,13 +40,13 @@ func FormGen(structType any, writeDirectory string) {
 			}
 			if tagset[1] == "form" && len(tagset) >= 3 && strings.Contains(tagset[2], "ele=textarea") {
 				fieldProp[v]["ele"] = "textarea"
-				fieldProp[v]["close_ele"] = ""
+				fieldProp[v]["close_ele"] = "</textarea>"
 			}
 		}
 	}
-	fmt.Printf("DEBUG: %s\n", u.JsonDump(fieldProp, ""))
+	// fmt.Printf("DEBUG: %s\n", u.JsonDump(fieldProp, ""))
 
-	fmt.Printf("DEBUG FLIST: %s\n", u.JsonDump(fList, ""))
+	// fmt.Printf("DEBUG FLIST: %s\n", u.JsonDump(fList, ""))
 	data := map[string]any{
 		"formName":   sInfo.Name,
 		"formClass":  "form-group",
@@ -57,14 +56,14 @@ func FormGen(structType any, writeDirectory string) {
 		"fieldProp":  fieldProp,
 	}
 	// ag.GoTemplateFile("tools/gen-form/form.go.tmpl", destFile, data, 0640)
-	ag.TemplateFile("tools/gen-form/form.jinja2", destFile, data, 0640)
+	ag.GoTemplateFile("tools/gen-form/form.go.tmpl", destFile, data, 0640)
 	formNameList := []string{}
 	for _, f := range model.AllModelObjects {
 		sInfo := ag.ReflectStruct(f, `form:"([^"]+)"`)
 		formNameList = append(formNameList, sInfo.Name)
 	}
 	// ag.GoTemplateFile("tools/gen-form/form-header.go.tmpl", writeDirectory+"/form-header.html", map[string]any{"formNameList": formNameList}, 0640)
-	ag.TemplateFile("tools/gen-form/form-header.go.tmpl", writeDirectory+"/form-header.html", map[string]any{"formNameList": formNameList}, 0640)
+	ag.GoTemplateFile("tools/gen-form/form-header.go.tmpl", writeDirectory+"/form-header.html", map[string]any{"formNameList": formNameList}, 0640)
 	// Generate some common func handler and form validation to copy/paste into the app.go
 }
 

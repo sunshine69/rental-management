@@ -34,10 +34,15 @@ func ParseQldRentalContract(pdffile string) {
 	blocklines := datalines[start:end]
 
 	pm := ParseLessor(blocklines)
+	if pm.Email == "" {
+		panic("[ERROR] can nto parse lessor\n")
+	}
 	// Parse tenant
-	block, _, _, _ := ag.ExtractTextBlockContains(textfile, []string{`Item 2.1 Tenant\/s`}, []string{`2.2 Address for service`}, []string{`Tenant 1 Full name`})
+	block, _, _, _ := ag.ExtractTextBlockContains(textfile, []string{`Item 2.1 Tenant\/s`}, []string{`2.2 Address for service`}, []string{`1. Full name/s`})
 	tns := ParseTenant(block)
-
+	if len(tns) == 0 {
+		panic("[ERROR] can not parse tenant\n")
+	}
 	_, start, end, blocklines = ag.ExtractTextBlock(textfile, []string{`Item 5.1 Address of the rental premises`}, []string{`5.2 Inclusions provided`})
 	property_code := ParseProperty(blocklines[start:end])
 
@@ -145,7 +150,7 @@ func ParseLessor(blocklines []string) *model.Property_manager {
 }
 
 func ParseTenant(block string) (tenants []model.Tenant) {
-	tenantBlocks := ag.SplitTextByPattern(block, `(?m)Tenant [\d]+ Full name`, true)
+	tenantBlocks := ag.SplitTextByPattern(block, `(?m)[\d]\. Full name\/s ([a-zA-Z0-9\s]+)`, true)
 	// println(u.JsonDump(tenantBlocks, ""))
 
 	for _, b := range tenantBlocks {
@@ -153,15 +158,14 @@ func ParseTenant(block string) (tenants []model.Tenant) {
 		datalines := strings.Split(b, "\n")
 		println(u.JsonDump(datalines, ""))
 
-		if o := ag.ExtractLineInLines(datalines, `Full name\/s (.*)$`, `Email ([^\@]+\@[^\@]+)`, `^([\d\s]+)$`); o != nil {
+		if o := ag.ExtractLineInLines(datalines, `Full name\/s (.*)$`, `Email ([^\@]+\@[^\@]+)`, `Emergency contact full name`); o != nil {
 			println(email)
 			email = o[0][1]
 		}
 		if o := ag.ExtractLineInLines(datalines, `Full name\/s (.*)$`, `Full name\/s (.*)$`, `^([\d\s]+)$`); o != nil {
-			println(firstName, lastName)
 			firstName, lastName = parseNames(o[0][1])
 		}
-		if o := ag.ExtractLineInLines(datalines, `Full name\/s (.*)$`, `^([\d\s]+)$`, `^([\d\s]+)$`); o != nil {
+		if o := ag.ExtractLineInLines(datalines, `Full name\/s (.*)$`, `^([\d\s]+)$`, `Emergency contact full name`); o != nil {
 			println(mobile)
 			mobile = o[0][1]
 		}

@@ -651,6 +651,8 @@ func ParseIdFromRequest(r *http.Request) int64 {
 func loadAllTemplates() *template.Template {
 	t := template.New("tmpl")
 	myFuncmap := ag.GoTemplateFuncMap
+	// CallTemplate allows us to call a pre-defined template name (using block or define); the name can be dynamic (a variable with value at runtime).
+	// Standard go `template` does not support this feature. See usage in the index.html
 	myFuncmap["CallTemplate"] = func(name string, data interface{}) (ret template.HTML, err error) {
 		buf := bytes.NewBuffer([]byte{})
 		// Need to use t (already created above) as when we call t parse ; will have the template name available

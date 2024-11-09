@@ -4,7 +4,7 @@
 		{% for fName in fList %}
 		{% set fp = fieldProp[fName] %}
 		{% if fp and fp["display"] %}
-		<label for="{{fName}}">{{fName|replace("_"," ")}} {{fp["label"]}}:</label>
+		<label for="{{fName}}">{{fName|replace("_"," ")}}{{fp["label"]}}:</label>
 		<{{ fp["ele"] }} id="{{fName}}" name="{{fName}}" value="{% if fp["ele"] != "textarea" %}{{"{{ or ."}}{{fName}}{{" \"\" }}"}}{% endif %}" placeholder="Enter {{fName|replace("_", " ")}}">{% if fp["ele"] == "textarea" %}{{"{{ or ."}}{{fName}}{{" \"\" }}"}}{% endif %}{% if fp["ele"] == "textarea" %}</textarea>{% endif %}
 		{% endif %}
 		{% endfor %}

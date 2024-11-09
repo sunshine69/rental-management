@@ -2,13 +2,19 @@
 	{{if not .Id }}<div id="FormTenant" class="form-group" style="display:none;">{{end}}
 	<form>
 		<label for="First_name">First name :</label>
-		<input id="First_name" name="First_name" value="{{ or .First_name "" }}" placeholder="Enter First name">		<label for="Last_name">Last name :</label>
-		<input id="Last_name" name="Last_name" value="{{ or .Last_name "" }}" placeholder="Enter Last name">		<label for="Address">Address :</label>
-		<input id="Address" name="Address" value="{{ or .Address "" }}" placeholder="Enter Address">		<label for="Contact_number">Contact number :</label>
-		<input id="Contact_number" name="Contact_number" value="{{ or .Contact_number "" }}" placeholder="Enter Contact number">		<label for="Email">Email *:</label>
-		<input id="Email" name="Email" value="{{ or .Email "" }}" placeholder="Enter Email">		<label for="Join_date">Join date :</label>
-		<input id="Join_date" name="Join_date" value="{{ or .Join_date "" }}" placeholder="Enter Join date">		<label for="Note">Note :</label>
-		<textarea id="Note" name="Note" value="" placeholder="Enter Note">{{ or .Note "" }}</textarea>
+		<input type="text" id="First_name" name="First_name" value="{{ or .First_name "" }}" placeholder="Enter First name" />
+		<label for="Last_name">Last name :</label>
+		<input type="text" id="Last_name" name="Last_name" value="{{ or .Last_name "" }}" placeholder="Enter Last name" />
+		<label for="Address">Address :</label>
+		<input type="text" id="Address" name="Address" value="{{ or .Address "" }}" placeholder="Enter Address" />
+		<label for="Contact_number">Contact number :</label>
+		<input type="text" id="Contact_number" name="Contact_number" value="{{ or .Contact_number "" }}" placeholder="Enter Contact number" />
+		<label for="Email">Email *:</label>
+		<input type="text" id="Email" name="Email" value="{{ or .Email "" }}" placeholder="Enter Email" />
+		<label for="Join_date">Join date :</label>
+		<input type="text" id="Join_date" name="Join_date" value="{{ or .Join_date "" }}" placeholder="Enter Join date" />
+		<label for="Note">Note :</label>
+		<textarea id="Note" name="Note" placeholder="Enter Note">{{ or .Note "" }}</textarea>
 		<input type="button" id="save-Tenant" name="save" value="Submit" hx-post="/tenant" hx-target="#post-response" />
 		<input type="button" id="search-Tenant" name="search" value="Search" hx-post="/tenant/search" hx-target="#post-response" />
 		<input type="reset" name="reset" value="Reset" />

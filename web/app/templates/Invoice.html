@@ -2,14 +2,21 @@
 	{{if not .Id }}<div id="FormInvoice" class="form-group" style="display:none;">{{end}}
 	<form>
 		<label for="Date">Date :</label>
-		<input id="Date" name="Date" value="{{ or .Date "" }}" placeholder="Enter Date">		<label for="Description">Description :</label>
-		<input id="Description" name="Description" value="{{ or .Description "" }}" placeholder="Enter Description">		<label for="Amount">Amount :</label>
-		<input id="Amount" name="Amount" value="{{ or .Amount "" }}" placeholder="Enter Amount">		<label for="Number">Number *:</label>
-		<input id="Number" name="Number" value="{{ or .Number "" }}" placeholder="Enter Number">		<label for="Issuer">Issuer *:</label>
-		<input id="Issuer" name="Issuer" value="{{ or .Issuer "" }}" placeholder="Enter Issuer">		<label for="Payer">Payer :</label>
-		<input id="Payer" name="Payer" value="{{ or .Payer "" }}" placeholder="Enter Payer">		<label for="Property">Property :</label>
-		<input id="Property" name="Property" value="{{ or .Property "" }}" placeholder="Enter Property">		<label for="Due_date">Due date :</label>
-		<input id="Due_date" name="Due_date" value="{{ or .Due_date "" }}" placeholder="Enter Due date">
+		<input type="text" id="Date" name="Date" value="{{ or .Date "" }}" placeholder="Enter Date" />
+		<label for="Description">Description :</label>
+		<input type="text" id="Description" name="Description" value="{{ or .Description "" }}" placeholder="Enter Description" />
+		<label for="Amount">Amount :</label>
+		<input type="text" id="Amount" name="Amount" value="{{ or .Amount "" }}" placeholder="Enter Amount" />
+		<label for="Number">Number *:</label>
+		<input type="text" id="Number" name="Number" value="{{ or .Number "" }}" placeholder="Enter Number" />
+		<label for="Issuer">Issuer *:</label>
+		<input type="text" id="Issuer" name="Issuer" value="{{ or .Issuer "" }}" placeholder="Enter Issuer" />
+		<label for="Payer">Payer :</label>
+		<input type="text" id="Payer" name="Payer" value="{{ or .Payer "" }}" placeholder="Enter Payer" />
+		<label for="Property">Property :</label>
+		<input type="text" id="Property" name="Property" value="{{ or .Property "" }}" placeholder="Enter Property" />
+		<label for="Due_date">Due date :</label>
+		<input type="text" id="Due_date" name="Due_date" value="{{ or .Due_date "" }}" placeholder="Enter Due date" />
 		<input type="button" id="save-Invoice" name="save" value="Submit" hx-post="/invoice" hx-target="#post-response" />
 		<input type="button" id="search-Invoice" name="search" value="Search" hx-post="/invoice/search" hx-target="#post-response" />
 		<input type="reset" name="reset" value="Reset" />

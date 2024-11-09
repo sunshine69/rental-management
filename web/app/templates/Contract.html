@@ -2,21 +2,35 @@
 	{{if not .Id }}<div id="FormContract" class="form-group" style="display:none;">{{end}}
 	<form>
 		<label for="Property">Property *:</label>
-		<input id="Property" name="Property" value="{{ or .Property "" }}" placeholder="Enter Property">		<label for="Property_manager">Property manager :</label>
-		<input id="Property_manager" name="Property_manager" value="{{ or .Property_manager "" }}" placeholder="Enter Property manager">		<label for="Tenant_main">Tenant main *:</label>
-		<input id="Tenant_main" name="Tenant_main" value="{{ or .Tenant_main "" }}" placeholder="Enter Tenant main">		<label for="Tenants">Tenants :</label>
-		<input id="Tenants" name="Tenants" value="{{ or .Tenants "" }}" placeholder="Enter Tenants">		<label for="Start_date">Start date *:</label>
-		<input id="Start_date" name="Start_date" value="{{ or .Start_date "" }}" placeholder="Enter Start date">		<label for="End_date">End date :</label>
-		<input id="End_date" name="End_date" value="{{ or .End_date "" }}" placeholder="Enter End date">		<label for="Signed_date">Signed date :</label>
-		<input id="Signed_date" name="Signed_date" value="{{ or .Signed_date "" }}" placeholder="Enter Signed date">		<label for="Term">Term :</label>
-		<input id="Term" name="Term" value="{{ or .Term "" }}" placeholder="Enter Term">		<label for="Rent">Rent :</label>
-		<input id="Rent" name="Rent" value="{{ or .Rent "" }}" placeholder="Enter Rent">		<label for="Rent_period">Rent period :</label>
-		<input id="Rent_period" name="Rent_period" value="{{ or .Rent_period "" }}" placeholder="Enter Rent period">		<label for="Rent_paid_on">Rent paid on :</label>
-		<input id="Rent_paid_on" name="Rent_paid_on" value="{{ or .Rent_paid_on "" }}" placeholder="Enter Rent paid on">		<label for="Water_charged">Water charged :</label>
-		<input id="Water_charged" name="Water_charged" value="{{ or .Water_charged "" }}" placeholder="Enter Water charged">		<label for="Document_file_path">Document file path :</label>
-		<input id="Document_file_path" name="Document_file_path" value="{{ or .Document_file_path "" }}" placeholder="Enter Document file path">		<label for="Url">Url :</label>
-		<input id="Url" name="Url" value="{{ or .Url "" }}" placeholder="Enter Url">		<label for="Note">Note :</label>
-		<textarea id="Note" name="Note" value="" placeholder="Enter Note">{{ or .Note "" }}</textarea>
+		<input type="text" id="Property" name="Property" value="{{ or .Property "" }}" placeholder="Enter Property" />
+		<label for="Property_manager">Property manager :</label>
+		<input type="text" id="Property_manager" name="Property_manager" value="{{ or .Property_manager "" }}" placeholder="Enter Property manager" />
+		<label for="Tenant_main">Tenant main *:</label>
+		<input type="text" id="Tenant_main" name="Tenant_main" value="{{ or .Tenant_main "" }}" placeholder="Enter Tenant main" />
+		<label for="Tenants">Tenants :</label>
+		<input type="text" id="Tenants" name="Tenants" value="{{ or .Tenants "" }}" placeholder="Enter Tenants" />
+		<label for="Start_date">Start date *:</label>
+		<input type="text" id="Start_date" name="Start_date" value="{{ or .Start_date "" }}" placeholder="Enter Start date" />
+		<label for="End_date">End date :</label>
+		<input type="text" id="End_date" name="End_date" value="{{ or .End_date "" }}" placeholder="Enter End date" />
+		<label for="Signed_date">Signed date :</label>
+		<input type="text" id="Signed_date" name="Signed_date" value="{{ or .Signed_date "" }}" placeholder="Enter Signed date" />
+		<label for="Term">Term :</label>
+		<input type="text" id="Term" name="Term" value="{{ or .Term "" }}" placeholder="Enter Term" />
+		<label for="Rent">Rent :</label>
+		<input type="text" id="Rent" name="Rent" value="{{ or .Rent "" }}" placeholder="Enter Rent" />
+		<label for="Rent_period">Rent period :</label>
+		<input type="text" id="Rent_period" name="Rent_period" value="{{ or .Rent_period "" }}" placeholder="Enter Rent period" />
+		<label for="Rent_paid_on">Rent paid on :</label>
+		<input type="text" id="Rent_paid_on" name="Rent_paid_on" value="{{ or .Rent_paid_on "" }}" placeholder="Enter Rent paid on" />
+		<label for="Water_charged">Water charged :</label>
+		<input type="text" id="Water_charged" name="Water_charged" value="{{ or .Water_charged "" }}" placeholder="Enter Water charged" />
+		<label for="Document_file_path">Document file path :</label>
+		<input type="text" id="Document_file_path" name="Document_file_path" value="{{ or .Document_file_path "" }}" placeholder="Enter Document file path" />
+		<label for="Url">Url :</label>
+		<input type="text" id="Url" name="Url" value="{{ or .Url "" }}" placeholder="Enter Url" />
+		<label for="Note">Note :</label>
+		<textarea id="Note" name="Note" placeholder="Enter Note">{{ or .Note "" }}</textarea>
 		<input type="button" id="save-Contract" name="save" value="Submit" hx-post="/contract" hx-target="#post-response" />
 		<input type="button" id="search-Contract" name="search" value="Search" hx-post="/contract/search" hx-target="#post-response" />
 		<input type="reset" name="reset" value="Reset" />
