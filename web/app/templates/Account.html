@@ -11,7 +11,12 @@
 		<textarea id="Note" name="Note" placeholder="Enter Note">{{ or .Note "" }}</textarea>
 		<input type="button" id="save-Account" name="save" value="Submit" hx-post="/account" hx-target="#post-response" />
 		<input type="button" id="search-Account" name="search" value="Search" hx-post="/account/search" hx-target="#post-response" />
-		<input type="reset" name="reset" value="Reset" />
+		<input type="button" name="reset" value="Reset Key Fields" onclick="ClearKeyFieldsAccount();" />
 	</form>
 	{{if not .Id }}</div>{{end}}
+	<script language="javascript">
+		function ClearKeyFieldsAccount() {
+			document.getElementById("Contract_id").value = "";
+			}
+	</script>
 {{ end }}

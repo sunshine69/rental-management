@@ -9,7 +9,12 @@
 		<textarea id="Note" name="Note" placeholder="Enter Note">{{ or .Note "" }}</textarea>
 		<input type="button" id="save-Property" name="save" value="Submit" hx-post="/property" hx-target="#post-response" />
 		<input type="button" id="search-Property" name="search" value="Search" hx-post="/property/search" hx-target="#post-response" />
-		<input type="reset" name="reset" value="Reset" />
+		<input type="button" name="reset" value="Reset Key Fields" onclick="ClearKeyFieldsProperty();" />
 	</form>
 	{{if not .Id }}</div>{{end}}
+	<script language="javascript">
+		function ClearKeyFieldsProperty() {
+			document.getElementById("Code").value = "";
+			}
+	</script>
 {{ end }}

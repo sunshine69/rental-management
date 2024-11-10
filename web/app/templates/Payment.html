@@ -13,7 +13,13 @@
 		<input type="text" id="Reference" name="Reference" value="{{ or .Reference "" }}" placeholder="Enter Reference" />
 		<input type="button" id="save-Payment" name="save" value="Submit" hx-post="/payment" hx-target="#post-response" />
 		<input type="button" id="search-Payment" name="search" value="Search" hx-post="/payment/search" hx-target="#post-response" />
-		<input type="reset" name="reset" value="Reset" />
+		<input type="button" name="reset" value="Reset Key Fields" onclick="ClearKeyFieldsPayment();" />
 	</form>
 	{{if not .Id }}</div>{{end}}
+	<script language="javascript">
+		function ClearKeyFieldsPayment() {
+			document.getElementById("Account_id").value = "";
+			document.getElementById("Pay_date").value = "";
+			}
+	</script>
 {{ end }}

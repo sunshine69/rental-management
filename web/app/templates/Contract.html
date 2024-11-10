@@ -33,7 +33,14 @@
 		<textarea id="Note" name="Note" placeholder="Enter Note">{{ or .Note "" }}</textarea>
 		<input type="button" id="save-Contract" name="save" value="Submit" hx-post="/contract" hx-target="#post-response" />
 		<input type="button" id="search-Contract" name="search" value="Search" hx-post="/contract/search" hx-target="#post-response" />
-		<input type="reset" name="reset" value="Reset" />
+		<input type="button" name="reset" value="Reset Key Fields" onclick="ClearKeyFieldsContract();" />
 	</form>
 	{{if not .Id }}</div>{{end}}
+	<script language="javascript">
+		function ClearKeyFieldsContract() {
+			document.getElementById("Property").value = "";
+			document.getElementById("Tenant_main").value = "";
+			document.getElementById("Start_date").value = "";
+			}
+	</script>
 {{ end }}

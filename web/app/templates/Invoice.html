@@ -19,7 +19,13 @@
 		<input type="text" id="Due_date" name="Due_date" value="{{ or .Due_date "" }}" placeholder="Enter Due date" />
 		<input type="button" id="save-Invoice" name="save" value="Submit" hx-post="/invoice" hx-target="#post-response" />
 		<input type="button" id="search-Invoice" name="search" value="Search" hx-post="/invoice/search" hx-target="#post-response" />
-		<input type="reset" name="reset" value="Reset" />
+		<input type="button" name="reset" value="Reset Key Fields" onclick="ClearKeyFieldsInvoice();" />
 	</form>
 	{{if not .Id }}</div>{{end}}
+	<script language="javascript">
+		function ClearKeyFieldsInvoice() {
+			document.getElementById("Number").value = "";
+			document.getElementById("Issuer").value = "";
+			}
+	</script>
 {{ end }}

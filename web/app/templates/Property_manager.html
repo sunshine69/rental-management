@@ -17,7 +17,12 @@
 		<textarea id="Note" name="Note" placeholder="Enter Note">{{ or .Note "" }}</textarea>
 		<input type="button" id="save-Property_manager" name="save" value="Submit" hx-post="/property_manager" hx-target="#post-response" />
 		<input type="button" id="search-Property_manager" name="search" value="Search" hx-post="/property_manager/search" hx-target="#post-response" />
-		<input type="reset" name="reset" value="Reset" />
+		<input type="button" name="reset" value="Reset Key Fields" onclick="ClearKeyFieldsProperty_manager();" />
 	</form>
 	{{if not .Id }}</div>{{end}}
+	<script language="javascript">
+		function ClearKeyFieldsProperty_manager() {
+			document.getElementById("Email").value = "";
+			}
+	</script>
 {{ end }}
