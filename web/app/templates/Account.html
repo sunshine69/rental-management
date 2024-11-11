@@ -1,14 +1,14 @@
 {{ block "FormAccount"  .}}
 	{{if not .Id }}<div id="FormAccount" class="form-group" style="display:none;">{{end}}
 	<form>
-		<label for="Balance">Balance :</label>
-		<input type="text" id="Balance" name="Balance" value="{{ or .Balance "" }}" placeholder="Enter Balance" />
-		<label for="Contract_id">Contract id *:</label>
-		<input type="text" id="Contract_id" name="Contract_id" value="{{ or .Contract_id "" }}" placeholder="Enter Contract id" />
-		<label for="Tenant_main">Tenant main :</label>
-		<input type="text" id="Tenant_main" name="Tenant_main" value="{{ or .Tenant_main "" }}" placeholder="Enter Tenant main" />
-		<label for="Note">Note :</label>
-		<textarea id="Note" name="Note" placeholder="Enter Note">{{ or .Note "" }}</textarea>
+		<label for="Account-Balance">Balance :</label>
+		<input type="text" id="Account-Balance" name="Balance" value="{{ or .Balance "" }}" placeholder="Enter Balance" />
+		<label for="Account-Contract_id">Contract id *:</label>
+		<input type="text" id="Account-Contract_id" name="Contract_id" value="{{ or .Contract_id "" }}" placeholder="Enter Contract id" />
+		<label for="Account-Tenant_main">Tenant main :</label>
+		<input type="text" id="Account-Tenant_main" name="Tenant_main" value="{{ or .Tenant_main "" }}" placeholder="Enter Tenant main" />
+		<label for="Account-Note">Note :</label>
+		<textarea id="Account-Note" name="Note" placeholder="Enter Note">{{ or .Note "" }}</textarea>
 		<input type="button" id="save-Account" name="save" value="Submit" hx-post="/account" hx-target="#post-response" />
 		<input type="button" id="search-Account" name="search" value="Search" hx-post="/account/search" hx-target="#post-response" />
 		<input type="button" name="reset" value="Reset Key Fields" onclick="ClearKeyFieldsAccount();" />
@@ -16,7 +16,7 @@
 	{{if not .Id }}</div>{{end}}
 	<script language="javascript">
 		function ClearKeyFieldsAccount() {
-			document.getElementById("Contract_id").value = "";
+			document.getElementById("Account-Contract_id").value = "";
 			}
 	</script>
 {{ end }}

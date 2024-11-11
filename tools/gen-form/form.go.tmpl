@@ -4,11 +4,11 @@
 		{{ range $fName := .fList -}}
 		{{ $fp := (index $.fieldProp $fName) -}}
 		{{ if index $fp "display" -}}
-		<label for="{{$fName}}">{{replace $fName "_" " "}} {{index $fp "label"}}:</label>
+		<label for="{{$.formName}}-{{$fName}}">{{replace $fName "_" " "}} {{index $fp "label"}}:</label>
 		{{if eq (index $fp "ele") "textarea" -}}
-		<textarea id="{{$fName}}" name="{{$fName}}" placeholder="Enter {{replace $fName "_" " "}}">{{"{{ or ."}}{{$fName}}{{ " \"\" }}"}}</textarea>
+		<textarea id="{{$.formName}}-{{$fName}}" name="{{$fName}}" placeholder="Enter {{replace $fName "_" " "}}">{{"{{ or ."}}{{$fName}}{{ " \"\" }}"}}</textarea>
 		{{else -}}
-        <{{ index $fp "ele" }} type="{{index $fp "type"}}" id="{{$fName}}" name="{{$fName}}" value="{{"{{ or ."}}{{$fName}}{{ " \"\" }}"}}" placeholder="Enter {{replace $fName "_" " "}}" {{ index $fp "close_ele" }}
+        <{{ index $fp "ele" }} type="{{index $fp "type"}}" id="{{$.formName}}-{{$fName}}" name="{{$fName}}" value="{{"{{ or ."}}{{$fName}}{{ " \"\" }}"}}" placeholder="Enter {{replace $fName "_" " "}}" {{ index $fp "close_ele" }}
 		{{end -}}
 		{{ end -}}
 		{{ end -}}
@@ -22,7 +22,7 @@
 			{{ range $fName := .fList -}}
 			{{ $fp := (index $.fieldProp $fName) -}}
 			{{ if eq (index $fp "label") "*" -}}
-			document.getElementById("{{$fName}}").value = "";
+			document.getElementById("{{$.formName}}-{{$fName}}").value = "";
 			{{end -}}
 			{{end -}}
 		}

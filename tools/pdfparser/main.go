@@ -23,6 +23,7 @@ func main() {
 	ParseQldRentalContract(*filename)
 }
 
+// This is subject to change depending on the form content changes
 func ParseQldRentalContract(pdffile string) {
 	tmpDir, err := os.MkdirTemp("", "pdfparser")
 	u.CheckErr(err, "CreateTemp pdfparser ")

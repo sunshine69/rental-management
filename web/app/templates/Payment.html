@@ -1,16 +1,16 @@
 {{ block "FormPayment"  .}}
 	{{if not .Id }}<div id="FormPayment" class="form-group" style="display:none;">{{end}}
 	<form>
-		<label for="Account_id">Account id *:</label>
-		<input type="text" id="Account_id" name="Account_id" value="{{ or .Account_id "" }}" placeholder="Enter Account id" />
-		<label for="Tenant">Tenant :</label>
-		<input type="text" id="Tenant" name="Tenant" value="{{ or .Tenant "" }}" placeholder="Enter Tenant" />
-		<label for="Amount">Amount :</label>
-		<input type="text" id="Amount" name="Amount" value="{{ or .Amount "" }}" placeholder="Enter Amount" />
-		<label for="Pay_date">Pay date *:</label>
-		<input type="text" id="Pay_date" name="Pay_date" value="{{ or .Pay_date "" }}" placeholder="Enter Pay date" />
-		<label for="Reference">Reference :</label>
-		<input type="text" id="Reference" name="Reference" value="{{ or .Reference "" }}" placeholder="Enter Reference" />
+		<label for="Payment-Account_id">Account id *:</label>
+		<input type="text" id="Payment-Account_id" name="Account_id" value="{{ or .Account_id "" }}" placeholder="Enter Account id" />
+		<label for="Payment-Tenant">Tenant :</label>
+		<input type="text" id="Payment-Tenant" name="Tenant" value="{{ or .Tenant "" }}" placeholder="Enter Tenant" />
+		<label for="Payment-Amount">Amount :</label>
+		<input type="text" id="Payment-Amount" name="Amount" value="{{ or .Amount "" }}" placeholder="Enter Amount" />
+		<label for="Payment-Pay_date">Pay date *:</label>
+		<input type="text" id="Payment-Pay_date" name="Pay_date" value="{{ or .Pay_date "" }}" placeholder="Enter Pay date" />
+		<label for="Payment-Reference">Reference :</label>
+		<input type="text" id="Payment-Reference" name="Reference" value="{{ or .Reference "" }}" placeholder="Enter Reference" />
 		<input type="button" id="save-Payment" name="save" value="Submit" hx-post="/payment" hx-target="#post-response" />
 		<input type="button" id="search-Payment" name="search" value="Search" hx-post="/payment/search" hx-target="#post-response" />
 		<input type="button" name="reset" value="Reset Key Fields" onclick="ClearKeyFieldsPayment();" />
@@ -18,8 +18,8 @@
 	{{if not .Id }}</div>{{end}}
 	<script language="javascript">
 		function ClearKeyFieldsPayment() {
-			document.getElementById("Account_id").value = "";
-			document.getElementById("Pay_date").value = "";
+			document.getElementById("Payment-Account_id").value = "";
+			document.getElementById("Payment-Pay_date").value = "";
 			}
 	</script>
 {{ end }}

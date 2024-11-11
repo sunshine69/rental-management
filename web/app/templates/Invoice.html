@@ -1,22 +1,22 @@
 {{ block "FormInvoice"  .}}
 	{{if not .Id }}<div id="FormInvoice" class="form-group" style="display:none;">{{end}}
 	<form>
-		<label for="Date">Date :</label>
-		<input type="text" id="Date" name="Date" value="{{ or .Date "" }}" placeholder="Enter Date" />
-		<label for="Description">Description :</label>
-		<input type="text" id="Description" name="Description" value="{{ or .Description "" }}" placeholder="Enter Description" />
-		<label for="Amount">Amount :</label>
-		<input type="text" id="Amount" name="Amount" value="{{ or .Amount "" }}" placeholder="Enter Amount" />
-		<label for="Number">Number *:</label>
-		<input type="text" id="Number" name="Number" value="{{ or .Number "" }}" placeholder="Enter Number" />
-		<label for="Issuer">Issuer *:</label>
-		<input type="text" id="Issuer" name="Issuer" value="{{ or .Issuer "" }}" placeholder="Enter Issuer" />
-		<label for="Payer">Payer :</label>
-		<input type="text" id="Payer" name="Payer" value="{{ or .Payer "" }}" placeholder="Enter Payer" />
-		<label for="Property">Property :</label>
-		<input type="text" id="Property" name="Property" value="{{ or .Property "" }}" placeholder="Enter Property" />
-		<label for="Due_date">Due date :</label>
-		<input type="text" id="Due_date" name="Due_date" value="{{ or .Due_date "" }}" placeholder="Enter Due date" />
+		<label for="Invoice-Date">Date :</label>
+		<input type="text" id="Invoice-Date" name="Date" value="{{ or .Date "" }}" placeholder="Enter Date" />
+		<label for="Invoice-Description">Description :</label>
+		<input type="text" id="Invoice-Description" name="Description" value="{{ or .Description "" }}" placeholder="Enter Description" />
+		<label for="Invoice-Amount">Amount :</label>
+		<input type="text" id="Invoice-Amount" name="Amount" value="{{ or .Amount "" }}" placeholder="Enter Amount" />
+		<label for="Invoice-Number">Number *:</label>
+		<input type="text" id="Invoice-Number" name="Number" value="{{ or .Number "" }}" placeholder="Enter Number" />
+		<label for="Invoice-Issuer">Issuer *:</label>
+		<input type="text" id="Invoice-Issuer" name="Issuer" value="{{ or .Issuer "" }}" placeholder="Enter Issuer" />
+		<label for="Invoice-Payer">Payer :</label>
+		<input type="text" id="Invoice-Payer" name="Payer" value="{{ or .Payer "" }}" placeholder="Enter Payer" />
+		<label for="Invoice-Property">Property :</label>
+		<input type="text" id="Invoice-Property" name="Property" value="{{ or .Property "" }}" placeholder="Enter Property" />
+		<label for="Invoice-Due_date">Due date :</label>
+		<input type="text" id="Invoice-Due_date" name="Due_date" value="{{ or .Due_date "" }}" placeholder="Enter Due date" />
 		<input type="button" id="save-Invoice" name="save" value="Submit" hx-post="/invoice" hx-target="#post-response" />
 		<input type="button" id="search-Invoice" name="search" value="Search" hx-post="/invoice/search" hx-target="#post-response" />
 		<input type="button" name="reset" value="Reset Key Fields" onclick="ClearKeyFieldsInvoice();" />
@@ -24,8 +24,8 @@
 	{{if not .Id }}</div>{{end}}
 	<script language="javascript">
 		function ClearKeyFieldsInvoice() {
-			document.getElementById("Number").value = "";
-			document.getElementById("Issuer").value = "";
+			document.getElementById("Invoice-Number").value = "";
+			document.getElementById("Invoice-Issuer").value = "";
 			}
 	</script>
 {{ end }}
