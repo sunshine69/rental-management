@@ -6,9 +6,9 @@
 		<label for="Property-Address">Address :</label>
 		<input type="text" id="Property-Address" name="Address" value="{{ or .Address "" }}" placeholder="Enter Address" />
 		<label for="Property-Note">Note :</label>
-		<textarea id="Property-Note" name="Note" placeholder="Enter Note">{{ or .Note "" }}</textarea>
-		<input type="button" id="save-Property" name="save" value="Submit" hx-post="/property" hx-target="#post-response" />
-		<input type="button" id="search-Property" name="search" value="Search" hx-post="/property/search" hx-target="#post-response" />
+		<textarea id="Property-Note" name="Note" placeholder="Enter Note" onchange="SetUpdateButtonLabelProperty();">{{ or .Note "" }}</textarea>
+		<input type="button" id="save-Property" name="save" value="Update" hx-post="/property" hx-target="this" />
+		<input type="button" id="search-Property" name="search" value="Search by key fields" hx-post="/property/search" hx-target="#post-response" />
 		<input type="button" name="reset" value="Reset Key Fields" onclick="ClearKeyFieldsProperty();" />
 	</form>
 	{{if not .Id }}</div>{{end}}
@@ -16,5 +16,11 @@
 		function ClearKeyFieldsProperty() {
 			document.getElementById("Property-Code").value = "";
 			}
+		function SetUpdateButtonLabelProperty() {
+			ele = document.getElementById("save-Property");
+			if (ele.value != "Update") {
+				ele.value = "Update";
+			}
+		}
 	</script>
 {{ end }}

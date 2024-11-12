@@ -17,8 +17,8 @@
 		<input type="text" id="Invoice-Property" name="Property" value="{{ or .Property "" }}" placeholder="Enter Property" />
 		<label for="Invoice-Due_date">Due date :</label>
 		<input type="text" id="Invoice-Due_date" name="Due_date" value="{{ or .Due_date "" }}" placeholder="Enter Due date" />
-		<input type="button" id="save-Invoice" name="save" value="Submit" hx-post="/invoice" hx-target="#post-response" />
-		<input type="button" id="search-Invoice" name="search" value="Search" hx-post="/invoice/search" hx-target="#post-response" />
+		<input type="button" id="save-Invoice" name="save" value="Update" hx-post="/invoice" hx-target="this" />
+		<input type="button" id="search-Invoice" name="search" value="Search by key fields" hx-post="/invoice/search" hx-target="#post-response" />
 		<input type="button" name="reset" value="Reset Key Fields" onclick="ClearKeyFieldsInvoice();" />
 	</form>
 	{{if not .Id }}</div>{{end}}
@@ -27,5 +27,11 @@
 			document.getElementById("Invoice-Number").value = "";
 			document.getElementById("Invoice-Issuer").value = "";
 			}
+		function SetUpdateButtonLabelInvoice() {
+			ele = document.getElementById("save-Invoice");
+			if (ele.value != "Update") {
+				ele.value = "Update";
+			}
+		}
 	</script>
 {{ end }}

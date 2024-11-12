@@ -14,9 +14,9 @@
 		<label for="Tenant-Join_date">Join date :</label>
 		<input type="text" id="Tenant-Join_date" name="Join_date" value="{{ or .Join_date "" }}" placeholder="Enter Join date" />
 		<label for="Tenant-Note">Note :</label>
-		<textarea id="Tenant-Note" name="Note" placeholder="Enter Note">{{ or .Note "" }}</textarea>
-		<input type="button" id="save-Tenant" name="save" value="Submit" hx-post="/tenant" hx-target="#post-response" />
-		<input type="button" id="search-Tenant" name="search" value="Search" hx-post="/tenant/search" hx-target="#post-response" />
+		<textarea id="Tenant-Note" name="Note" placeholder="Enter Note" onchange="SetUpdateButtonLabelTenant();">{{ or .Note "" }}</textarea>
+		<input type="button" id="save-Tenant" name="save" value="Update" hx-post="/tenant" hx-target="this" />
+		<input type="button" id="search-Tenant" name="search" value="Search by key fields" hx-post="/tenant/search" hx-target="#post-response" />
 		<input type="button" name="reset" value="Reset Key Fields" onclick="ClearKeyFieldsTenant();" />
 	</form>
 	{{if not .Id }}</div>{{end}}
@@ -24,5 +24,11 @@
 		function ClearKeyFieldsTenant() {
 			document.getElementById("Tenant-Email").value = "";
 			}
+		function SetUpdateButtonLabelTenant() {
+			ele = document.getElementById("save-Tenant");
+			if (ele.value != "Update") {
+				ele.value = "Update";
+			}
+		}
 	</script>
 {{ end }}

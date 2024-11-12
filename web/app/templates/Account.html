@@ -8,9 +8,9 @@
 		<label for="Account-Tenant_main">Tenant main :</label>
 		<input type="text" id="Account-Tenant_main" name="Tenant_main" value="{{ or .Tenant_main "" }}" placeholder="Enter Tenant main" />
 		<label for="Account-Note">Note :</label>
-		<textarea id="Account-Note" name="Note" placeholder="Enter Note">{{ or .Note "" }}</textarea>
-		<input type="button" id="save-Account" name="save" value="Submit" hx-post="/account" hx-target="#post-response" />
-		<input type="button" id="search-Account" name="search" value="Search" hx-post="/account/search" hx-target="#post-response" />
+		<textarea id="Account-Note" name="Note" placeholder="Enter Note" onchange="SetUpdateButtonLabelAccount();">{{ or .Note "" }}</textarea>
+		<input type="button" id="save-Account" name="save" value="Update" hx-post="/account" hx-target="this" />
+		<input type="button" id="search-Account" name="search" value="Search by key fields" hx-post="/account/search" hx-target="#post-response" />
 		<input type="button" name="reset" value="Reset Key Fields" onclick="ClearKeyFieldsAccount();" />
 	</form>
 	{{if not .Id }}</div>{{end}}
@@ -18,5 +18,11 @@
 		function ClearKeyFieldsAccount() {
 			document.getElementById("Account-Contract_id").value = "";
 			}
+		function SetUpdateButtonLabelAccount() {
+			ele = document.getElementById("save-Account");
+			if (ele.value != "Update") {
+				ele.value = "Update";
+			}
+		}
 	</script>
 {{ end }}

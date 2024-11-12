@@ -6,14 +6,14 @@
 		{{ if index $fp "display" -}}
 		<label for="{{$.formName}}-{{$fName}}">{{replace $fName "_" " "}} {{index $fp "label"}}:</label>
 		{{if eq (index $fp "ele") "textarea" -}}
-		<textarea id="{{$.formName}}-{{$fName}}" name="{{$fName}}" placeholder="Enter {{replace $fName "_" " "}}">{{"{{ or ."}}{{$fName}}{{ " \"\" }}"}}</textarea>
+		<textarea id="{{$.formName}}-{{$fName}}" name="{{$fName}}" placeholder="Enter {{replace $fName "_" " "}}" onchange="SetUpdateButtonLabel{{$.formName}}();">{{"{{ or ."}}{{$fName}}{{ " \"\" }}"}}</textarea>
 		{{else -}}
         <{{ index $fp "ele" }} type="{{index $fp "type"}}" id="{{$.formName}}-{{$fName}}" name="{{$fName}}" value="{{"{{ or ."}}{{$fName}}{{ " \"\" }}"}}" placeholder="Enter {{replace $fName "_" " "}}" {{ index $fp "close_ele" }}
 		{{end -}}
 		{{ end -}}
 		{{ end -}}
-		<input type="button" id="save-{{$.formName}}" name="save" value="Submit" hx-post="/{{lower $.formName}}" hx-target="#post-response" />
-		<input type="button" id="search-{{$.formName}}" name="search" value="Search" hx-post="/{{lower $.formName}}/search" hx-target="#post-response" />
+		<input type="button" id="save-{{$.formName}}" name="save" value="Update" hx-post="/{{lower $.formName}}" hx-target="this" />
+		<input type="button" id="search-{{$.formName}}" name="search" value="Search by key fields" hx-post="/{{lower $.formName}}/search" hx-target="#post-response" />
 		<input type="button" name="reset" value="Reset Key Fields" onclick="ClearKeyFields{{.formName}}();" />
 	</form>
 	{{"{{if not .Id }}"}}</div>{{"{{end}}"}}
@@ -25,6 +25,12 @@
 			document.getElementById("{{$.formName}}-{{$fName}}").value = "";
 			{{end -}}
 			{{end -}}
+		}
+		function SetUpdateButtonLabel{{$.formName}}() {
+			ele = document.getElementById("save-{{$.formName}}");
+			if (ele.value != "Update") {
+				ele.value = "Update";
+			}
 		}
 	</script>
 {{"{{"}} end {{"}}"}}

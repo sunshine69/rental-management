@@ -13,8 +13,8 @@
 		<input type="text" id="Maintenance_request-Invoice_id" name="Invoice_id" value="{{ or .Invoice_id "" }}" placeholder="Enter Invoice id" />
 		<label for="Maintenance_request-Contract_id">Contract id *:</label>
 		<input type="text" id="Maintenance_request-Contract_id" name="Contract_id" value="{{ or .Contract_id "" }}" placeholder="Enter Contract id" />
-		<input type="button" id="save-Maintenance_request" name="save" value="Submit" hx-post="/maintenance_request" hx-target="#post-response" />
-		<input type="button" id="search-Maintenance_request" name="search" value="Search" hx-post="/maintenance_request/search" hx-target="#post-response" />
+		<input type="button" id="save-Maintenance_request" name="save" value="Update" hx-post="/maintenance_request" hx-target="this" />
+		<input type="button" id="search-Maintenance_request" name="search" value="Search by key fields" hx-post="/maintenance_request/search" hx-target="#post-response" />
 		<input type="button" name="reset" value="Reset Key Fields" onclick="ClearKeyFieldsMaintenance_request();" />
 	</form>
 	{{if not .Id }}</div>{{end}}
@@ -23,5 +23,11 @@
 			document.getElementById("Maintenance_request-Request_date").value = "";
 			document.getElementById("Maintenance_request-Contract_id").value = "";
 			}
+		function SetUpdateButtonLabelMaintenance_request() {
+			ele = document.getElementById("save-Maintenance_request");
+			if (ele.value != "Update") {
+				ele.value = "Update";
+			}
+		}
 	</script>
 {{ end }}

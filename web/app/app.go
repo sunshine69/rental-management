@@ -145,11 +145,11 @@ func Tenant(w http.ResponseWriter, r *http.Request) {
         return
     }
     if err := obj.Save(); err != nil {
-        fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
+        fmt.Fprint(w, "[ERROR] saving object")
         fmt.Fprintf(os.Stderr, "%s", err.Error())
         return
     }
-    fmt.Fprint(w, "Data saved")
+    fmt.Fprint(w, "Saved!")
 }
 func SearchTenant(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Tenant{})
@@ -203,11 +203,11 @@ func Property_manager(w http.ResponseWriter, r *http.Request) {
         return
     }
     if err := obj.Save(); err != nil {
-        fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
+        fmt.Fprint(w, "[ERROR] saving object")
         fmt.Fprintf(os.Stderr, "%s", err.Error())
         return
     }
-    fmt.Fprint(w, "Data saved")
+    fmt.Fprint(w, "Saved!")
 }
 func SearchProperty_manager(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Property_manager{})
@@ -261,11 +261,11 @@ func Property(w http.ResponseWriter, r *http.Request) {
         return
     }
     if err := obj.Save(); err != nil {
-        fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
+        fmt.Fprint(w, "[ERROR] saving object")
         fmt.Fprintf(os.Stderr, "%s", err.Error())
         return
     }
-    fmt.Fprint(w, "Data saved")
+    fmt.Fprint(w, "Saved!")
 }
 func SearchProperty(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Property{})
@@ -319,11 +319,11 @@ func Contract(w http.ResponseWriter, r *http.Request) {
         return
     }
     if err := obj.Save(); err != nil {
-        fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
+        fmt.Fprint(w, "[ERROR] saving object")
         fmt.Fprintf(os.Stderr, "%s", err.Error())
         return
     }
-    fmt.Fprint(w, "Data saved")
+    fmt.Fprint(w, "Saved!")
 }
 func SearchContract(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Contract{})
@@ -377,11 +377,11 @@ func Account(w http.ResponseWriter, r *http.Request) {
         return
     }
     if err := obj.Save(); err != nil {
-        fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
+        fmt.Fprint(w, "[ERROR] saving object")
         fmt.Fprintf(os.Stderr, "%s", err.Error())
         return
     }
-    fmt.Fprint(w, "Data saved")
+    fmt.Fprint(w, "Saved!")
 }
 func SearchAccount(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Account{})
@@ -435,11 +435,11 @@ func Payment(w http.ResponseWriter, r *http.Request) {
         return
     }
     if err := obj.Save(); err != nil {
-        fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
+        fmt.Fprint(w, "[ERROR] saving object")
         fmt.Fprintf(os.Stderr, "%s", err.Error())
         return
     }
-    fmt.Fprint(w, "Data saved")
+    fmt.Fprint(w, "Saved!")
 }
 func SearchPayment(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Payment{})
@@ -493,11 +493,11 @@ func Invoice(w http.ResponseWriter, r *http.Request) {
         return
     }
     if err := obj.Save(); err != nil {
-        fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
+        fmt.Fprint(w, "[ERROR] saving object")
         fmt.Fprintf(os.Stderr, "%s", err.Error())
         return
     }
-    fmt.Fprint(w, "Data saved")
+    fmt.Fprint(w, "Saved!")
 }
 func SearchInvoice(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Invoice{})
@@ -551,11 +551,11 @@ func Maintenance_request(w http.ResponseWriter, r *http.Request) {
         return
     }
     if err := obj.Save(); err != nil {
-        fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
+        fmt.Fprint(w, "[ERROR] saving object")
         fmt.Fprintf(os.Stderr, "%s", err.Error())
         return
     }
-    fmt.Fprint(w, "Data saved")
+    fmt.Fprint(w, "Saved!")
 }
 func SearchMaintenance_request(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.Maintenance_request{})

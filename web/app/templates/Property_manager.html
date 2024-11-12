@@ -14,9 +14,9 @@
 		<label for="Property_manager-Join_date">Join date :</label>
 		<input type="text" id="Property_manager-Join_date" name="Join_date" value="{{ or .Join_date "" }}" placeholder="Enter Join date" />
 		<label for="Property_manager-Note">Note :</label>
-		<textarea id="Property_manager-Note" name="Note" placeholder="Enter Note">{{ or .Note "" }}</textarea>
-		<input type="button" id="save-Property_manager" name="save" value="Submit" hx-post="/property_manager" hx-target="#post-response" />
-		<input type="button" id="search-Property_manager" name="search" value="Search" hx-post="/property_manager/search" hx-target="#post-response" />
+		<textarea id="Property_manager-Note" name="Note" placeholder="Enter Note" onchange="SetUpdateButtonLabelProperty_manager();">{{ or .Note "" }}</textarea>
+		<input type="button" id="save-Property_manager" name="save" value="Update" hx-post="/property_manager" hx-target="this" />
+		<input type="button" id="search-Property_manager" name="search" value="Search by key fields" hx-post="/property_manager/search" hx-target="#post-response" />
 		<input type="button" name="reset" value="Reset Key Fields" onclick="ClearKeyFieldsProperty_manager();" />
 	</form>
 	{{if not .Id }}</div>{{end}}
@@ -24,5 +24,11 @@
 		function ClearKeyFieldsProperty_manager() {
 			document.getElementById("Property_manager-Email").value = "";
 			}
+		function SetUpdateButtonLabelProperty_manager() {
+			ele = document.getElementById("save-Property_manager");
+			if (ele.value != "Update") {
+				ele.value = "Update";
+			}
+		}
 	</script>
 {{ end }}

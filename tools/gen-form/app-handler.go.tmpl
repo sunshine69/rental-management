@@ -6,11 +6,11 @@ func {{$objName}}(w http.ResponseWriter, r *http.Request) {
         return
     }
     if err := obj.Save(); err != nil {
-        fmt.Fprint(w, "[ERROR] while saving object. See the server log for details")
+        fmt.Fprint(w, "[ERROR] saving object")
         fmt.Fprintf(os.Stderr, "%s", err.Error())
         return
     }
-    fmt.Fprint(w, "Data saved")
+    fmt.Fprint(w, "Saved!")
 }
 func Search{{$objName}}(w http.ResponseWriter, r *http.Request) {
     obj, err := ProcessPreSteps(w, r, model.{{$objName}}{})

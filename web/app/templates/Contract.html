@@ -30,9 +30,9 @@
 		<label for="Contract-Url">Url :</label>
 		<input type="text" id="Contract-Url" name="Url" value="{{ or .Url "" }}" placeholder="Enter Url" />
 		<label for="Contract-Note">Note :</label>
-		<textarea id="Contract-Note" name="Note" placeholder="Enter Note">{{ or .Note "" }}</textarea>
-		<input type="button" id="save-Contract" name="save" value="Submit" hx-post="/contract" hx-target="#post-response" />
-		<input type="button" id="search-Contract" name="search" value="Search" hx-post="/contract/search" hx-target="#post-response" />
+		<textarea id="Contract-Note" name="Note" placeholder="Enter Note" onchange="SetUpdateButtonLabelContract();">{{ or .Note "" }}</textarea>
+		<input type="button" id="save-Contract" name="save" value="Update" hx-post="/contract" hx-target="this" />
+		<input type="button" id="search-Contract" name="search" value="Search by key fields" hx-post="/contract/search" hx-target="#post-response" />
 		<input type="button" name="reset" value="Reset Key Fields" onclick="ClearKeyFieldsContract();" />
 	</form>
 	{{if not .Id }}</div>{{end}}
@@ -42,5 +42,11 @@
 			document.getElementById("Contract-Tenant_main").value = "";
 			document.getElementById("Contract-Start_date").value = "";
 			}
+		function SetUpdateButtonLabelContract() {
+			ele = document.getElementById("save-Contract");
+			if (ele.value != "Update") {
+				ele.value = "Update";
+			}
+		}
 	</script>
 {{ end }}
