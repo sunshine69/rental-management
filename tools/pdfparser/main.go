@@ -23,7 +23,8 @@ func main() {
 	ParseQldRentalContract(*filename)
 }
 
-// This is subject to change depending on the form content changes
+// This is subject to change depending on the form content changes. I run the pdftotext manually to get the text file and view them to find out the pattern
+// to extract. The gov. changes the form pretty much frequently
 func ParseQldRentalContract(pdffile string) {
 	tmpDir, err := os.MkdirTemp("", "pdfparser")
 	u.CheckErr(err, "CreateTemp pdfparser ")
@@ -36,7 +37,7 @@ func ParseQldRentalContract(pdffile string) {
 
 	pm := ParseLessor(blocklines)
 	if pm.Email == "" {
-		panic("[ERROR] can nto parse lessor\n")
+		panic("[ERROR] can not parse lessor\n")
 	}
 	// Parse tenant
 	block, _, _, _ := ag.ExtractTextBlockContains(textfile, []string{`Item 2.1 Tenant\/s`}, []string{`2.2 Address for service`}, []string{`1. Full name/s`})
@@ -52,22 +53,22 @@ func ParseQldRentalContract(pdffile string) {
 }
 
 func ParseContract(blocklines []string, block, property_code string, pm *model.Property_manager, tns []model.Tenant) model.Contract {
-	fixedTermPtn := regexp.MustCompile(`(?m)✔ fixed term agreement`)
-	startPtn := regexp.MustCompile(`(?m)6.2 Starting on\n([\d]+\/[\d]+\/[\d]+)`)
-	endPtn := regexp.MustCompile(`(?m)6.3 Ending on[\n]+[^\d]+[\n]+([\d]+\/[\d]+\/[\d]+)`)
+
 	var start_date, end_date, term string
+	println(u.JsonDump(blocklines, ""))
+	start_block_lines := ag.ExtractLineInLines(blocklines, `6.3 Ending on`, `([\d]+\/[\d]+\/[\d]+)`, `([\d]+\/[\d]+\/[\d]+)`)
+	println(u.JsonDump(start_block_lines, ""))
+	start_date = start_block_lines[0][1]
+	end_block_lines := ag.ExtractLineInLines(blocklines, `([\d]+\/[\d]+\/[\d]+)`, `([\d]+\/[\d]+\/[\d]+)`, `Fixed term agreements only`)
+	end_date = end_block_lines[0][1]
+
+	fixedTermPtn := regexp.MustCompile(`✔ fixed term agreement`)
 	if fixed := fixedTermPtn.MatchString(block); fixed {
 		term = "fixed"
 	} else {
 		term = "periodic"
 	}
 
-	if m := startPtn.FindStringSubmatch(block); m != nil {
-		start_date = m[1]
-	}
-	if m := endPtn.FindStringSubmatch(block); m != nil {
-		end_date = m[1]
-	}
 	contract := model.Contract{Property: property_code, Start_date: start_date, End_date: end_date, Term: term, Property_manager: pm.Email, Tenant_main: tns[0].Email}
 	if o := ag.ExtractLineInLines(blocklines, `Item Rent`, `\$ ([\d]+)`, `Item Rent must be paid on the`); o != nil {
 		if rent, err := strconv.ParseInt(o[0][1], 10, 64); err == nil {
@@ -157,17 +158,17 @@ func ParseTenant(block string) (tenants []model.Tenant) {
 	for _, b := range tenantBlocks {
 		var mobile, email, firstName, lastName string
 		datalines := strings.Split(b, "\n")
-		println(u.JsonDump(datalines, ""))
+		// println(u.JsonDump(datalines, ""))
 
 		if o := ag.ExtractLineInLines(datalines, `Full name\/s (.*)$`, `Email ([^\@]+\@[^\@]+)`, `Emergency contact full name`); o != nil {
-			println(email)
+			// println(email)
 			email = o[0][1]
 		}
 		if o := ag.ExtractLineInLines(datalines, `Full name\/s (.*)$`, `Full name\/s (.*)$`, `^([\d\s]+)$`); o != nil {
 			firstName, lastName = parseNames(o[0][1])
 		}
 		if o := ag.ExtractLineInLines(datalines, `Full name\/s (.*)$`, `^([\d\s]+)$`, `Emergency contact full name`); o != nil {
-			println(mobile)
+			// println(mobile)
 			mobile = o[0][1]
 		}
 		if email != "" {
