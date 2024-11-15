@@ -153,6 +153,7 @@ func ParseLessor(blocklines []string) *model.Property_manager {
 func ParseTenant(block string) (tenants []model.Tenant) {
 	tenantBlocks := u.SplitTextByPattern(block, `(?m)[\d]\. Full name\/s ([a-zA-Z0-9\s]+)`, true)
 	// println(u.JsonDump(tenantBlocks, ""))
+	tenantNamePtn := regexp.MustCompile(`(?m)[\d]\. Full name\/s (.*)`)
 
 	for _, b := range tenantBlocks {
 		var mobile, email, firstName, lastName string
@@ -163,8 +164,11 @@ func ParseTenant(block string) (tenants []model.Tenant) {
 			// println(email)
 			email = o[0][1]
 		}
-		if o := u.ExtractLineInLines(datalines, `Full name\/s (.*)$`, `Full name\/s (.*)$`, `^([\d\s]+)$`); o != nil {
-			firstName, lastName = parseNames(o[0][1])
+		parsed := tenantNamePtn.FindStringSubmatch(b)
+		if parsed != nil {
+			firstName, lastName = parseNames(parsed[1])
+		} else {
+			panic("[ERROR] can not parse tenant name - adjust tenantNamePtn pattern\n")
 		}
 		if o := u.ExtractLineInLines(datalines, `Full name\/s (.*)$`, `^([\d\s]+)$`, `Emergency contact full name`); o != nil {
 			// println(mobile)
