@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"strings"
 
-	ag "github.com/sunshine69/automation-go/lib"
 	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/sunshine69/rental-management/configs"
 	"github.com/sunshine69/rental-management/model"
@@ -32,7 +31,7 @@ func ParseQldRentalContract(pdffile string) {
 	textfile := tmpDir + "/pdftotext.txt"
 	o, err := u.RunSystemCommandV2("pdftotext '"+pdffile+"' "+textfile, true)
 	u.CheckErr(err, "RunSystemCommandV2 pdftotext "+o)
-	_, start, end, datalines := ag.ExtractTextBlockContains(textfile, []string{`Item 1.1 Lessor`}, []string{`Item 2.1 Tenant\/s`}, []string{`Name/trading name`})
+	_, start, end, datalines := u.ExtractTextBlockContains(textfile, []string{`Item 1.1 Lessor`}, []string{`Item 2.1 Tenant\/s`}, []string{`Name/trading name`})
 	blocklines := datalines[start:end]
 
 	pm := ParseLessor(blocklines)
@@ -40,15 +39,15 @@ func ParseQldRentalContract(pdffile string) {
 		panic("[ERROR] can not parse lessor\n")
 	}
 	// Parse tenant
-	block, _, _, _ := ag.ExtractTextBlockContains(textfile, []string{`Item 2.1 Tenant\/s`}, []string{`2.2 Address for service`}, []string{`1. Full name/s`})
+	block, _, _, _ := u.ExtractTextBlockContains(textfile, []string{`Item 2.1 Tenant\/s`}, []string{`2.2 Address for service`}, []string{`1. Full name/s`})
 	tns := ParseTenant(block)
 	if len(tns) == 0 {
 		panic("[ERROR] can not parse tenant\n")
 	}
-	_, start, end, blocklines = ag.ExtractTextBlock(textfile, []string{`Item 5.1 Address of the rental premises`}, []string{`5.2 Inclusions provided`})
+	_, start, end, blocklines = u.ExtractTextBlock(textfile, []string{`Item 5.1 Address of the rental premises`}, []string{`5.2 Inclusions provided`})
 	property_code := ParseProperty(blocklines[start:end])
 
-	block, start, end, blocklines = ag.ExtractTextBlockContains(textfile, []string{`5.2 Inclusions provided`}, []string{`Part 2 Standard Terms`}, []string{`6.3 Ending on`})
+	block, start, end, blocklines = u.ExtractTextBlockContains(textfile, []string{`5.2 Inclusions provided`}, []string{`Part 2 Standard Terms`}, []string{`6.3 Ending on`})
 	ParseContract(blocklines[start:end], block, property_code, pm, tns)
 }
 
@@ -56,10 +55,10 @@ func ParseContract(blocklines []string, block, property_code string, pm *model.P
 
 	var start_date, end_date, term string
 	println(u.JsonDump(blocklines, ""))
-	start_block_lines := ag.ExtractLineInLines(blocklines, `6.3 Ending on`, `([\d]+\/[\d]+\/[\d]+)`, `([\d]+\/[\d]+\/[\d]+)`)
+	start_block_lines := u.ExtractLineInLines(blocklines, `6.3 Ending on`, `([\d]+\/[\d]+\/[\d]+)`, `([\d]+\/[\d]+\/[\d]+)`)
 	println(u.JsonDump(start_block_lines, ""))
 	start_date = start_block_lines[0][1]
-	end_block_lines := ag.ExtractLineInLines(blocklines, `([\d]+\/[\d]+\/[\d]+)`, `([\d]+\/[\d]+\/[\d]+)`, `Fixed term agreements only`)
+	end_block_lines := u.ExtractLineInLines(blocklines, `([\d]+\/[\d]+\/[\d]+)`, `([\d]+\/[\d]+\/[\d]+)`, `Fixed term agreements only`)
 	end_date = end_block_lines[0][1]
 
 	fixedTermPtn := regexp.MustCompile(`✔ fixed term agreement`)
@@ -70,7 +69,7 @@ func ParseContract(blocklines []string, block, property_code string, pm *model.P
 	}
 
 	contract := model.Contract{Property: property_code, Start_date: start_date, End_date: end_date, Term: term, Property_manager: pm.Email, Tenant_main: tns[0].Email}
-	if o := ag.ExtractLineInLines(blocklines, `Item Rent`, `\$ ([\d]+)`, `Item Rent must be paid on the`); o != nil {
+	if o := u.ExtractLineInLines(blocklines, `Item Rent`, `\$ ([\d]+)`, `Item Rent must be paid on the`); o != nil {
 		if rent, err := strconv.ParseInt(o[0][1], 10, 64); err == nil {
 			contract.Rent = rent
 		}
@@ -152,7 +151,7 @@ func ParseLessor(blocklines []string) *model.Property_manager {
 }
 
 func ParseTenant(block string) (tenants []model.Tenant) {
-	tenantBlocks := ag.SplitTextByPattern(block, `(?m)[\d]\. Full name\/s ([a-zA-Z0-9\s]+)`, true)
+	tenantBlocks := u.SplitTextByPattern(block, `(?m)[\d]\. Full name\/s ([a-zA-Z0-9\s]+)`, true)
 	// println(u.JsonDump(tenantBlocks, ""))
 
 	for _, b := range tenantBlocks {
@@ -160,14 +159,14 @@ func ParseTenant(block string) (tenants []model.Tenant) {
 		datalines := strings.Split(b, "\n")
 		// println(u.JsonDump(datalines, ""))
 
-		if o := ag.ExtractLineInLines(datalines, `Full name\/s (.*)$`, `Email ([^\@]+\@[^\@]+)`, `Emergency contact full name`); o != nil {
+		if o := u.ExtractLineInLines(datalines, `Full name\/s (.*)$`, `Email ([^\@]+\@[^\@]+)`, `Emergency contact full name`); o != nil {
 			// println(email)
 			email = o[0][1]
 		}
-		if o := ag.ExtractLineInLines(datalines, `Full name\/s (.*)$`, `Full name\/s (.*)$`, `^([\d\s]+)$`); o != nil {
+		if o := u.ExtractLineInLines(datalines, `Full name\/s (.*)$`, `Full name\/s (.*)$`, `^([\d\s]+)$`); o != nil {
 			firstName, lastName = parseNames(o[0][1])
 		}
-		if o := ag.ExtractLineInLines(datalines, `Full name\/s (.*)$`, `^([\d\s]+)$`, `Emergency contact full name`); o != nil {
+		if o := u.ExtractLineInLines(datalines, `Full name\/s (.*)$`, `^([\d\s]+)$`, `Emergency contact full name`); o != nil {
 			// println(mobile)
 			mobile = o[0][1]
 		}

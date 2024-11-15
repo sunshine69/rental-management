@@ -8,7 +8,6 @@ import (
 	"regexp"
 	"strings"
 
-	ag "github.com/sunshine69/automation-go/lib"
 	u "github.com/sunshine69/golang-tools/utils"
 )
 
@@ -29,7 +28,7 @@ var ObjectList []string
 
 func CodeGen(templateFile string) {
 	if sqlb, err := os.ReadFile("db/schema.sql"); err == nil {
-		sqls := ag.SplitTextByPattern(string(sqlb), `(?m)^CREATE TABLE IF NOT EXISTS .*`, true)
+		sqls := u.SplitTextByPattern(string(sqlb), `(?m)^CREATE TABLE IF NOT EXISTS .*`, true)
 		// fmt.Printf("%s\n", u.JsonDump(sqls, "  "))
 		for _, sqltext := range sqls {
 			GenerateClass(sqltext, templateFile)
@@ -63,14 +62,14 @@ func GenerateClass(sqltext, classTemplateFile string) {
 	uniqueFieldPtn := regexp.MustCompile(`UNIQUE[ ]*\(([^\)]+)\)`)
 	o2 := uniqueFieldPtn.FindStringSubmatch(sqltext)
 	uniqueFields := strings.Split(o2[1], ",")
-	uniqueFields = ag.SliceMap(uniqueFields, func(s string) *string { o := strings.TrimSpace(strings.ReplaceAll(s, `"`, ``)); return &o })
+	uniqueFields = u.SliceMap(uniqueFields, func(s string) *string { o := strings.TrimSpace(strings.ReplaceAll(s, `"`, ``)); return &o })
 	//uniqueFieldsMap[field name] => golang type as string
-	uniqueFieldsMap := ag.SliceToMap(uniqueFields)
+	uniqueFieldsMap := u.SliceToMap(uniqueFields)
 	for k := range uniqueFieldsMap {
 		uniqueFieldsMap[k] = fieldmap[k]
 	}
 	// uniqueStringFields used to generate search function thus we only take string
-	uniqueStringFields := ag.SliceMap(uniqueFields, func(s string) *string {
+	uniqueStringFields := u.SliceMap(uniqueFields, func(s string) *string {
 		if uniqueFieldsMap[s].(string) == "string" {
 			return &s
 		} else {
@@ -85,7 +84,7 @@ func GenerateClass(sqltext, classTemplateFile string) {
 		}
 	}
 	targetFile := filepath.Dir(classTemplateFile) + "/" + typeName + ".go"
-	ag.GoTemplateFile(classTemplateFile, targetFile, map[string]interface{}{
+	u.GoTemplateFile(classTemplateFile, targetFile, map[string]interface{}{
 		"typename":           typeName,
 		"fields":             fieldmap,
 		"fieldsList":         fieldsList,
@@ -111,8 +110,8 @@ func main() {
 			{{- end}}
 				}
 		var AllModelObjects []any = []any{ {{range $idx, $typeName := $g}}{{$typeName|title}}{}{{if ne $idx (add (len $g) -1 ) }}, {{end}}{{end}} }`
-		textrpl := ag.GoTemplateString(tmpl, ObjectList)
-		ag.BlockInFile("model/global.go", []string{}, []string{`\/\/ End generate AllModelObjects`}, []string{`\/\/ Auto generate AllModelObjects`}, textrpl, true, false)
+		textrpl := u.GoTemplateString(tmpl, ObjectList)
+		u.BlockInFile("model/global.go", []string{}, []string{`\/\/ End generate AllModelObjects`}, []string{`\/\/ Auto generate AllModelObjects`}, textrpl, true, false)
 		u.RunSystemCommandV2("go fmt model/global.go", true)
 	case "api":
 		CodeGen("api/api-template.go.tmpl")

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	ag "github.com/sunshine69/automation-go/lib"
+	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/sunshine69/rental-management/model"
 )
 
@@ -13,7 +13,7 @@ func GetTemplateData() (data map[string]any) {
 	objs := []string{}
 
 	for _, it := range model.AllModelObjects {
-		sInfo := ag.ReflectStruct(it, `form:"([^"]+)"`)
+		sInfo := u.ReflectStruct(it, `form:"([^"]+)"`)
 		objs = append(objs, sInfo.Name)
 		data[sInfo.Name] = sInfo
 	}
@@ -23,7 +23,7 @@ func GetTemplateData() (data map[string]any) {
 
 // Take all structs in model and generate golang template html form - write to target dir
 func FormGen(structType any, writeDirectory string) {
-	sInfo := ag.ReflectStruct(structType, `([^\:\s]+):"([^"]+)"`)
+	sInfo := u.ReflectStruct(structType, `([^\:\s]+):"([^"]+)"`)
 	destFile := writeDirectory + "/" + sInfo.Name + ".html"
 	fList := []string{}
 	fieldProp := map[string]map[string]any{}
@@ -52,13 +52,13 @@ func FormGen(structType any, writeDirectory string) {
 		"fList":      fList,
 		"fieldProp":  fieldProp,
 	}
-	ag.GoTemplateFile("tools/gen-form/form.go.tmpl", destFile, data, 0640)
+	u.GoTemplateFile("tools/gen-form/form.go.tmpl", destFile, data, 0640)
 	formNameList := []string{}
 	for _, f := range model.AllModelObjects {
-		sInfo := ag.ReflectStruct(f, `form:"([^"]+)"`)
+		sInfo := u.ReflectStruct(f, `form:"([^"]+)"`)
 		formNameList = append(formNameList, sInfo.Name)
 	}
-	ag.GoTemplateFile("tools/gen-form/form-header.go.tmpl", writeDirectory+"/form-header.html", map[string]any{"formNameList": formNameList}, 0640)
+	u.GoTemplateFile("tools/gen-form/form-header.go.tmpl", writeDirectory+"/form-header.html", map[string]any{"formNameList": formNameList}, 0640)
 }
 
 func main() {

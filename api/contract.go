@@ -6,14 +6,13 @@ import (
 	"net/http"
 
 	"github.com/R167/go-sets"
-	ag "github.com/sunshine69/automation-go/lib"
 	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/sunshine69/rental-management/model"
 	"github.com/sunshine69/rental-management/utils"
 )
 
 func CreateContract(w http.ResponseWriter, r *http.Request) {
-	if contract := ag.ParseJsonReqBodyToStruct[model.Contract](r); contract != nil {
+	if contract := u.ParseJsonReqBodyToStruct[model.Contract](r); contract != nil {
 		if err := contract.Save(); err != nil {
 			fmt.Fprintf(w, `{"status": "ERROR", "msg": "%s"}`, err.Error())
 		}
@@ -23,7 +22,7 @@ func CreateContract(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateContract(w http.ResponseWriter, r *http.Request) {
-	o := ag.ParseJsonReqBodyToMap(r)
+	o := u.ParseJsonReqBodyToMap(r)
 	if id := utils.ParseID(r); id != 0 {
 		tn := model.GetContractByID(id)
 		if tn == nil {
@@ -63,7 +62,7 @@ func DeleteContract(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	} else {
-		contract := ag.ParseJsonReqBodyToStruct[model.Contract](r)
+		contract := u.ParseJsonReqBodyToStruct[model.Contract](r)
 		if contract != nil {
 			if contract.Id != 0 {
 				model.DeleteContractByID(contract.Id)

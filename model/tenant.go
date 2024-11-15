@@ -5,13 +5,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	u "github.com/sunshine69/golang-tools/utils"
 	"os"
 	"strings"
 	"time"
 
 	_ "github.com/mutecomm/go-sqlcipher/v4"
-	ag "github.com/sunshine69/automation-go/lib"
+	u "github.com/sunshine69/golang-tools/utils"
 )
 
 type Tenant struct {
@@ -111,14 +110,14 @@ func (o *Tenant) Search() []Tenant {
 
 // Save new object which is saved it into db
 func (o *Tenant) Update(data map[string]interface{}) error {
-	fields := ag.MapKeysToSlice(data)
-	fieldsWithoutKey := ag.SliceMap(fields, func(s string) *string {
+	fields := u.MapKeysToSlice(data)
+	fieldsWithoutKey := u.SliceMap(fields, func(s string) *string {
 		if s != "id" && s != "email" {
 			return &s
 		}
 		return nil
 	})
-	updateFields := ag.SliceMap(fieldsWithoutKey, func(s string) *string { s = s + " = :" + s; return &s })
+	updateFields := u.SliceMap(fieldsWithoutKey, func(s string) *string { s = s + " = :" + s; return &s })
 	updateFieldsStr := strings.Join(updateFields, ",")
 
 	if _, err := DB.NamedExec(`UPDATE tenant SET `+updateFieldsStr, data); err != nil {

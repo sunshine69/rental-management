@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	_ "github.com/mutecomm/go-sqlcipher/v4"
-	ag "github.com/sunshine69/automation-go/lib"
+	u "github.com/sunshine69/golang-tools/utils"
 	"os"
 	"strings"
 )
@@ -101,14 +101,14 @@ func (o *Property) Search() []Property {
 
 // Save new object which is saved it into db
 func (o *Property) Update(data map[string]interface{}) error {
-	fields := ag.MapKeysToSlice(data)
-	fieldsWithoutKey := ag.SliceMap(fields, func(s string) *string {
+	fields := u.MapKeysToSlice(data)
+	fieldsWithoutKey := u.SliceMap(fields, func(s string) *string {
 		if s != "id" && s != "code" {
 			return &s
 		}
 		return nil
 	})
-	updateFields := ag.SliceMap(fieldsWithoutKey, func(s string) *string { s = s + " = :" + s; return &s })
+	updateFields := u.SliceMap(fieldsWithoutKey, func(s string) *string { s = s + " = :" + s; return &s })
 	updateFieldsStr := strings.Join(updateFields, ",")
 
 	if _, err := DB.NamedExec(`UPDATE property SET `+updateFieldsStr, data); err != nil {

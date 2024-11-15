@@ -6,14 +6,13 @@ import (
 	"net/http"
 
 	"github.com/R167/go-sets"
-	ag "github.com/sunshine69/automation-go/lib"
 	u "github.com/sunshine69/golang-tools/utils"
 	"github.com/sunshine69/rental-management/model"
 	"github.com/sunshine69/rental-management/utils"
 )
 
 func CreateAccount(w http.ResponseWriter, r *http.Request) {
-	if account := ag.ParseJsonReqBodyToStruct[model.Account](r); account != nil {
+	if account := u.ParseJsonReqBodyToStruct[model.Account](r); account != nil {
 		if err := account.Save(); err != nil {
 			fmt.Fprintf(w, `{"status": "ERROR", "msg": "%s"}`, err.Error())
 		}
@@ -23,7 +22,7 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateAccount(w http.ResponseWriter, r *http.Request) {
-	o := ag.ParseJsonReqBodyToMap(r)
+	o := u.ParseJsonReqBodyToMap(r)
 	if id := utils.ParseID(r); id != 0 {
 		tn := model.GetAccountByID(id)
 		if tn == nil {
@@ -63,7 +62,7 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	} else {
-		account := ag.ParseJsonReqBodyToStruct[model.Account](r)
+		account := u.ParseJsonReqBodyToStruct[model.Account](r)
 		if account != nil {
 			if account.Id != 0 {
 				model.DeleteAccountByID(account.Id)

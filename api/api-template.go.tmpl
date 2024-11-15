@@ -6,14 +6,13 @@ import (
 	"net/http"
 
 	u "github.com/sunshine69/golang-tools/utils"
-	ag "github.com/sunshine69/automation-go/lib"
 	"github.com/R167/go-sets"
 	"github.com/sunshine69/rental-management/model"
 	"github.com/sunshine69/rental-management/utils"
 )
 
 func Create{{.typename|title}}(w http.ResponseWriter, r *http.Request) {
-	if {{.typename}} := ag.ParseJsonReqBodyToStruct[model.{{.typename|title}}](r); {{.typename}} != nil {
+	if {{.typename}} := u.ParseJsonReqBodyToStruct[model.{{.typename|title}}](r); {{.typename}} != nil {
 		if err := {{.typename}}.Save(); err != nil {
 			fmt.Fprintf(w, `{"status": "ERROR", "msg": "%s"}`, err.Error())
 		}
@@ -23,7 +22,7 @@ func Create{{.typename|title}}(w http.ResponseWriter, r *http.Request) {
 }
 
 func Update{{.typename|title}}(w http.ResponseWriter, r *http.Request) {
-	o := ag.ParseJsonReqBodyToMap(r)
+	o := u.ParseJsonReqBodyToMap(r)
 	if id := utils.ParseID(r); id != 0 {
 		tn := model.Get{{.typename|title}}ByID(id)
 		if tn == nil {
@@ -63,7 +62,7 @@ func Delete{{.typename|title}}(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	} else {
-		{{.typename}} := ag.ParseJsonReqBodyToStruct[model.{{.typename|title}}](r)
+		{{.typename}} := u.ParseJsonReqBodyToStruct[model.{{.typename|title}}](r)
 		if {{.typename}} != nil {
 			if {{.typename}}.Id != 0 {
 				model.Delete{{.typename|title}}ByID({{.typename}}.Id)
