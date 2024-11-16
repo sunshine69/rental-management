@@ -26,3 +26,4 @@ go.work.sum
 *.sqlite3
 *.db 
 *.bak
+*.backup

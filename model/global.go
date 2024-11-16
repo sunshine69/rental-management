@@ -1,19 +1,21 @@
 package model
 
 import (
+	"fmt"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	_ "github.com/mutecomm/go-sqlcipher/v4"
 	u "github.com/sunshine69/golang-tools/utils"
+	_ "modernc.org/sqlite"
 )
 
 // DbConn - Global DB connection
 var DB *sqlx.DB
 
 func init() {
-	DB = sqlx.MustConnect("sqlite3", u.Getenv("DB_PATH", "test.sqlite3"))
+	DB = sqlx.MustConnect("sqlite", u.Getenv("DB_PATH", "test.sqlite3"))
 }
 
 // Take a map scan if the key contains the string `date` then detect if the value is a string but parsable into a datetime unix int value
@@ -51,3 +53,12 @@ var AllForms = map[string]any{
 var AllModelObjects []any = []any{Tenant{}, Property_manager{}, Property{}, Contract{}, Account{}, Payment{}, Invoice{}, Maintenance_request{}}
 
 // End generate AllModelObjects
+
+func SetupDBSchema(schemafile string) {
+	fmt.Println("Setup db")
+	sqlb, err := os.ReadFile(schemafile)
+	u.CheckErr(err, "Read sql file")
+	res, err := DB.Exec(string(sqlb))
+	u.CheckErr(err, "Exec")
+	println(u.JsonDump(res, ""))
+}

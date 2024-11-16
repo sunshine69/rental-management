@@ -9,6 +9,8 @@ import (
 
 func TestTenant(t *testing.T) {
 	fmt.Println("start test")
+	// os.Remove("test.sqlite3")
+	SetupDBSchema("../db/schema.sql")
 	m0 := map[string]interface{}{"email": "k@k", "start_date": 12333, "end_date": "12/02/2023 00:00:00 +11"}
 	m1 := ParseDatetimeFieldOfMapData(m0)
 	fmt.Printf("m1: %s\n", u.JsonDump(m1, ""))

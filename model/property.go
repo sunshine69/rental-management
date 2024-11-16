@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	_ "github.com/mutecomm/go-sqlcipher/v4"
 	u "github.com/sunshine69/golang-tools/utils"
+	_ "modernc.org/sqlite"
 	"os"
 	"strings"
 )
