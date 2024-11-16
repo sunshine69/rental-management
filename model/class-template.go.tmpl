@@ -132,7 +132,7 @@ func (o *{{.typename|title}}) Update(data map[string]interface{}) error {
 }
 
 
-// Save existing object which is saved it into db
+// Save existing object which is saved it into db. Note that this will update all fields. If you only update some fields then better use the Update func above
 func (o *{{.typename|title}}) Save() error {
 	if res, err := DB.NamedExec(`INSERT INTO {{.typename}}({{range $idx, $f := .fieldsList}}{{if ne $f "id"}}{{$f}}{{end}}{{if ne $f "id"}}{{if ne $idx (add ($.fieldsList|len) -1)}},{{end}}{{end}}{{end}}) VALUES({{range $idx, $f := .fieldsList}}{{if ne $f "id"}}:{{$f}}{{end}}{{if ne $f "id"}}{{if ne $idx (add ($.fieldsList|len) -1)}},{{end}}{{end}}{{end}}) ON CONFLICT( {{range $idx, $f := .uniqueFields}}{{$f}}{{if ne $idx (add ($.uniqueFields|len) -1)}},{{end}}{{end}}) DO UPDATE SET {{range $idx, $f := .fieldsList}}{{if ne $f "id"}}{{$f}}=excluded.{{$f}}{{end}}{{if ne $f "id"}}{{if ne $idx (add ($.fieldsList|len) -1)}},{{end}}{{end}}{{end}}`, o); err != nil {
 		return err

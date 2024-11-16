@@ -11,17 +11,18 @@ func TestTenant(t *testing.T) {
 	fmt.Println("start test")
 	// os.Remove("test.sqlite3")
 	SetupDBSchema("../db/schema.sql")
-	m0 := map[string]interface{}{"email": "k@k", "start_date": 12333, "end_date": "12/02/2023 00:00:00 +11"}
+	m0 := map[string]any{"email": "k@k", "join_date": "12/02/2024"}
 	m1 := ParseDatetimeFieldOfMapData(m0)
 	fmt.Printf("m1: %s\n", u.JsonDump(m1, ""))
-	GetTenantByCompositeKeyOrNew(map[string]interface{}{"email": "myf@ptcm"})
-	// at := Tenant{Email: "msh@come"}
-	// at.Save()
-	at := Tenant{Where: "email like '%msh%'"}
+	at := GetTenantByCompositeKeyOrNew(map[string]any{"email": "k@k"})
+	m1["address"] = "My address"
+	u.CheckErr(at.Update(m1), "Update use map")
+	at.Where = "email = 'k@k'"
 	at1 := at.Search()[0]
 	fmt.Printf("%s\n", u.JsonDump(at1, ""))
-	at1.Address = "New address stevek "
+	at1.Address = "New address stevek"
 	u.CheckErr(at1.Save(), "")
-	fmt.Printf("%s\n", u.JsonDump(at1, ""))
+	at2 := at.Search()
+	fmt.Printf("%s\n", u.JsonDump(at2, ""))
 	// tn := Tenant{Address: "%moon%"}
 }

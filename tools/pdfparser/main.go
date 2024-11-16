@@ -17,14 +17,16 @@ var Cfg configs.Config
 
 func main() {
 	filename := flag.String("f", "", "Path to pdf file")
+	contractVersion := flag.String("v", "2024", "Contract version year")
+
 	flag.Parse()
-	fmt.Printf("INput file: '%s'\n", *filename)
-	ParseQldRentalContract(*filename)
+	fmt.Printf("Input file: '%s'\n", *filename)
+	ParseQldRentalContract(*filename, *contractVersion)
 }
 
 // This is subject to change depending on the form content changes. I run the pdftotext manually to get the text file and view them to find out the pattern
 // to extract. The gov. changes the form pretty much frequently
-func ParseQldRentalContract(pdffile string) {
+func ParseQldRentalContract(pdffile, contractVersion string) {
 	tmpDir, err := os.MkdirTemp("", "pdfparser")
 	u.CheckErr(err, "CreateTemp pdfparser ")
 	defer os.RemoveAll(tmpDir)
@@ -39,8 +41,18 @@ func ParseQldRentalContract(pdffile string) {
 		panic("[ERROR] can not parse lessor\n")
 	}
 	// Parse tenant
-	block, _, _, _ := u.ExtractTextBlockContains(textfile, []string{`Item 2.1 Tenant\/s`}, []string{`2.2 Address for service`}, []string{`1. Full name/s`})
-	tns := ParseTenant(block)
+	var block string
+	var tns []model.Tenant
+	_o, _ := u.RunSystemCommandV2("cat "+textfile, true)
+	println(_o)
+	switch contractVersion {
+	case "2024":
+		block, _, _, _ = u.ExtractTextBlockContains(textfile, []string{`Item 2.1 Tenant\/s`}, []string{`2.2 Address for service`}, []string{`1. Full name/s`})
+		tns = ParseTenant2024(block)
+	case "2023":
+		block, _, _, _ = u.ExtractTextBlockContains(textfile, []string{`Item 2.1 Tenant\/s`}, []string{`Item 3\.1 Agent If applicable`}, []string{`2\.2 Address for service`})
+		tns = ParseTenant2023(block)
+	}
 	if len(tns) == 0 {
 		panic("[ERROR] can not parse tenant\n")
 	}
@@ -67,8 +79,8 @@ func ParseContract(blocklines []string, block, property_code string, pm *model.P
 	} else {
 		term = "periodic"
 	}
-
-	contract := model.Contract{Property: property_code, Start_date: start_date, End_date: end_date, Term: term, Property_manager: pm.Email, Tenant_main: tns[0].Email}
+	contract := model.GetContractByCompositeKeyOrNew(map[string]any{"property": property_code, "tenant_main": tns[0].Email, "start_date": start_date})
+	u.CheckErr(contract.Update(map[string]any{"end_date": end_date, "term": term}), "Update contract")
 	if o := u.ExtractLineInLines(blocklines, `Item Rent`, `\$ ([\d]+)`, `Item Rent must be paid on the`); o != nil {
 		if rent, err := strconv.ParseInt(o[0][1], 10, 64); err == nil {
 			contract.Rent = rent
@@ -78,8 +90,7 @@ func ParseContract(blocklines []string, block, property_code string, pm *model.P
 	if len(tns) > 1 {
 		contract.Tenants = u.JsonDump(tns[1:], "")
 	}
-	contract.Save()
-	return contract
+	return *contract
 }
 
 func ParseProperty(blocklines []string) (property_code string) {
@@ -102,8 +113,8 @@ func ParseProperty(blocklines []string) (property_code string) {
 		}
 	}
 	property_code = strings.ReplaceAll(address, " ", "") + "_" + postcode
-	pr := model.Property{Code: property_code, Address: address + ", " + suburb + " " + postcode}
-	pr.Save()
+	pr := model.GetPropertyByCompositeKeyOrNew(map[string]any{"code": property_code})
+	u.CheckErr(pr.Update(map[string]any{"address": address + ", " + suburb + " " + postcode}), "Update property")
 	return
 }
 
@@ -144,16 +155,18 @@ func ParseLessor(blocklines []string) *model.Property_manager {
 		}
 
 	}
-	pm := model.Property_manager{Email: email, First_name: firstName, Last_name: lastName, Address: address + " " + postcode,
-		Contact_number: mobile}
-	pm.Save()
-	return &pm
+	pm := model.GetProperty_managerByCompositeKeyOrNew(map[string]any{"email": email})
+	u.CheckErr(pm.Update(map[string]any{"first_name": firstName, "last_name": lastName, "address": address + " " + postcode, "contact_number": mobile}), "Update properety-manager")
+	return pm
 }
 
-func ParseTenant(block string) (tenants []model.Tenant) {
+func ParseTenant2024(block string) (tenants []model.Tenant) {
+	if block == "" {
+		panic("ParseTenant2023 input is empty")
+	}
 	tenantBlocks := u.SplitTextByPattern(block, `(?m)[\d]\. Full name\/s ([a-zA-Z0-9\s]+)`, true)
 	// println(u.JsonDump(tenantBlocks, ""))
-	tenantNamePtn := regexp.MustCompile(`(?m)[\d]\. Full name\/s (.*)`)
+	tenantNamePtn := regexp.MustCompile(`(?m)[\d][\.]{0,1} Full name\/s (.*)`)
 
 	for _, b := range tenantBlocks {
 		var mobile, email, firstName, lastName string
@@ -161,27 +174,64 @@ func ParseTenant(block string) (tenants []model.Tenant) {
 		// println(u.JsonDump(datalines, ""))
 
 		if o := u.ExtractLineInLines(datalines, `Full name\/s (.*)$`, `Email ([^\@]+\@[^\@]+)`, `Emergency contact full name`); o != nil {
-			// println(email)
+			println("parsed email ", email)
 			email = o[0][1]
 		}
+		println(u.JsonDump(b, ""))
 		parsed := tenantNamePtn.FindStringSubmatch(b)
 		if parsed != nil {
 			firstName, lastName = parseNames(parsed[1])
-		} else {
-			panic("[ERROR] can not parse tenant name - adjust tenantNamePtn pattern\n")
 		}
 		if o := u.ExtractLineInLines(datalines, `Full name\/s (.*)$`, `^([\d\s]+)$`, `Emergency contact full name`); o != nil {
 			// println(mobile)
 			mobile = o[0][1]
 		}
-		if email != "" {
-			tn := model.Tenant{Email: email, Contact_number: mobile, First_name: firstName, Last_name: lastName}
-			tn.Save()
-			tenants = append(tenants, tn)
+		if email != "" && firstName != "" && lastName != "" {
+			tn := model.GetTenantByCompositeKeyOrNew(map[string]any{"email": email})
+			u.CheckErr(tn.Update(map[string]any{"contact_number": mobile, "first_name": firstName, "last_name": lastName}), "Update Tenant")
+			tenants = append(tenants, *tn)
 		} else {
 			if len(tenants) > 0 {
-				tenants[0].Note = fmt.Sprintf("%s\n%s %s %s", tenants[0].Note, firstName, lastName, mobile)
-				tenants[0].Save()
+				u.CheckErr(tenants[0].Update(map[string]any{"note": u.Ternary(tenants[0].Note != "", tenants[0].Note+"\n", "") + fmt.Sprintf("%s\n%s %s %s", tenants[0].Note, firstName, lastName, mobile)}), "Update Tenant Note")
+			}
+		}
+	}
+	return
+}
+
+func ParseTenant2023(block string) (tenants []model.Tenant) {
+	if block == "" {
+		panic("ParseTenant2023 input is empty")
+	}
+	tenantBlocks := u.SplitTextByPattern(block, `(?m)^Tenant [\d] Full name\/s ([a-zA-Z0-9\s]+)`, true)
+	println("tenantBlocks: ", u.JsonDump(tenantBlocks, ""))
+	tenantNamePtn := regexp.MustCompile(`(?m)[\d][\s\.]{0,1} Full name\/s (.*)`)
+
+	for _, b := range tenantBlocks {
+		var mobile, email, firstName, lastName string
+		datalines := strings.Split(b, "\n")
+		// println(u.JsonDump(datalines, ""))
+
+		if o := u.ExtractLineInLines(datalines, `Full name\/s (.*)$`, `Email ([^\@]+\@[^\@]+)`, `Emergency contact full name`); o != nil {
+			println("parsed email ", email)
+			email = o[0][1]
+		}
+		println("block content: ", u.JsonDump(b, ""))
+		parsed := tenantNamePtn.FindStringSubmatch(b)
+		if parsed != nil {
+			firstName, lastName = parseNames(parsed[1])
+		}
+		if o := u.ExtractLineInLines(datalines, `Full name\/s (.*)$`, `^([\d\s]+)$`, `Emergency contact full name`); o != nil {
+			// println(mobile)
+			mobile = o[0][1]
+		}
+		if email != "" && firstName != "" && lastName != "" {
+			tn := model.GetTenantByCompositeKeyOrNew(map[string]any{"email": email})
+			u.CheckErr(tn.Update(map[string]any{"contact_number": mobile, "first_name": firstName, "last_name": lastName}), "Update Tenant")
+			tenants = append(tenants, *tn)
+		} else {
+			if len(tenants) > 0 {
+				u.CheckErr(tenants[0].Update(map[string]any{"note": u.Ternary(tenants[0].Note != "", tenants[0].Note+"\n", "") + fmt.Sprintf("%s\n%s %s %s", tenants[0].Note, firstName, lastName, mobile)}), "Update Tenant Note")
 			}
 		}
 	}
