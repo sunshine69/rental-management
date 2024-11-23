@@ -131,7 +131,7 @@ func (o *Invoice) Update(data map[string]interface{}) error {
 	return nil
 }
 
-// Save existing object which is saved it into db
+// Save existing object which is saved it into db. Note that this will update all fields. If you only update some fields then better use the Update func above
 func (o *Invoice) Save() error {
 	if res, err := DB.NamedExec(`INSERT INTO invoice(date,description,amount,number,issuer,payer,property,due_date) VALUES(:date,:description,:amount,:number,:issuer,:payer,:property,:due_date) ON CONFLICT( number,issuer) DO UPDATE SET date=excluded.date,description=excluded.description,amount=excluded.amount,number=excluded.number,issuer=excluded.issuer,payer=excluded.payer,property=excluded.property,due_date=excluded.due_date`, o); err != nil {
 		return err

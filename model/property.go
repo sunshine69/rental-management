@@ -117,7 +117,7 @@ func (o *Property) Update(data map[string]interface{}) error {
 	return nil
 }
 
-// Save existing object which is saved it into db
+// Save existing object which is saved it into db. Note that this will update all fields. If you only update some fields then better use the Update func above
 func (o *Property) Save() error {
 	if res, err := DB.NamedExec(`INSERT INTO property(code,address,note) VALUES(:code,:address,:note) ON CONFLICT( code) DO UPDATE SET code=excluded.code,address=excluded.address,note=excluded.note`, o); err != nil {
 		return err

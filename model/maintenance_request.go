@@ -126,7 +126,7 @@ func (o *Maintenance_request) Update(data map[string]interface{}) error {
 	return nil
 }
 
-// Save existing object which is saved it into db
+// Save existing object which is saved it into db. Note that this will update all fields. If you only update some fields then better use the Update func above
 func (o *Maintenance_request) Save() error {
 	if res, err := DB.NamedExec(`INSERT INTO maintenance_request(request_date,type,status,cost,invoice_id,contract_id) VALUES(:request_date,:type,:status,:cost,:invoice_id,:contract_id) ON CONFLICT( contract_id,request_date) DO UPDATE SET request_date=excluded.request_date,type=excluded.type,status=excluded.status,cost=excluded.cost,invoice_id=excluded.invoice_id,contract_id=excluded.contract_id`, o); err != nil {
 		return err

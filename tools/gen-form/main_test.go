@@ -35,4 +35,5 @@ func TestAppHanderGen(t *testing.T) {
 
 	code := u.GoTemplateString(string(appGoB), data)
 	u.BlockInFile("web/app/app.go", []string{}, []string{`// End app-handler.go.tmpl`}, []string{`// Auto generate using app-handler.go.tmpl template`}, code, true, true)
+	u.RunSystemCommandV2("go fmt web/app/app.go", false)
 }

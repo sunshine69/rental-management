@@ -19,7 +19,7 @@ import (
 
 type {{ .typename | title }} struct {
 	{{- range $f := .fieldsList }}
-	 {{ $f | title }} {{ index $.fields $f }} `db:"{{$f}}{{if index $.uniqueFieldsMap $f}},unique{{end}}"{{if eq $f "note"}} form:"Note,ele=textarea"{{end}}`
+	{{ $f | title }} {{ index $.fields $f }} `db:"{{$f}}{{if index $.uniqueFieldsMap $f}},unique{{end}}"{{if eq $f "note"}} form:"Note,ele=textarea"{{end}}`
 	{{- end }}
 	Where string `form:"-"`
 }

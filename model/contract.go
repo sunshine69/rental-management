@@ -142,7 +142,7 @@ func (o *Contract) Update(data map[string]interface{}) error {
 	return nil
 }
 
-// Save existing object which is saved it into db
+// Save existing object which is saved it into db. Note that this will update all fields. If you only update some fields then better use the Update func above
 func (o *Contract) Save() error {
 	if res, err := DB.NamedExec(`INSERT INTO contract(property,property_manager,tenant_main,tenants,start_date,end_date,signed_date,term,rent,rent_period,rent_paid_on,water_charged,document_file_path,url,note) VALUES(:property,:property_manager,:tenant_main,:tenants,:start_date,:end_date,:signed_date,:term,:rent,:rent_period,:rent_paid_on,:water_charged,:document_file_path,:url,:note) ON CONFLICT( property,start_date,tenant_main) DO UPDATE SET property=excluded.property,property_manager=excluded.property_manager,tenant_main=excluded.tenant_main,tenants=excluded.tenants,start_date=excluded.start_date,end_date=excluded.end_date,signed_date=excluded.signed_date,term=excluded.term,rent=excluded.rent,rent_period=excluded.rent_period,rent_paid_on=excluded.rent_paid_on,water_charged=excluded.water_charged,document_file_path=excluded.document_file_path,url=excluded.url,note=excluded.note`, o); err != nil {
 		return err

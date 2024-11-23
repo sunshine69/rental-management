@@ -75,6 +75,8 @@ github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcU
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/sunshine69/golang-tools/utils v0.0.0-20241115101122-6d936a160b5c h1:X8uEs2oi2oockLz1JQQjgOYqeEOJfJbvJVtWZgakzoM=
 github.com/sunshine69/golang-tools/utils v0.0.0-20241115101122-6d936a160b5c/go.mod h1:0pr3NNl1V98RwLlmcTZXewZT7qqjChN5HQSYTdWw/UY=
+github.com/sunshine69/golang-tools/utils v0.0.0-20241123021205-cd97dc709185 h1:K22ZsHQORfPLV3j1+8+QPPwGwTpC8o7ldCJUTjPaB/k=
+github.com/sunshine69/golang-tools/utils v0.0.0-20241123021205-cd97dc709185/go.mod h1:eAo1v9VyXiQE0o05ZZv19recmYfmueSbvDkcy4YO2qE=
 github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyCJ6HpOuEn7z0Csc=
 github.com/valyala/fasttemplate v1.0.1/go.mod h1:UQGH1tvbgY+Nz5t2n7tXsz52dQxojPUpymEIMZ47gx8=
 golang.org/x/crypto v0.29.0 h1:L5SG1JTTXupVV3n6sUqMTeWbjAyfPwoda2DLX8J8FrQ=

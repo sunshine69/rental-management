@@ -126,7 +126,7 @@ func (o *Tenant) Update(data map[string]interface{}) error {
 	return nil
 }
 
-// Save existing object which is saved it into db.
+// Save existing object which is saved it into db. Note that this will update all fields. If you only update some fields then better use the Update func above
 func (o *Tenant) Save() error {
 	if res, err := DB.NamedExec(`INSERT INTO tenant(first_name,last_name,address,contact_number,email,join_date,note) VALUES(:first_name,:last_name,:address,:contact_number,:email,:join_date,:note) ON CONFLICT( email) DO UPDATE SET first_name=excluded.first_name,last_name=excluded.last_name,address=excluded.address,contact_number=excluded.contact_number,email=excluded.email,join_date=excluded.join_date,note=excluded.note`, o); err != nil {
 		return err
