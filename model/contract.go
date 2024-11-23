@@ -2,86 +2,128 @@
 package model
 
 import (
-	"database/sql"
-	"errors"
-	"fmt"
-	"os"
+	"context"
 	"strings"
 	"time"
 
 	u "github.com/sunshine69/golang-tools/utils"
-	_ "modernc.org/sqlite"
+	"zombiezen.com/go/sqlite"
+	"zombiezen.com/go/sqlite/sqlitex"
 )
 
 type Contract struct {
-	Id                 int64  `db:"id"`
-	Property           string `db:"property,unique"`
-	Property_manager   string `db:"property_manager"`
-	Tenant_main        string `db:"tenant_main,unique"`
-	Tenants            string `db:"tenants"`
-	Start_date         string `db:"start_date,unique"`
-	End_date           string `db:"end_date"`
-	Signed_date        string `db:"signed_date"`
-	Term               string `db:"term"`
-	Rent               int64  `db:"rent"`
-	Rent_period        string `db:"rent_period"`
-	Rent_paid_on       string `db:"rent_paid_on"`
-	Water_charged      int64  `db:"water_charged"`
-	Document_file_path string `db:"document_file_path"`
-	Url                string `db:"url"`
-	Note               string `db:"note" form:"Note,ele=textarea"`
-	Where              string `form:"-"`
+	Id                 int64          `db:"id"`
+	Property           string         `db:"property,unique"`
+	Property_manager   string         `db:"property_manager"`
+	Tenant_main        string         `db:"tenant_main,unique"`
+	Tenants            string         `db:"tenants"`
+	Start_date         string         `db:"start_date,unique"`
+	End_date           string         `db:"end_date"`
+	Signed_date        string         `db:"signed_date"`
+	Term               string         `db:"term"`
+	Rent               int64          `db:"rent"`
+	Rent_period        string         `db:"rent_period"`
+	Rent_paid_on       string         `db:"rent_paid_on"`
+	Water_charged      int64          `db:"water_charged"`
+	Document_file_path string         `db:"document_file_path"`
+	Url                string         `db:"url"`
+	Note               string         `db:"note" form:"Note,ele=textarea"`
+	Where              string         `form:"-"`
+	WhereNamedArg      map[string]any `form:"-"`
+}
+
+func ParseContractFromStmt(stmt *sqlite.Stmt) (o Contract) {
+	for idx := 0; idx < stmt.ColumnCount(); idx++ {
+		col_name, col_val, _ := GetSqliteCol(stmt, idx)
+		switch col_name {
+		case "id":
+			o.Id = col_val.(int64)
+		case "property":
+			o.Property = col_val.(string)
+		case "property_manager":
+			o.Property_manager = col_val.(string)
+		case "tenant_main":
+			o.Tenant_main = col_val.(string)
+		case "tenants":
+			o.Tenants = col_val.(string)
+		case "start_date":
+			o.Start_date = col_val.(string)
+			if o.Start_date == "" {
+				o.Start_date = time.Now().Format(u.TimeISO8601LayOut)
+			}
+		case "end_date":
+			o.End_date = col_val.(string)
+			if o.End_date == "" {
+				o.End_date = time.Now().Format(u.TimeISO8601LayOut)
+			}
+		case "signed_date":
+			o.Signed_date = col_val.(string)
+			if o.Signed_date == "" {
+				o.Signed_date = time.Now().Format(u.TimeISO8601LayOut)
+			}
+		case "term":
+			o.Term = col_val.(string)
+		case "rent":
+			o.Rent = col_val.(int64)
+		case "rent_period":
+			o.Rent_period = col_val.(string)
+		case "rent_paid_on":
+			o.Rent_paid_on = col_val.(string)
+		case "water_charged":
+			o.Water_charged = col_val.(int64)
+		case "document_file_path":
+			o.Document_file_path = col_val.(string)
+		case "url":
+			o.Url = col_val.(string)
+		case "note":
+			o.Note = col_val.(string)
+		}
+	}
+	return
 }
 
 func NewContract(property string, start_date string, tenant_main string) Contract {
-
-	o := Contract{}
-	if err := DB.Get(&o, "SELECT * FROM contract WHERE  property = ? AND  start_date = ? AND  tenant_main = ?", property, start_date, tenant_main); errors.Is(err, sql.ErrNoRows) {
+	o := Contract{Where: ` property = :property AND  start_date = :start_date AND  tenant_main = :tenant_main`, WhereNamedArg: map[string]any{":property": property, ":start_date": start_date, ":tenant_main": tenant_main}}
+	output := o.Search()
+	if len(output) == 0 {
 		o.Property = property
 		o.Start_date = start_date
 		o.Tenant_main = tenant_main
-		if o.Start_date == "" {
-			o.Start_date = time.Now().Format(u.TimeISO8601LayOut)
-		}
-		if o.End_date == "" {
-			o.End_date = time.Now().Format(u.TimeISO8601LayOut)
-		}
-		if o.Signed_date == "" {
-			o.Signed_date = time.Now().Format(u.TimeISO8601LayOut)
-		}
 		o.Save()
+	} else {
+		o = output[0]
 	}
-	// get one and test if exists return as it is
 	return o
 }
 
 func GetContractByCompositeKeyOrNew(data map[string]interface{}) *Contract {
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	t := Contract{}
 	data = ParseDatetimeFieldOfMapData(data)
-	if rows, err := DB.NamedQuery(`SELECT * FROM contract WHERE property=:property  AND start_date=:start_date  AND tenant_main=:tenant_main `, data); err == nil {
-		defer rows.Close()
-		for rows.Next() {
-			tn := Contract{}
-			if err = rows.StructScan(&tn); err == nil {
-				return &tn
-			} else {
-				fmt.Fprintf(os.Stderr, "[ERROR] GetContractByCompositeKey %s\n", err.Error())
-				return nil
-			}
-		}
+	err := sqlitex.Execute(DB, `SELECT * FROM contract WHERE  property = :property AND  start_date = :start_date AND  tenant_main = :tenant_main`, &sqlitex.ExecOptions{
+		Named: map[string]any{":property": data["property"], ":start_date": data["start_date"], ":tenant_main": data["tenant_main"]},
+		ResultFunc: func(stmt *sqlite.Stmt) error {
+			t = ParseContractFromStmt(stmt)
+			return nil
+		},
+	})
+	if err == nil && t.Id != 0 {
+		return &t
+	} else {
 		// create new one
 		tn := NewContract(data["property"].(string), data["start_date"].(string), data["tenant_main"].(string))
 		tn.Update(data)
 		return &tn
-	} else {
-		fmt.Fprintf(os.Stderr, "[ERROR] GetContractByCompositeKey %s\n", err.Error())
 	}
-	return nil
 }
 
 func GetContract(property string, start_date string, tenant_main string) *Contract {
 	o := Contract{
 		Property: property, Start_date: start_date, Tenant_main: tenant_main,
-		Where: "property=:property , start_date=:start_date , tenant_main=:tenant_main "}
+		Where:         " property = :property AND  start_date = :start_date AND  tenant_main = :tenant_main",
+		WhereNamedArg: map[string]any{":property": property, ":start_date": start_date, ":tenant_main": tenant_main},
+	}
 	if r := o.Search(); len(r) > 0 {
 		return &r[0]
 	} else {
@@ -91,8 +133,10 @@ func GetContract(property string, start_date string, tenant_main string) *Contra
 
 func GetContractByID(id int64) *Contract {
 	o := Contract{
-		Id:    id,
-		Where: "id=:id"}
+		Id:            id,
+		Where:         "id=:id",
+		WhereNamedArg: map[string]any{":id": id},
+	}
 	if r := o.Search(); len(r) > 0 {
 		return &r[0]
 	} else {
@@ -104,22 +148,23 @@ func GetContractByID(id int64) *Contract {
 func (o *Contract) Search() []Contract {
 	output := []Contract{}
 	if o.Where == "" {
-		o.Where = "property LIKE '%" + o.Property + "%' AND start_date LIKE '%" + o.Start_date + "%' AND tenant_main LIKE '%" + o.Tenant_main + "%'"
-	}
-	fmt.Println(o.Where)
-	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM contract WHERE %s`, o.Where), o); err == nil {
-		defer rows.Close()
-		for rows.Next() {
-			_t := Contract{}
-			if er := rows.StructScan(&_t); er == nil {
-				output = append(output, _t)
-			} else {
-				fmt.Printf("[ERROR] Scan %s\n", er.Error())
-				continue
-			}
+		o.Where = "true"
+		if len(o.WhereNamedArg) == 0 {
+			o.WhereNamedArg = map[string]any{}
 		}
-	} else {
-		fmt.Printf("[ERROR] NamedQuery %s\n", err.Error())
+	}
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	err := sqlitex.Execute(DB, "SELECT * FROM tenant WHERE "+o.Where, &sqlitex.ExecOptions{
+		Named: o.WhereNamedArg,
+		ResultFunc: func(stmt *sqlite.Stmt) error {
+			t := ParseContractFromStmt(stmt)
+			output = append(output, t)
+			return nil
+		},
+	})
+	if err != nil {
+		println("[ERROR] ", err.Error())
 	}
 	return output
 }
@@ -133,54 +178,55 @@ func (o *Contract) Update(data map[string]interface{}) error {
 		}
 		return nil
 	})
-	updateFields := u.SliceMap(fieldsWithoutKey, func(s string) *string { s = s + " = :" + s; return &s })
+	namedArgs := map[string]any{}
+	updateFields := u.SliceMap(fieldsWithoutKey, func(s string) *string {
+		s = s + " = :" + s
+		namedArgs[":"+s] = data[s]
+		return &s
+	})
 	updateFieldsStr := strings.Join(updateFields, ",")
 
-	if _, err := DB.NamedExec(`UPDATE contract SET `+updateFieldsStr, data); err != nil {
-		return err
-	}
-	return nil
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	return sqlitex.Execute(DB, `UPDATE contract SET `+updateFieldsStr, &sqlitex.ExecOptions{
+		Named: namedArgs,
+	})
 }
 
-// Save existing object which is saved it into db
+// Save existing object which is saved it into db. Note that this will update all fields. If you only update some fields then better use the Update func above
 func (o *Contract) Save() error {
-	if res, err := DB.NamedExec(`INSERT INTO contract(property,property_manager,tenant_main,tenants,start_date,end_date,signed_date,term,rent,rent_period,rent_paid_on,water_charged,document_file_path,url,note) VALUES(:property,:property_manager,:tenant_main,:tenants,:start_date,:end_date,:signed_date,:term,:rent,:rent_period,:rent_paid_on,:water_charged,:document_file_path,:url,:note) ON CONFLICT( property,start_date,tenant_main) DO UPDATE SET property=excluded.property,property_manager=excluded.property_manager,tenant_main=excluded.tenant_main,tenants=excluded.tenants,start_date=excluded.start_date,end_date=excluded.end_date,signed_date=excluded.signed_date,term=excluded.term,rent=excluded.rent,rent_period=excluded.rent_period,rent_paid_on=excluded.rent_paid_on,water_charged=excluded.water_charged,document_file_path=excluded.document_file_path,url=excluded.url,note=excluded.note`, o); err != nil {
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	sqlstr := `INSERT INTO contract(property,property_manager,tenant_main,tenants,start_date,end_date,signed_date,term,rent,rent_period,rent_paid_on,water_charged,document_file_path,url,note) VALUES(:property,:property_manager,:tenant_main,:tenants,:start_date,:end_date,:signed_date,:term,:rent,:rent_period,:rent_paid_on,:water_charged,:document_file_path,:url,:note) ON CONFLICT( property,start_date,tenant_main) DO UPDATE SET property=excluded.property,property_manager=excluded.property_manager,tenant_main=excluded.tenant_main,tenants=excluded.tenants,start_date=excluded.start_date,end_date=excluded.end_date,signed_date=excluded.signed_date,term=excluded.term,rent=excluded.rent,rent_period=excluded.rent_period,rent_paid_on=excluded.rent_paid_on,water_charged=excluded.water_charged,document_file_path=excluded.document_file_path,url=excluded.url,note=excluded.note`
+	err := sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
+		Named: map[string]any{":id": o.Id, ":property": o.Property, ":property_manager": o.Property_manager, ":tenant_main": o.Tenant_main, ":tenants": o.Tenants, ":start_date": o.Start_date, ":end_date": o.End_date, ":signed_date": o.Signed_date, ":term": o.Term, ":rent": o.Rent, ":rent_period": o.Rent_period, ":rent_paid_on": o.Rent_paid_on, ":water_charged": o.Water_charged, ":document_file_path": o.Document_file_path, ":url": o.Url, ":note": o.Note},
+	})
+	if err != nil {
 		return err
-	} else {
-		o.Id, _ = res.LastInsertId()
+	}
+	if DB.Changes() > 0 {
+		o.Id = DB.LastInsertRowID()
 	}
 	return nil
 }
 
 // Delete one object
 func (o *Contract) Delete() error {
-	if res, err := DB.NamedExec(`DELETE FROM contract WHERE property=:property , start_date=:start_date , tenant_main=:tenant_main `, o); err != nil {
-		return err
-	} else {
-		r, err := res.RowsAffected()
-		if err != nil {
-			return err
-		}
-		if r == 0 {
-			return fmt.Errorf("ERROR contract not found")
-		}
-	}
-	return nil
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	sqlstr := `DELETE FROM contract WHERE  property = :property AND  start_date = :start_date AND  tenant_main = :tenant_main`
+	return sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
+		Named: map[string]any{":property": o.Property, ":start_date": o.Start_date, ":tenant_main": o.Tenant_main},
+	})
 }
 
 func DeleteContractByID(id int64) error {
-	// sqlx bug? If directly use Exec and sql is a pure string it never delete it but still return ok
-	// looks like we always need to bind the named query with sqlx - can not parse pure string in
-	if res, err := DB.NamedExec(`DELETE FROM contract WHERE id = :id`, map[string]interface{}{"id": id}); err != nil {
-		return err
-	} else {
-		r, err := res.RowsAffected()
-		if err != nil {
-			return err
-		}
-		if r == 0 {
-			return fmt.Errorf("ERROR contract not found")
-		}
-	}
-	return nil
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	sqlstr := `DELETE FROM contract WHERE id = :id`
+	return sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
+		Named: map[string]any{
+			":id": id,
+		},
+	})
 }

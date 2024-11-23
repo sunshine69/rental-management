@@ -2,62 +2,82 @@
 package model
 
 import (
-	"database/sql"
-	"errors"
-	"fmt"
+	"context"
 	u "github.com/sunshine69/golang-tools/utils"
-	_ "modernc.org/sqlite"
-	"os"
 	"strings"
+	"zombiezen.com/go/sqlite"
+	"zombiezen.com/go/sqlite/sqlitex"
 )
 
 type Account struct {
-	Id          int64  `db:"id"`
-	Balance     int64  `db:"balance"`
-	Contract_id int64  `db:"contract_id,unique"`
-	Tenant_main string `db:"tenant_main"`
-	Note        string `db:"note" form:"Note,ele=textarea"`
-	Where       string `form:"-"`
+	Id            int64          `db:"id"`
+	Balance       int64          `db:"balance"`
+	Contract_id   int64          `db:"contract_id,unique"`
+	Tenant_main   string         `db:"tenant_main"`
+	Note          string         `db:"note" form:"Note,ele=textarea"`
+	Where         string         `form:"-"`
+	WhereNamedArg map[string]any `form:"-"`
+}
+
+func ParseAccountFromStmt(stmt *sqlite.Stmt) (o Account) {
+	for idx := 0; idx < stmt.ColumnCount(); idx++ {
+		col_name, col_val, _ := GetSqliteCol(stmt, idx)
+		switch col_name {
+		case "id":
+			o.Id = col_val.(int64)
+		case "balance":
+			o.Balance = col_val.(int64)
+		case "contract_id":
+			o.Contract_id = col_val.(int64)
+		case "tenant_main":
+			o.Tenant_main = col_val.(string)
+		case "note":
+			o.Note = col_val.(string)
+		}
+	}
+	return
 }
 
 func NewAccount(contract_id int64) Account {
-
-	o := Account{}
-	if err := DB.Get(&o, "SELECT * FROM account WHERE  contract_id = ?", contract_id); errors.Is(err, sql.ErrNoRows) {
+	o := Account{Where: ` contract_id = :contract_id`, WhereNamedArg: map[string]any{":contract_id": contract_id}}
+	output := o.Search()
+	if len(output) == 0 {
 		o.Contract_id = contract_id
 		o.Save()
+	} else {
+		o = output[0]
 	}
-	// get one and test if exists return as it is
 	return o
 }
 
 func GetAccountByCompositeKeyOrNew(data map[string]interface{}) *Account {
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	t := Account{}
 	data = ParseDatetimeFieldOfMapData(data)
-	if rows, err := DB.NamedQuery(`SELECT * FROM account WHERE contract_id=:contract_id `, data); err == nil {
-		defer rows.Close()
-		for rows.Next() {
-			tn := Account{}
-			if err = rows.StructScan(&tn); err == nil {
-				return &tn
-			} else {
-				fmt.Fprintf(os.Stderr, "[ERROR] GetAccountByCompositeKey %s\n", err.Error())
-				return nil
-			}
-		}
+	err := sqlitex.Execute(DB, `SELECT * FROM account WHERE  contract_id = :contract_id`, &sqlitex.ExecOptions{
+		Named: map[string]any{":contract_id": data["contract_id"]},
+		ResultFunc: func(stmt *sqlite.Stmt) error {
+			t = ParseAccountFromStmt(stmt)
+			return nil
+		},
+	})
+	if err == nil && t.Id != 0 {
+		return &t
+	} else {
 		// create new one
 		tn := NewAccount(data["contract_id"].(int64))
 		tn.Update(data)
 		return &tn
-	} else {
-		fmt.Fprintf(os.Stderr, "[ERROR] GetAccountByCompositeKey %s\n", err.Error())
 	}
-	return nil
 }
 
 func GetAccount(contract_id int64) *Account {
 	o := Account{
-		Contract_id: contract_id,
-		Where:       "contract_id=:contract_id "}
+		Contract_id:   contract_id,
+		Where:         " contract_id = :contract_id",
+		WhereNamedArg: map[string]any{":contract_id": contract_id},
+	}
 	if r := o.Search(); len(r) > 0 {
 		return &r[0]
 	} else {
@@ -67,8 +87,10 @@ func GetAccount(contract_id int64) *Account {
 
 func GetAccountByID(id int64) *Account {
 	o := Account{
-		Id:    id,
-		Where: "id=:id"}
+		Id:            id,
+		Where:         "id=:id",
+		WhereNamedArg: map[string]any{":id": id},
+	}
 	if r := o.Search(); len(r) > 0 {
 		return &r[0]
 	} else {
@@ -80,22 +102,23 @@ func GetAccountByID(id int64) *Account {
 func (o *Account) Search() []Account {
 	output := []Account{}
 	if o.Where == "" {
-		o.Where = ""
-	}
-	fmt.Println(o.Where)
-	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM account WHERE %s`, o.Where), o); err == nil {
-		defer rows.Close()
-		for rows.Next() {
-			_t := Account{}
-			if er := rows.StructScan(&_t); er == nil {
-				output = append(output, _t)
-			} else {
-				fmt.Printf("[ERROR] Scan %s\n", er.Error())
-				continue
-			}
+		o.Where = "true"
+		if len(o.WhereNamedArg) == 0 {
+			o.WhereNamedArg = map[string]any{}
 		}
-	} else {
-		fmt.Printf("[ERROR] NamedQuery %s\n", err.Error())
+	}
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	err := sqlitex.Execute(DB, "SELECT * FROM tenant WHERE "+o.Where, &sqlitex.ExecOptions{
+		Named: o.WhereNamedArg,
+		ResultFunc: func(stmt *sqlite.Stmt) error {
+			t := ParseAccountFromStmt(stmt)
+			output = append(output, t)
+			return nil
+		},
+	})
+	if err != nil {
+		println("[ERROR] ", err.Error())
 	}
 	return output
 }
@@ -109,54 +132,55 @@ func (o *Account) Update(data map[string]interface{}) error {
 		}
 		return nil
 	})
-	updateFields := u.SliceMap(fieldsWithoutKey, func(s string) *string { s = s + " = :" + s; return &s })
+	namedArgs := map[string]any{}
+	updateFields := u.SliceMap(fieldsWithoutKey, func(s string) *string {
+		s = s + " = :" + s
+		namedArgs[":"+s] = data[s]
+		return &s
+	})
 	updateFieldsStr := strings.Join(updateFields, ",")
 
-	if _, err := DB.NamedExec(`UPDATE account SET `+updateFieldsStr, data); err != nil {
-		return err
-	}
-	return nil
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	return sqlitex.Execute(DB, `UPDATE account SET `+updateFieldsStr, &sqlitex.ExecOptions{
+		Named: namedArgs,
+	})
 }
 
-// Save existing object which is saved it into db
+// Save existing object which is saved it into db. Note that this will update all fields. If you only update some fields then better use the Update func above
 func (o *Account) Save() error {
-	if res, err := DB.NamedExec(`INSERT INTO account(balance,contract_id,tenant_main,note) VALUES(:balance,:contract_id,:tenant_main,:note) ON CONFLICT( contract_id) DO UPDATE SET balance=excluded.balance,contract_id=excluded.contract_id,tenant_main=excluded.tenant_main,note=excluded.note`, o); err != nil {
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	sqlstr := `INSERT INTO account(balance,contract_id,tenant_main,note) VALUES(:balance,:contract_id,:tenant_main,:note) ON CONFLICT( contract_id) DO UPDATE SET balance=excluded.balance,contract_id=excluded.contract_id,tenant_main=excluded.tenant_main,note=excluded.note`
+	err := sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
+		Named: map[string]any{":id": o.Id, ":balance": o.Balance, ":contract_id": o.Contract_id, ":tenant_main": o.Tenant_main, ":note": o.Note},
+	})
+	if err != nil {
 		return err
-	} else {
-		o.Id, _ = res.LastInsertId()
+	}
+	if DB.Changes() > 0 {
+		o.Id = DB.LastInsertRowID()
 	}
 	return nil
 }
 
 // Delete one object
 func (o *Account) Delete() error {
-	if res, err := DB.NamedExec(`DELETE FROM account WHERE contract_id=:contract_id `, o); err != nil {
-		return err
-	} else {
-		r, err := res.RowsAffected()
-		if err != nil {
-			return err
-		}
-		if r == 0 {
-			return fmt.Errorf("ERROR account not found")
-		}
-	}
-	return nil
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	sqlstr := `DELETE FROM account WHERE  contract_id = :contract_id`
+	return sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
+		Named: map[string]any{":contract_id": o.Contract_id},
+	})
 }
 
 func DeleteAccountByID(id int64) error {
-	// sqlx bug? If directly use Exec and sql is a pure string it never delete it but still return ok
-	// looks like we always need to bind the named query with sqlx - can not parse pure string in
-	if res, err := DB.NamedExec(`DELETE FROM account WHERE id = :id`, map[string]interface{}{"id": id}); err != nil {
-		return err
-	} else {
-		r, err := res.RowsAffected()
-		if err != nil {
-			return err
-		}
-		if r == 0 {
-			return fmt.Errorf("ERROR account not found")
-		}
-	}
-	return nil
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	sqlstr := `DELETE FROM account WHERE id = :id`
+	return sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
+		Named: map[string]any{
+			":id": id,
+		},
+	})
 }

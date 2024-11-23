@@ -1,21 +1,24 @@
 package model
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/jmoiron/sqlx"
 	u "github.com/sunshine69/golang-tools/utils"
-	_ "modernc.org/sqlite"
+	"zombiezen.com/go/sqlite"
+	"zombiezen.com/go/sqlite/sqlitex"
 )
 
-// DbConn - Global DB connection
-var DB *sqlx.DB
+var DbPool *sqlitex.Pool
 
 func init() {
-	DB = sqlx.MustConnect("sqlite", u.Getenv("DB_PATH", "test.sqlite3"))
+	DbPath := u.Getenv("DB_PATH", "test.sqlite3")
+	DbPool = u.Must(sqlitex.NewPool("file:"+DbPath, sqlitex.PoolOptions{
+		PoolSize: 10,
+	}))
 }
 
 // Take a map scan if the key contains the string `date` then detect if the value is a string but parsable into a datetime unix int value
@@ -55,10 +58,30 @@ var AllModelObjects []any = []any{Tenant{}, Property_manager{}, Property{}, Cont
 // End generate AllModelObjects
 
 func SetupDBSchema(schemafile string) {
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
 	fmt.Println("Setup db")
 	sqlb, err := os.ReadFile(schemafile)
 	u.CheckErr(err, "Read sql file")
-	res, err := DB.Exec(string(sqlb))
-	u.CheckErr(err, "Exec")
-	println(u.JsonDump(res, ""))
+	u.CheckErr(sqlitex.ExecuteScript(DB, string(sqlb), nil), "SetUpDB")
+}
+
+func GetSqliteCol(stmt *sqlite.Stmt, col_index int) (col_name string, col_val any, go_type string) {
+	col_name = stmt.ColumnName(col_index)
+	col_type_s := stmt.ColumnType(col_index)
+	switch col_type_s {
+	case sqlite.TypeInteger:
+		col_val = stmt.ColumnInt64(col_index)
+		go_type = "int64"
+	case sqlite.TypeText:
+		col_val = stmt.ColumnText(col_index)
+		go_type = "string"
+	case sqlite.TypeFloat:
+		col_val = stmt.ColumnFloat(col_index)
+		go_type = "float64"
+	// BLOB and NUL not supported yet
+	default:
+		println("[WARN] GetSqliteCol un-supported type " + col_type_s.String())
+	}
+	return
 }

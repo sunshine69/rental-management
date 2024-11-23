@@ -2,70 +2,94 @@
 package model
 
 import (
-	"database/sql"
-	"errors"
-	"fmt"
-	"os"
+	"context"
 	"strings"
 	"time"
 
 	u "github.com/sunshine69/golang-tools/utils"
-	_ "modernc.org/sqlite"
+	"zombiezen.com/go/sqlite"
+	"zombiezen.com/go/sqlite/sqlitex"
 )
 
 type Maintenance_request struct {
-	Id           int64  `db:"id"`
-	Request_date string `db:"request_date,unique"`
-	Type         string `db:"type"`
-	Status       string `db:"status"`
-	Cost         int64  `db:"cost"`
-	Invoice_id   int64  `db:"invoice_id"`
-	Contract_id  int64  `db:"contract_id,unique"`
-	Where        string `form:"-"`
+	Id            int64          `db:"id"`
+	Request_date  string         `db:"request_date,unique"`
+	Type          string         `db:"type"`
+	Status        string         `db:"status"`
+	Cost          int64          `db:"cost"`
+	Invoice_id    int64          `db:"invoice_id"`
+	Contract_id   int64          `db:"contract_id,unique"`
+	Where         string         `form:"-"`
+	WhereNamedArg map[string]any `form:"-"`
+}
+
+func ParseMaintenance_requestFromStmt(stmt *sqlite.Stmt) (o Maintenance_request) {
+	for idx := 0; idx < stmt.ColumnCount(); idx++ {
+		col_name, col_val, _ := GetSqliteCol(stmt, idx)
+		switch col_name {
+		case "id":
+			o.Id = col_val.(int64)
+		case "request_date":
+			o.Request_date = col_val.(string)
+			if o.Request_date == "" {
+				o.Request_date = time.Now().Format(u.TimeISO8601LayOut)
+			}
+		case "type":
+			o.Type = col_val.(string)
+		case "status":
+			o.Status = col_val.(string)
+		case "cost":
+			o.Cost = col_val.(int64)
+		case "invoice_id":
+			o.Invoice_id = col_val.(int64)
+		case "contract_id":
+			o.Contract_id = col_val.(int64)
+		}
+	}
+	return
 }
 
 func NewMaintenance_request(contract_id int64, request_date string) Maintenance_request {
-
-	o := Maintenance_request{}
-	if err := DB.Get(&o, "SELECT * FROM maintenance_request WHERE  contract_id = ? AND  request_date = ?", contract_id, request_date); errors.Is(err, sql.ErrNoRows) {
+	o := Maintenance_request{Where: ` contract_id = :contract_id AND  request_date = :request_date`, WhereNamedArg: map[string]any{":contract_id": contract_id, ":request_date": request_date}}
+	output := o.Search()
+	if len(output) == 0 {
 		o.Contract_id = contract_id
 		o.Request_date = request_date
-		if o.Request_date == "" {
-			o.Request_date = time.Now().Format(u.TimeISO8601LayOut)
-		}
 		o.Save()
+	} else {
+		o = output[0]
 	}
-	// get one and test if exists return as it is
 	return o
 }
 
 func GetMaintenance_requestByCompositeKeyOrNew(data map[string]interface{}) *Maintenance_request {
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	t := Maintenance_request{}
 	data = ParseDatetimeFieldOfMapData(data)
-	if rows, err := DB.NamedQuery(`SELECT * FROM maintenance_request WHERE contract_id=:contract_id  AND request_date=:request_date `, data); err == nil {
-		defer rows.Close()
-		for rows.Next() {
-			tn := Maintenance_request{}
-			if err = rows.StructScan(&tn); err == nil {
-				return &tn
-			} else {
-				fmt.Fprintf(os.Stderr, "[ERROR] GetMaintenance_requestByCompositeKey %s\n", err.Error())
-				return nil
-			}
-		}
+	err := sqlitex.Execute(DB, `SELECT * FROM maintenance_request WHERE  contract_id = :contract_id AND  request_date = :request_date`, &sqlitex.ExecOptions{
+		Named: map[string]any{":contract_id": data["contract_id"], ":request_date": data["request_date"]},
+		ResultFunc: func(stmt *sqlite.Stmt) error {
+			t = ParseMaintenance_requestFromStmt(stmt)
+			return nil
+		},
+	})
+	if err == nil && t.Id != 0 {
+		return &t
+	} else {
 		// create new one
 		tn := NewMaintenance_request(data["contract_id"].(int64), data["request_date"].(string))
 		tn.Update(data)
 		return &tn
-	} else {
-		fmt.Fprintf(os.Stderr, "[ERROR] GetMaintenance_requestByCompositeKey %s\n", err.Error())
 	}
-	return nil
 }
 
 func GetMaintenance_request(contract_id int64, request_date string) *Maintenance_request {
 	o := Maintenance_request{
 		Contract_id: contract_id, Request_date: request_date,
-		Where: "contract_id=:contract_id , request_date=:request_date "}
+		Where:         " contract_id = :contract_id AND  request_date = :request_date",
+		WhereNamedArg: map[string]any{":contract_id": contract_id, ":request_date": request_date},
+	}
 	if r := o.Search(); len(r) > 0 {
 		return &r[0]
 	} else {
@@ -75,8 +99,10 @@ func GetMaintenance_request(contract_id int64, request_date string) *Maintenance
 
 func GetMaintenance_requestByID(id int64) *Maintenance_request {
 	o := Maintenance_request{
-		Id:    id,
-		Where: "id=:id"}
+		Id:            id,
+		Where:         "id=:id",
+		WhereNamedArg: map[string]any{":id": id},
+	}
 	if r := o.Search(); len(r) > 0 {
 		return &r[0]
 	} else {
@@ -88,22 +114,23 @@ func GetMaintenance_requestByID(id int64) *Maintenance_request {
 func (o *Maintenance_request) Search() []Maintenance_request {
 	output := []Maintenance_request{}
 	if o.Where == "" {
-		o.Where = "request_date LIKE '%" + o.Request_date + "%'"
-	}
-	fmt.Println(o.Where)
-	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM maintenance_request WHERE %s`, o.Where), o); err == nil {
-		defer rows.Close()
-		for rows.Next() {
-			_t := Maintenance_request{}
-			if er := rows.StructScan(&_t); er == nil {
-				output = append(output, _t)
-			} else {
-				fmt.Printf("[ERROR] Scan %s\n", er.Error())
-				continue
-			}
+		o.Where = "true"
+		if len(o.WhereNamedArg) == 0 {
+			o.WhereNamedArg = map[string]any{}
 		}
-	} else {
-		fmt.Printf("[ERROR] NamedQuery %s\n", err.Error())
+	}
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	err := sqlitex.Execute(DB, "SELECT * FROM tenant WHERE "+o.Where, &sqlitex.ExecOptions{
+		Named: o.WhereNamedArg,
+		ResultFunc: func(stmt *sqlite.Stmt) error {
+			t := ParseMaintenance_requestFromStmt(stmt)
+			output = append(output, t)
+			return nil
+		},
+	})
+	if err != nil {
+		println("[ERROR] ", err.Error())
 	}
 	return output
 }
@@ -117,54 +144,55 @@ func (o *Maintenance_request) Update(data map[string]interface{}) error {
 		}
 		return nil
 	})
-	updateFields := u.SliceMap(fieldsWithoutKey, func(s string) *string { s = s + " = :" + s; return &s })
+	namedArgs := map[string]any{}
+	updateFields := u.SliceMap(fieldsWithoutKey, func(s string) *string {
+		s = s + " = :" + s
+		namedArgs[":"+s] = data[s]
+		return &s
+	})
 	updateFieldsStr := strings.Join(updateFields, ",")
 
-	if _, err := DB.NamedExec(`UPDATE maintenance_request SET `+updateFieldsStr, data); err != nil {
-		return err
-	}
-	return nil
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	return sqlitex.Execute(DB, `UPDATE maintenance_request SET `+updateFieldsStr, &sqlitex.ExecOptions{
+		Named: namedArgs,
+	})
 }
 
-// Save existing object which is saved it into db
+// Save existing object which is saved it into db. Note that this will update all fields. If you only update some fields then better use the Update func above
 func (o *Maintenance_request) Save() error {
-	if res, err := DB.NamedExec(`INSERT INTO maintenance_request(request_date,type,status,cost,invoice_id,contract_id) VALUES(:request_date,:type,:status,:cost,:invoice_id,:contract_id) ON CONFLICT( contract_id,request_date) DO UPDATE SET request_date=excluded.request_date,type=excluded.type,status=excluded.status,cost=excluded.cost,invoice_id=excluded.invoice_id,contract_id=excluded.contract_id`, o); err != nil {
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	sqlstr := `INSERT INTO maintenance_request(request_date,type,status,cost,invoice_id,contract_id) VALUES(:request_date,:type,:status,:cost,:invoice_id,:contract_id) ON CONFLICT( contract_id,request_date) DO UPDATE SET request_date=excluded.request_date,type=excluded.type,status=excluded.status,cost=excluded.cost,invoice_id=excluded.invoice_id,contract_id=excluded.contract_id`
+	err := sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
+		Named: map[string]any{":id": o.Id, ":request_date": o.Request_date, ":type": o.Type, ":status": o.Status, ":cost": o.Cost, ":invoice_id": o.Invoice_id, ":contract_id": o.Contract_id},
+	})
+	if err != nil {
 		return err
-	} else {
-		o.Id, _ = res.LastInsertId()
+	}
+	if DB.Changes() > 0 {
+		o.Id = DB.LastInsertRowID()
 	}
 	return nil
 }
 
 // Delete one object
 func (o *Maintenance_request) Delete() error {
-	if res, err := DB.NamedExec(`DELETE FROM maintenance_request WHERE contract_id=:contract_id , request_date=:request_date `, o); err != nil {
-		return err
-	} else {
-		r, err := res.RowsAffected()
-		if err != nil {
-			return err
-		}
-		if r == 0 {
-			return fmt.Errorf("ERROR maintenance_request not found")
-		}
-	}
-	return nil
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	sqlstr := `DELETE FROM maintenance_request WHERE  contract_id = :contract_id AND  request_date = :request_date`
+	return sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
+		Named: map[string]any{":contract_id": o.Contract_id, ":request_date": o.Request_date},
+	})
 }
 
 func DeleteMaintenance_requestByID(id int64) error {
-	// sqlx bug? If directly use Exec and sql is a pure string it never delete it but still return ok
-	// looks like we always need to bind the named query with sqlx - can not parse pure string in
-	if res, err := DB.NamedExec(`DELETE FROM maintenance_request WHERE id = :id`, map[string]interface{}{"id": id}); err != nil {
-		return err
-	} else {
-		r, err := res.RowsAffected()
-		if err != nil {
-			return err
-		}
-		if r == 0 {
-			return fmt.Errorf("ERROR maintenance_request not found")
-		}
-	}
-	return nil
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	sqlstr := `DELETE FROM maintenance_request WHERE id = :id`
+	return sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
+		Named: map[string]any{
+			":id": id,
+		},
+	})
 }

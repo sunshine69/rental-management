@@ -7,10 +7,10 @@ require (
 	github.com/R167/go-sets v0.2.0
 	github.com/go-playground/form/v4 v4.2.1
 	github.com/go-playground/validator/v10 v10.22.1
-	github.com/jmoiron/sqlx v1.4.0
 	github.com/joho/godotenv v1.5.1
-	github.com/sunshine69/golang-tools/utils v0.0.0-20241115101122-6d936a160b5c
+	github.com/sunshine69/golang-tools/utils v0.0.0-20241123021205-cd97dc709185
 	modernc.org/sqlite v1.34.0
+	zombiezen.com/go/sqlite v1.4.0
 )
 
 require (

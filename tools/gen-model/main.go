@@ -76,9 +76,9 @@ func GenerateClass(sqltext, classTemplateFile string) {
 			return nil
 		}
 	})
-	query_new := "SELECT * FROM " + typeName + " WHERE "
+	query_new := ""
 	for idx, _f := range uniqueFields {
-		query_new = query_new + " " + _f + " = ?"
+		query_new = fmt.Sprintf("%s %s = :%s", query_new, _f, _f)
 		if idx < len(uniqueFields)-1 {
 			query_new = query_new + " AND "
 		}

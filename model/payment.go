@@ -2,69 +2,91 @@
 package model
 
 import (
-	"database/sql"
-	"errors"
-	"fmt"
-	"os"
+	"context"
 	"strings"
 	"time"
 
 	u "github.com/sunshine69/golang-tools/utils"
-	_ "modernc.org/sqlite"
+	"zombiezen.com/go/sqlite"
+	"zombiezen.com/go/sqlite/sqlitex"
 )
 
 type Payment struct {
-	Id         int64  `db:"id"`
-	Account_id int64  `db:"account_id,unique"`
-	Tenant     string `db:"tenant"`
-	Amount     int64  `db:"amount"`
-	Pay_date   string `db:"pay_date,unique"`
-	Reference  string `db:"reference"`
-	Where      string `form:"-"`
+	Id            int64          `db:"id"`
+	Account_id    int64          `db:"account_id,unique"`
+	Tenant        string         `db:"tenant"`
+	Amount        int64          `db:"amount"`
+	Pay_date      string         `db:"pay_date,unique"`
+	Reference     string         `db:"reference"`
+	Where         string         `form:"-"`
+	WhereNamedArg map[string]any `form:"-"`
+}
+
+func ParsePaymentFromStmt(stmt *sqlite.Stmt) (o Payment) {
+	for idx := 0; idx < stmt.ColumnCount(); idx++ {
+		col_name, col_val, _ := GetSqliteCol(stmt, idx)
+		switch col_name {
+		case "id":
+			o.Id = col_val.(int64)
+		case "account_id":
+			o.Account_id = col_val.(int64)
+		case "tenant":
+			o.Tenant = col_val.(string)
+		case "amount":
+			o.Amount = col_val.(int64)
+		case "pay_date":
+			o.Pay_date = col_val.(string)
+			if o.Pay_date == "" {
+				o.Pay_date = time.Now().Format(u.TimeISO8601LayOut)
+			}
+		case "reference":
+			o.Reference = col_val.(string)
+		}
+	}
+	return
 }
 
 func NewPayment(account_id int64, pay_date string) Payment {
-
-	o := Payment{}
-	if err := DB.Get(&o, "SELECT * FROM payment WHERE  account_id = ? AND  pay_date = ?", account_id, pay_date); errors.Is(err, sql.ErrNoRows) {
+	o := Payment{Where: ` account_id = :account_id AND  pay_date = :pay_date`, WhereNamedArg: map[string]any{":account_id": account_id, ":pay_date": pay_date}}
+	output := o.Search()
+	if len(output) == 0 {
 		o.Account_id = account_id
 		o.Pay_date = pay_date
-		if o.Pay_date == "" {
-			o.Pay_date = time.Now().Format(u.TimeISO8601LayOut)
-		}
 		o.Save()
+	} else {
+		o = output[0]
 	}
-	// get one and test if exists return as it is
 	return o
 }
 
 func GetPaymentByCompositeKeyOrNew(data map[string]interface{}) *Payment {
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	t := Payment{}
 	data = ParseDatetimeFieldOfMapData(data)
-	if rows, err := DB.NamedQuery(`SELECT * FROM payment WHERE account_id=:account_id  AND pay_date=:pay_date `, data); err == nil {
-		defer rows.Close()
-		for rows.Next() {
-			tn := Payment{}
-			if err = rows.StructScan(&tn); err == nil {
-				return &tn
-			} else {
-				fmt.Fprintf(os.Stderr, "[ERROR] GetPaymentByCompositeKey %s\n", err.Error())
-				return nil
-			}
-		}
+	err := sqlitex.Execute(DB, `SELECT * FROM payment WHERE  account_id = :account_id AND  pay_date = :pay_date`, &sqlitex.ExecOptions{
+		Named: map[string]any{":account_id": data["account_id"], ":pay_date": data["pay_date"]},
+		ResultFunc: func(stmt *sqlite.Stmt) error {
+			t = ParsePaymentFromStmt(stmt)
+			return nil
+		},
+	})
+	if err == nil && t.Id != 0 {
+		return &t
+	} else {
 		// create new one
 		tn := NewPayment(data["account_id"].(int64), data["pay_date"].(string))
 		tn.Update(data)
 		return &tn
-	} else {
-		fmt.Fprintf(os.Stderr, "[ERROR] GetPaymentByCompositeKey %s\n", err.Error())
 	}
-	return nil
 }
 
 func GetPayment(account_id int64, pay_date string) *Payment {
 	o := Payment{
 		Account_id: account_id, Pay_date: pay_date,
-		Where: "account_id=:account_id , pay_date=:pay_date "}
+		Where:         " account_id = :account_id AND  pay_date = :pay_date",
+		WhereNamedArg: map[string]any{":account_id": account_id, ":pay_date": pay_date},
+	}
 	if r := o.Search(); len(r) > 0 {
 		return &r[0]
 	} else {
@@ -74,8 +96,10 @@ func GetPayment(account_id int64, pay_date string) *Payment {
 
 func GetPaymentByID(id int64) *Payment {
 	o := Payment{
-		Id:    id,
-		Where: "id=:id"}
+		Id:            id,
+		Where:         "id=:id",
+		WhereNamedArg: map[string]any{":id": id},
+	}
 	if r := o.Search(); len(r) > 0 {
 		return &r[0]
 	} else {
@@ -87,22 +111,23 @@ func GetPaymentByID(id int64) *Payment {
 func (o *Payment) Search() []Payment {
 	output := []Payment{}
 	if o.Where == "" {
-		o.Where = "pay_date LIKE '%" + o.Pay_date + "%'"
-	}
-	fmt.Println(o.Where)
-	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM payment WHERE %s`, o.Where), o); err == nil {
-		defer rows.Close()
-		for rows.Next() {
-			_t := Payment{}
-			if er := rows.StructScan(&_t); er == nil {
-				output = append(output, _t)
-			} else {
-				fmt.Printf("[ERROR] Scan %s\n", er.Error())
-				continue
-			}
+		o.Where = "true"
+		if len(o.WhereNamedArg) == 0 {
+			o.WhereNamedArg = map[string]any{}
 		}
-	} else {
-		fmt.Printf("[ERROR] NamedQuery %s\n", err.Error())
+	}
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	err := sqlitex.Execute(DB, "SELECT * FROM tenant WHERE "+o.Where, &sqlitex.ExecOptions{
+		Named: o.WhereNamedArg,
+		ResultFunc: func(stmt *sqlite.Stmt) error {
+			t := ParsePaymentFromStmt(stmt)
+			output = append(output, t)
+			return nil
+		},
+	})
+	if err != nil {
+		println("[ERROR] ", err.Error())
 	}
 	return output
 }
@@ -116,54 +141,55 @@ func (o *Payment) Update(data map[string]interface{}) error {
 		}
 		return nil
 	})
-	updateFields := u.SliceMap(fieldsWithoutKey, func(s string) *string { s = s + " = :" + s; return &s })
+	namedArgs := map[string]any{}
+	updateFields := u.SliceMap(fieldsWithoutKey, func(s string) *string {
+		s = s + " = :" + s
+		namedArgs[":"+s] = data[s]
+		return &s
+	})
 	updateFieldsStr := strings.Join(updateFields, ",")
 
-	if _, err := DB.NamedExec(`UPDATE payment SET `+updateFieldsStr, data); err != nil {
-		return err
-	}
-	return nil
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	return sqlitex.Execute(DB, `UPDATE payment SET `+updateFieldsStr, &sqlitex.ExecOptions{
+		Named: namedArgs,
+	})
 }
 
-// Save existing object which is saved it into db
+// Save existing object which is saved it into db. Note that this will update all fields. If you only update some fields then better use the Update func above
 func (o *Payment) Save() error {
-	if res, err := DB.NamedExec(`INSERT INTO payment(account_id,tenant,amount,pay_date,reference) VALUES(:account_id,:tenant,:amount,:pay_date,:reference) ON CONFLICT( account_id,pay_date) DO UPDATE SET account_id=excluded.account_id,tenant=excluded.tenant,amount=excluded.amount,pay_date=excluded.pay_date,reference=excluded.reference`, o); err != nil {
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	sqlstr := `INSERT INTO payment(account_id,tenant,amount,pay_date,reference) VALUES(:account_id,:tenant,:amount,:pay_date,:reference) ON CONFLICT( account_id,pay_date) DO UPDATE SET account_id=excluded.account_id,tenant=excluded.tenant,amount=excluded.amount,pay_date=excluded.pay_date,reference=excluded.reference`
+	err := sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
+		Named: map[string]any{":id": o.Id, ":account_id": o.Account_id, ":tenant": o.Tenant, ":amount": o.Amount, ":pay_date": o.Pay_date, ":reference": o.Reference},
+	})
+	if err != nil {
 		return err
-	} else {
-		o.Id, _ = res.LastInsertId()
+	}
+	if DB.Changes() > 0 {
+		o.Id = DB.LastInsertRowID()
 	}
 	return nil
 }
 
 // Delete one object
 func (o *Payment) Delete() error {
-	if res, err := DB.NamedExec(`DELETE FROM payment WHERE account_id=:account_id , pay_date=:pay_date `, o); err != nil {
-		return err
-	} else {
-		r, err := res.RowsAffected()
-		if err != nil {
-			return err
-		}
-		if r == 0 {
-			return fmt.Errorf("ERROR payment not found")
-		}
-	}
-	return nil
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	sqlstr := `DELETE FROM payment WHERE  account_id = :account_id AND  pay_date = :pay_date`
+	return sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
+		Named: map[string]any{":account_id": o.Account_id, ":pay_date": o.Pay_date},
+	})
 }
 
 func DeletePaymentByID(id int64) error {
-	// sqlx bug? If directly use Exec and sql is a pure string it never delete it but still return ok
-	// looks like we always need to bind the named query with sqlx - can not parse pure string in
-	if res, err := DB.NamedExec(`DELETE FROM payment WHERE id = :id`, map[string]interface{}{"id": id}); err != nil {
-		return err
-	} else {
-		r, err := res.RowsAffected()
-		if err != nil {
-			return err
-		}
-		if r == 0 {
-			return fmt.Errorf("ERROR payment not found")
-		}
-	}
-	return nil
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	sqlstr := `DELETE FROM payment WHERE id = :id`
+	return sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
+		Named: map[string]any{
+			":id": id,
+		},
+	})
 }

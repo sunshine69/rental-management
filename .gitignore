@@ -23,7 +23,7 @@ go.work.sum
 
 # env file
 .env
-*.sqlite3
+*.sqlite3*
 *.db 
 *.bak
 *.backup

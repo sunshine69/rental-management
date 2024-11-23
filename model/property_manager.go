@@ -2,70 +2,96 @@
 package model
 
 import (
-	"database/sql"
-	"errors"
-	"fmt"
-	"os"
+	"context"
 	"strings"
 	"time"
 
 	u "github.com/sunshine69/golang-tools/utils"
-	_ "modernc.org/sqlite"
+	"zombiezen.com/go/sqlite"
+	"zombiezen.com/go/sqlite/sqlitex"
 )
 
 type Property_manager struct {
-	Id             int64  `db:"id"`
-	First_name     string `db:"first_name"`
-	Last_name      string `db:"last_name"`
-	Address        string `db:"address"`
-	Contact_number string `db:"contact_number"`
-	Email          string `db:"email,unique"`
-	Join_date      string `db:"join_date"`
-	Note           string `db:"note" form:"Note,ele=textarea"`
-	Where          string `form:"-"`
+	Id             int64          `db:"id"`
+	First_name     string         `db:"first_name"`
+	Last_name      string         `db:"last_name"`
+	Address        string         `db:"address"`
+	Contact_number string         `db:"contact_number"`
+	Email          string         `db:"email,unique"`
+	Join_date      string         `db:"join_date"`
+	Note           string         `db:"note" form:"Note,ele=textarea"`
+	Where          string         `form:"-"`
+	WhereNamedArg  map[string]any `form:"-"`
+}
+
+func ParseProperty_managerFromStmt(stmt *sqlite.Stmt) (o Property_manager) {
+	for idx := 0; idx < stmt.ColumnCount(); idx++ {
+		col_name, col_val, _ := GetSqliteCol(stmt, idx)
+		switch col_name {
+		case "id":
+			o.Id = col_val.(int64)
+		case "first_name":
+			o.First_name = col_val.(string)
+		case "last_name":
+			o.Last_name = col_val.(string)
+		case "address":
+			o.Address = col_val.(string)
+		case "contact_number":
+			o.Contact_number = col_val.(string)
+		case "email":
+			o.Email = col_val.(string)
+		case "join_date":
+			o.Join_date = col_val.(string)
+			if o.Join_date == "" {
+				o.Join_date = time.Now().Format(u.TimeISO8601LayOut)
+			}
+		case "note":
+			o.Note = col_val.(string)
+		}
+	}
+	return
 }
 
 func NewProperty_manager(email string) Property_manager {
-
-	o := Property_manager{}
-	if err := DB.Get(&o, "SELECT * FROM property_manager WHERE  email = ?", email); errors.Is(err, sql.ErrNoRows) {
+	o := Property_manager{Where: ` email = :email`, WhereNamedArg: map[string]any{":email": email}}
+	output := o.Search()
+	if len(output) == 0 {
 		o.Email = email
-		if o.Join_date == "" {
-			o.Join_date = time.Now().Format(u.TimeISO8601LayOut)
-		}
 		o.Save()
+	} else {
+		o = output[0]
 	}
-	// get one and test if exists return as it is
 	return o
 }
 
 func GetProperty_managerByCompositeKeyOrNew(data map[string]interface{}) *Property_manager {
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	t := Property_manager{}
 	data = ParseDatetimeFieldOfMapData(data)
-	if rows, err := DB.NamedQuery(`SELECT * FROM property_manager WHERE email=:email `, data); err == nil {
-		defer rows.Close()
-		for rows.Next() {
-			tn := Property_manager{}
-			if err = rows.StructScan(&tn); err == nil {
-				return &tn
-			} else {
-				fmt.Fprintf(os.Stderr, "[ERROR] GetProperty_managerByCompositeKey %s\n", err.Error())
-				return nil
-			}
-		}
+	err := sqlitex.Execute(DB, `SELECT * FROM property_manager WHERE  email = :email`, &sqlitex.ExecOptions{
+		Named: map[string]any{":email": data["email"]},
+		ResultFunc: func(stmt *sqlite.Stmt) error {
+			t = ParseProperty_managerFromStmt(stmt)
+			return nil
+		},
+	})
+	if err == nil && t.Id != 0 {
+		return &t
+	} else {
 		// create new one
 		tn := NewProperty_manager(data["email"].(string))
 		tn.Update(data)
 		return &tn
-	} else {
-		fmt.Fprintf(os.Stderr, "[ERROR] GetProperty_managerByCompositeKey %s\n", err.Error())
 	}
-	return nil
 }
 
 func GetProperty_manager(email string) *Property_manager {
 	o := Property_manager{
-		Email: email,
-		Where: "email=:email "}
+		Email:         email,
+		Where:         " email = :email",
+		WhereNamedArg: map[string]any{":email": email},
+	}
 	if r := o.Search(); len(r) > 0 {
 		return &r[0]
 	} else {
@@ -75,8 +101,10 @@ func GetProperty_manager(email string) *Property_manager {
 
 func GetProperty_managerByID(id int64) *Property_manager {
 	o := Property_manager{
-		Id:    id,
-		Where: "id=:id"}
+		Id:            id,
+		Where:         "id=:id",
+		WhereNamedArg: map[string]any{":id": id},
+	}
 	if r := o.Search(); len(r) > 0 {
 		return &r[0]
 	} else {
@@ -88,22 +116,23 @@ func GetProperty_managerByID(id int64) *Property_manager {
 func (o *Property_manager) Search() []Property_manager {
 	output := []Property_manager{}
 	if o.Where == "" {
-		o.Where = "email LIKE '%" + o.Email + "%'"
-	}
-	fmt.Println(o.Where)
-	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM property_manager WHERE %s`, o.Where), o); err == nil {
-		defer rows.Close()
-		for rows.Next() {
-			_t := Property_manager{}
-			if er := rows.StructScan(&_t); er == nil {
-				output = append(output, _t)
-			} else {
-				fmt.Printf("[ERROR] Scan %s\n", er.Error())
-				continue
-			}
+		o.Where = "true"
+		if len(o.WhereNamedArg) == 0 {
+			o.WhereNamedArg = map[string]any{}
 		}
-	} else {
-		fmt.Printf("[ERROR] NamedQuery %s\n", err.Error())
+	}
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	err := sqlitex.Execute(DB, "SELECT * FROM tenant WHERE "+o.Where, &sqlitex.ExecOptions{
+		Named: o.WhereNamedArg,
+		ResultFunc: func(stmt *sqlite.Stmt) error {
+			t := ParseProperty_managerFromStmt(stmt)
+			output = append(output, t)
+			return nil
+		},
+	})
+	if err != nil {
+		println("[ERROR] ", err.Error())
 	}
 	return output
 }
@@ -117,54 +146,55 @@ func (o *Property_manager) Update(data map[string]interface{}) error {
 		}
 		return nil
 	})
-	updateFields := u.SliceMap(fieldsWithoutKey, func(s string) *string { s = s + " = :" + s; return &s })
+	namedArgs := map[string]any{}
+	updateFields := u.SliceMap(fieldsWithoutKey, func(s string) *string {
+		s = s + " = :" + s
+		namedArgs[":"+s] = data[s]
+		return &s
+	})
 	updateFieldsStr := strings.Join(updateFields, ",")
 
-	if _, err := DB.NamedExec(`UPDATE property_manager SET `+updateFieldsStr, data); err != nil {
-		return err
-	}
-	return nil
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	return sqlitex.Execute(DB, `UPDATE property_manager SET `+updateFieldsStr, &sqlitex.ExecOptions{
+		Named: namedArgs,
+	})
 }
 
-// Save existing object which is saved it into db
+// Save existing object which is saved it into db. Note that this will update all fields. If you only update some fields then better use the Update func above
 func (o *Property_manager) Save() error {
-	if res, err := DB.NamedExec(`INSERT INTO property_manager(first_name,last_name,address,contact_number,email,join_date,note) VALUES(:first_name,:last_name,:address,:contact_number,:email,:join_date,:note) ON CONFLICT( email) DO UPDATE SET first_name=excluded.first_name,last_name=excluded.last_name,address=excluded.address,contact_number=excluded.contact_number,email=excluded.email,join_date=excluded.join_date,note=excluded.note`, o); err != nil {
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	sqlstr := `INSERT INTO property_manager(first_name,last_name,address,contact_number,email,join_date,note) VALUES(:first_name,:last_name,:address,:contact_number,:email,:join_date,:note) ON CONFLICT( email) DO UPDATE SET first_name=excluded.first_name,last_name=excluded.last_name,address=excluded.address,contact_number=excluded.contact_number,email=excluded.email,join_date=excluded.join_date,note=excluded.note`
+	err := sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
+		Named: map[string]any{":id": o.Id, ":first_name": o.First_name, ":last_name": o.Last_name, ":address": o.Address, ":contact_number": o.Contact_number, ":email": o.Email, ":join_date": o.Join_date, ":note": o.Note},
+	})
+	if err != nil {
 		return err
-	} else {
-		o.Id, _ = res.LastInsertId()
+	}
+	if DB.Changes() > 0 {
+		o.Id = DB.LastInsertRowID()
 	}
 	return nil
 }
 
 // Delete one object
 func (o *Property_manager) Delete() error {
-	if res, err := DB.NamedExec(`DELETE FROM property_manager WHERE email=:email `, o); err != nil {
-		return err
-	} else {
-		r, err := res.RowsAffected()
-		if err != nil {
-			return err
-		}
-		if r == 0 {
-			return fmt.Errorf("ERROR property_manager not found")
-		}
-	}
-	return nil
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	sqlstr := `DELETE FROM property_manager WHERE  email = :email`
+	return sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
+		Named: map[string]any{":email": o.Email},
+	})
 }
 
 func DeleteProperty_managerByID(id int64) error {
-	// sqlx bug? If directly use Exec and sql is a pure string it never delete it but still return ok
-	// looks like we always need to bind the named query with sqlx - can not parse pure string in
-	if res, err := DB.NamedExec(`DELETE FROM property_manager WHERE id = :id`, map[string]interface{}{"id": id}); err != nil {
-		return err
-	} else {
-		r, err := res.RowsAffected()
-		if err != nil {
-			return err
-		}
-		if r == 0 {
-			return fmt.Errorf("ERROR property_manager not found")
-		}
-	}
-	return nil
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	sqlstr := `DELETE FROM property_manager WHERE id = :id`
+	return sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
+		Named: map[string]any{
+			":id": id,
+		},
+	})
 }

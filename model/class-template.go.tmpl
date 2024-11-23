@@ -2,75 +2,88 @@
 package model
 
 import (
-	"database/sql"
-	"errors"
-	"fmt"
-	"os"
 	"strings"
+	"context"
 	{{- range $idx, $f := .fieldsList }}
 	{{- if contains $f "date" }}
 	"time"
 	{{break}}
 	{{- end }}
 	{{- end }}
-	_ "modernc.org/sqlite"
+	"zombiezen.com/go/sqlite"
+	"zombiezen.com/go/sqlite/sqlitex"
 	u "github.com/sunshine69/golang-tools/utils"
 )
 
 type {{ .typename | title }} struct {
 	{{- range $f := .fieldsList }}
-	 {{ $f | title }} {{ index $.fields $f }} `db:"{{$f}}{{if index $.uniqueFieldsMap $f}},unique{{end}}"{{if eq $f "note"}} form:"Note,ele=textarea"{{end}}`
+	{{ $f | title }} {{ index $.fields $f }} `db:"{{$f}}{{if index $.uniqueFieldsMap $f}},unique{{end}}"{{if eq $f "note"}} form:"Note,ele=textarea"{{end}}`
 	{{- end }}
-	Where string `form:"-"`
+	Where          string          `form:"-"`
+	WhereNamedArg  map[string]any  `form:"-"`
 }
 
-func New{{ .typename | title }}( {{- range $idx, $f := .uniqueFields -}}{{- $f }} {{ index $.uniqueFieldsMap $f }} {{ if ne $idx (add ($.uniqueFields|len) -1) }},{{ end }} {{- end -}} ) {{ .typename | title }} {
-
-	o := {{ .typename | title }}{}
-	if err := DB.Get(&o, "{{ .query_new }}", {{- range $idx, $f := .uniqueFields -}}{{- $f }} {{ if ne $idx (add ($.uniqueFields|len) -1) }},{{ end }} {{- end -}} ); errors.Is(err, sql.ErrNoRows) {
-		{{- range $idx, $f := .uniqueFields }}
-		o.{{ $f|title }} = {{ $f }}
+func Parse{{ .typename | title }}FromStmt(stmt *sqlite.Stmt) (o {{ .typename | title }}) {
+	for idx := 0; idx < stmt.ColumnCount(); idx++ {
+		col_name, col_val, _ := GetSqliteCol(stmt, idx)
+		switch col_name {
+		{{- range $f := .fieldsList }}
+		case "{{$f}}":
+			o.{{$f|title}} = col_val.({{ index $.fields $f }})
+			{{- if contains $f "date" }}
+			if o.{{$f|title}} == "" {
+				o.{{$f|title}} = time.Now().Format(u.TimeISO8601LayOut)
+			}
+			{{- end }}
 		{{- end }}
-		{{- range $idx, $f := .fieldsList }}
-		{{- if contains $f "date" }}
-		if o.{{ $f|title }} == "" {
-			o.{{ $f|title }} = time.Now().Format(u.TimeISO8601LayOut)
 		}
-		{{- end }}
+	}
+	return
+}
+
+
+func New{{ .typename | title }}( {{- range $idx, $f := .uniqueFields -}}{{- $f }} {{ index $.uniqueFieldsMap $f }} {{ if ne $idx (add ($.uniqueFields|len) -1) }},{{ end }} {{- end -}} ) {{ .typename | title }} {
+	o := {{ .typename | title }}{ Where: `{{.query_new}}`, WhereNamedArg: map[string]any{ {{- range $idx, $f := .uniqueFields -}}":{{$f}}": {{$f}} {{ if ne $idx (add ($.uniqueFields|len) -1) }},{{ end }} {{- end -}} } }
+	output := o.Search()
+	if len(output) == 0 {
+		{{- range $idx, $f := .uniqueFields }}
+		o.{{$f|title}} = {{$f}}
 		{{- end }}
 		o.Save()
+	} else {
+		o = output[0]
 	}
-	// get one and test if exists return as it is
 	return o
 }
 
 func Get{{.typename|title}}ByCompositeKeyOrNew(data map[string]interface{}) *{{.typename|title}} {
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	t := {{ .typename | title }}{}
 	data = ParseDatetimeFieldOfMapData(data)
-	if rows, err := DB.NamedQuery(`SELECT * FROM {{.typename}} WHERE {{range $idx, $f := .uniqueFields}}{{$f}}=:{{$f}} {{if ne $idx (add ($.uniqueFields|len) -1)}} AND {{end}}{{end}}`, data); err == nil {
-		defer rows.Close()
-		for rows.Next() {
-			tn := {{.typename|title}}{}
-			if err = rows.StructScan(&tn); err == nil {
-				return &tn
-			} else {
-				fmt.Fprintf(os.Stderr, "[ERROR] Get{{.typename|title}}ByCompositeKey %s\n", err.Error())
-				return nil
-			}
-		}
+	err := sqlitex.Execute(DB, `SELECT * FROM {{ .typename }} WHERE {{.query_new}}`, &sqlitex.ExecOptions{
+		Named: map[string]any{ {{- range $idx, $f := .uniqueFields -}}":{{$f}}": data["{{$f}}"] {{ if ne $idx (add ($.uniqueFields|len) -1) }},{{ end }} {{- end -}} },
+		ResultFunc: func(stmt *sqlite.Stmt) error {
+			t = Parse{{ .typename | title }}FromStmt(stmt)
+			return nil
+		},
+	})
+	if err == nil && t.Id != 0 {
+		return &t
+	} else {
 		// create new one
-		tn := New{{.typename|title}}({{range $idx, $f := .uniqueFields}}data["{{$f}}"].({{index $.uniqueFieldsMap $f}}){{if ne $idx (add ($.uniqueFields|len) -1)}}, {{end}}{{end}})
+		tn := New{{ .typename | title }}( {{- range $idx, $f := .uniqueFields -}}data["{{$f}}"].({{index $.uniqueFieldsMap $f}}){{ if ne $idx (add ($.uniqueFields|len) -1) }},{{ end }} {{- end -}} )
 		tn.Update(data)
 		return &tn
-	} else {
-		fmt.Fprintf(os.Stderr, "[ERROR] Get{{.typename|title}}ByCompositeKey %s\n", err.Error())
 	}
-	return nil
 }
 
 func Get{{.typename|title}}({{range $idx, $f := .uniqueFields}}{{$f}} {{ index $.uniqueFieldsMap $f }}{{if ne $idx (add ($.uniqueFields|len) -1)}}, {{end}}{{end}}) *{{.typename|title}} {
-	o := {{.typename|title}}{
-		{{range $idx, $f := .uniqueFields}}{{$f|title}}: {{$f}} {{if ne $idx (add ($.uniqueFields|len) -1)}}, {{end}}{{end}},
-		Where: "{{range $idx, $f := .uniqueFields}}{{$f}}=:{{$f}} {{if ne $idx (add ($.uniqueFields|len) -1)}}, {{end}}{{end}}"}
+	o := {{ .typename|title }}{
+		{{range $idx, $f := .uniqueFields}}{{$f|title}}: {{$f}} {{if ne $idx (add ($.uniqueFields|len) -1)}},{{end}}{{end}},
+		Where: "{{.query_new}}",
+		WhereNamedArg: map[string]any{ {{- range $idx, $f := .uniqueFields -}}":{{$f}}": {{$f}} {{ if ne $idx (add ($.uniqueFields|len) -1) }},{{ end }} {{- end -}} },
+	}
 	if r := o.Search(); len(r) > 0 {
 		return &r[0]
 	} else {
@@ -79,9 +92,11 @@ func Get{{.typename|title}}({{range $idx, $f := .uniqueFields}}{{$f}} {{ index $
 }
 
 func Get{{.typename|title}}ByID(id int64) *{{.typename|title}} {
-	o := {{.typename|title}}{
-		Id: id,
-		Where: "id=:id"}
+	o := {{ .typename|title  }}{
+		Id:    id,
+		Where: "id=:id",
+		WhereNamedArg: map[string]any{":id": id},
+	}
 	if r := o.Search(); len(r) > 0 {
 		return &r[0]
 	} else {
@@ -91,24 +106,25 @@ func Get{{.typename|title}}ByID(id int64) *{{.typename|title}} {
 
 // Search func
 func (o *{{.typename|title}}) Search() []{{.typename|title}} {
-	output := []{{.typename|title}}{}
+	output := []{{ .typename|title  }}{}
 	if o.Where == "" {
-		o.Where = "{{range $idx, $f := .uniqueStringFields}}{{$f}} LIKE '%"+o.{{$f|title}}+"%'{{if ne $idx (add ($.uniqueStringFields|len) -1)}} AND {{end}}{{end}}"
-	}
-	fmt.Println(o.Where)
-	if rows, err := DB.NamedQuery(fmt.Sprintf(`SELECT * FROM {{.typename}} WHERE %s`, o.Where), o); err == nil {
-		defer rows.Close()
-		for rows.Next() {
-			_t := {{.typename|title}}{}
-			if er := rows.StructScan(&_t); er == nil {
-				output = append(output, _t)
-			} else {
-				fmt.Printf("[ERROR] Scan %s\n", er.Error())
-				continue
-			}
+		o.Where = "true"
+		if len(o.WhereNamedArg) == 0 {
+			o.WhereNamedArg = map[string]any{}
 		}
-	} else {
-		fmt.Printf("[ERROR] NamedQuery %s\n", err.Error())
+	}
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	err := sqlitex.Execute(DB, "SELECT * FROM tenant WHERE "+o.Where, &sqlitex.ExecOptions{
+		Named: o.WhereNamedArg,
+		ResultFunc: func(stmt *sqlite.Stmt) error {
+			t := Parse{{ .typename|title  }}FromStmt(stmt)
+			output = append(output, t)
+			return nil
+		},
+	})
+	if err != nil {
+		println("[ERROR] ", err.Error())
 	}
 	return output
 }
@@ -117,60 +133,61 @@ func (o *{{.typename|title}}) Search() []{{.typename|title}} {
 func (o *{{.typename|title}}) Update(data map[string]interface{}) error {
 	fields := u.MapKeysToSlice(data)
 	fieldsWithoutKey := u.SliceMap(fields, func(s string) *string {
-		if s != "id" && {{range $idx, $f := .uniqueFields}}s != "{{$f}}" {{if ne $idx (add ($.uniqueFields|len) -1)}} && {{end}}{{end}} {
+		if s != "id" && {{- range $idx, $f := .uniqueFields -}}s != "{{$f}}" {{ if ne $idx (add ($.uniqueFields|len) -1) }} && {{ end }} {{- end -}} {
 			return &s
 		}
 		return nil
 	})
-	updateFields := u.SliceMap(fieldsWithoutKey, func(s string) *string { s = s + " = :" + s; return &s })
+	namedArgs := map[string]any{}
+	updateFields := u.SliceMap(fieldsWithoutKey, func(s string) *string {
+		s = s + " = :" + s
+		namedArgs[":"+s] = data[s]
+		return &s
+	})
 	updateFieldsStr := strings.Join(updateFields, ",")
 
-	if _, err := DB.NamedExec(`UPDATE {{.typename}} SET `+updateFieldsStr, data); err != nil {
-		return err
-	}
-	return nil
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	return sqlitex.Execute(DB, `UPDATE {{.typename}} SET `+updateFieldsStr, &sqlitex.ExecOptions{
+		Named: namedArgs,
+	})
 }
 
 
 // Save existing object which is saved it into db. Note that this will update all fields. If you only update some fields then better use the Update func above
 func (o *{{.typename|title}}) Save() error {
-	if res, err := DB.NamedExec(`INSERT INTO {{.typename}}({{range $idx, $f := .fieldsList}}{{if ne $f "id"}}{{$f}}{{end}}{{if ne $f "id"}}{{if ne $idx (add ($.fieldsList|len) -1)}},{{end}}{{end}}{{end}}) VALUES({{range $idx, $f := .fieldsList}}{{if ne $f "id"}}:{{$f}}{{end}}{{if ne $f "id"}}{{if ne $idx (add ($.fieldsList|len) -1)}},{{end}}{{end}}{{end}}) ON CONFLICT( {{range $idx, $f := .uniqueFields}}{{$f}}{{if ne $idx (add ($.uniqueFields|len) -1)}},{{end}}{{end}}) DO UPDATE SET {{range $idx, $f := .fieldsList}}{{if ne $f "id"}}{{$f}}=excluded.{{$f}}{{end}}{{if ne $f "id"}}{{if ne $idx (add ($.fieldsList|len) -1)}},{{end}}{{end}}{{end}}`, o); err != nil {
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	sqlstr := `INSERT INTO {{.typename}}({{range $idx, $f := .fieldsList}}{{if ne $f "id"}}{{$f}}{{end}}{{if ne $f "id"}}{{if ne $idx (add ($.fieldsList|len) -1)}},{{end}}{{end}}{{end}}) VALUES({{range $idx, $f := .fieldsList}}{{if ne $f "id"}}:{{$f}}{{end}}{{if ne $f "id"}}{{if ne $idx (add ($.fieldsList|len) -1)}},{{end}}{{end}}{{end}}) ON CONFLICT( {{range $idx, $f := .uniqueFields}}{{$f}}{{if ne $idx (add ($.uniqueFields|len) -1)}},{{end}}{{end}}) DO UPDATE SET {{range $idx, $f := .fieldsList}}{{if ne $f "id"}}{{$f}}=excluded.{{$f}}{{end}}{{if ne $f "id"}}{{if ne $idx (add ($.fieldsList|len) -1)}},{{end}}{{end}}{{end}}`
+	err := sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
+		Named: map[string]any{ {{- range $idx, $f := .fieldsList -}}":{{$f}}": o.{{$f|title}} {{ if ne $idx (add ($.fieldsList|len) -1) }},{{ end }} {{- end -}} },
+	})
+	if err != nil {
 		return err
-	} else {
-		o.Id, _ = res.LastInsertId()
+	}
+	if DB.Changes() > 0 {
+		o.Id = DB.LastInsertRowID()
 	}
 	return nil
 }
 
 // Delete one object
 func (o *{{.typename|title}}) Delete() error {
-	if res, err := DB.NamedExec(`DELETE FROM {{.typename}} WHERE {{range $idx, $f := .uniqueFields}}{{$f}}=:{{$f}} {{if ne $idx (add ($.uniqueFields|len) -1)}}, {{end}}{{end}}`, o); err != nil {
-		return err
-	} else {
-		r, err := res.RowsAffected()
-		if err != nil {
-			return err
-		}
-		if r == 0 {
-			return fmt.Errorf("ERROR {{.typename}} not found")
-		}
-	}
-	return nil
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	sqlstr := `DELETE FROM {{.typename}} WHERE {{.query_new}}`
+	return sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
+		Named: map[string]any{ {{- range $idx, $f := .uniqueFields -}}":{{$f}}": o.{{$f|title}} {{ if ne $idx (add ($.uniqueFields|len) -1) }},{{ end }} {{- end -}} },
+	})
 }
 
 func Delete{{.typename|title}}ByID(id int64) error {
-	// sqlx bug? If directly use Exec and sql is a pure string it never delete it but still return ok
-	// looks like we always need to bind the named query with sqlx - can not parse pure string in
-	if res, err := DB.NamedExec(`DELETE FROM {{.typename}} WHERE id = :id`, map[string]interface{}{"id": id}); err != nil {
-		return err
-	} else {
-		r, err := res.RowsAffected()
-		if err != nil {
-			return err
-		}
-		if r == 0 {
-			return fmt.Errorf("ERROR {{.typename}} not found")
-		}
-	}
-	return nil
+	DB := u.Must(DbPool.Take(context.TODO()))
+	defer DbPool.Put(DB)
+	sqlstr := `DELETE FROM {{.typename}} WHERE id = :id`
+	return sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
+		Named: map[string]any{
+			":id": id,
+		},
+	})
 }
