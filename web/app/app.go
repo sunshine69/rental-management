@@ -160,6 +160,7 @@ func SearchTenant(w http.ResponseWriter, r *http.Request) {
 	out := obj.Search()
 	rows := []map[string]any{}
 	fieldList := []string{}
+	println("[DEBUG] ", u.JsonDump(out, ""))
 	for _, v := range out {
 		_fieldList, r := u.ConvertStruct2Map(v)
 		rows = append(rows, r)

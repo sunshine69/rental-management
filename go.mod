@@ -8,7 +8,7 @@ require (
 	github.com/go-playground/form/v4 v4.2.1
 	github.com/go-playground/validator/v10 v10.22.1
 	github.com/joho/godotenv v1.5.1
-	github.com/sunshine69/golang-tools/utils v0.0.0-20241123021205-cd97dc709185
+	github.com/sunshine69/golang-tools/utils v0.0.0-20241217103924-271159ccad12
 	modernc.org/sqlite v1.34.0
 	zombiezen.com/go/sqlite v1.4.0
 )
@@ -34,6 +34,7 @@ require (
 	golang.org/x/sys v0.27.0 // indirect
 	golang.org/x/text v0.20.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 	modernc.org/gc/v3 v3.0.0-20240107210532-573471604cb6 // indirect
 	modernc.org/libc v1.55.3 // indirect
 	modernc.org/mathutil v1.6.0 // indirect
