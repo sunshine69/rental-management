@@ -109,7 +109,7 @@ func (o *Account) Search() []Account {
 	}
 	DB := u.Must(DbPool.Take(context.TODO()))
 	defer DbPool.Put(DB)
-	err := sqlitex.Execute(DB, "SELECT * FROM tenant WHERE "+o.Where, &sqlitex.ExecOptions{
+	err := sqlitex.Execute(DB, "SELECT * FROM account WHERE "+o.Where, &sqlitex.ExecOptions{
 		Named: o.WhereNamedArg,
 		ResultFunc: func(stmt *sqlite.Stmt) error {
 			t := ParseAccountFromStmt(stmt)
@@ -153,7 +153,7 @@ func (o *Account) Save() error {
 	defer DbPool.Put(DB)
 	sqlstr := `INSERT INTO account(balance,contract_id,tenant_main,note) VALUES(:balance,:contract_id,:tenant_main,:note) ON CONFLICT( contract_id) DO UPDATE SET balance=excluded.balance,contract_id=excluded.contract_id,tenant_main=excluded.tenant_main,note=excluded.note`
 	err := sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
-		Named: map[string]any{":id": o.Id, ":balance": o.Balance, ":contract_id": o.Contract_id, ":tenant_main": o.Tenant_main, ":note": o.Note},
+		Named: map[string]any{":balance": o.Balance, ":contract_id": o.Contract_id, ":tenant_main": o.Tenant_main, ":note": o.Note},
 	})
 	if err != nil {
 		return err

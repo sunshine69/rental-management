@@ -3,10 +3,8 @@ package model
 
 import (
 	"context"
-	"strings"
-	"time"
-
 	u "github.com/sunshine69/golang-tools/utils"
+	"strings"
 	"zombiezen.com/go/sqlite"
 	"zombiezen.com/go/sqlite/sqlitex"
 )
@@ -36,9 +34,6 @@ func ParsePaymentFromStmt(stmt *sqlite.Stmt) (o Payment) {
 			o.Amount = col_val.(int64)
 		case "pay_date":
 			o.Pay_date = col_val.(string)
-			if o.Pay_date == "" {
-				o.Pay_date = time.Now().Format(u.TimeISO8601LayOut)
-			}
 		case "reference":
 			o.Reference = col_val.(string)
 		}
@@ -118,7 +113,7 @@ func (o *Payment) Search() []Payment {
 	}
 	DB := u.Must(DbPool.Take(context.TODO()))
 	defer DbPool.Put(DB)
-	err := sqlitex.Execute(DB, "SELECT * FROM tenant WHERE "+o.Where, &sqlitex.ExecOptions{
+	err := sqlitex.Execute(DB, "SELECT * FROM payment WHERE "+o.Where, &sqlitex.ExecOptions{
 		Named: o.WhereNamedArg,
 		ResultFunc: func(stmt *sqlite.Stmt) error {
 			t := ParsePaymentFromStmt(stmt)
@@ -162,7 +157,7 @@ func (o *Payment) Save() error {
 	defer DbPool.Put(DB)
 	sqlstr := `INSERT INTO payment(account_id,tenant,amount,pay_date,reference) VALUES(:account_id,:tenant,:amount,:pay_date,:reference) ON CONFLICT( account_id,pay_date) DO UPDATE SET account_id=excluded.account_id,tenant=excluded.tenant,amount=excluded.amount,pay_date=excluded.pay_date,reference=excluded.reference`
 	err := sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
-		Named: map[string]any{":id": o.Id, ":account_id": o.Account_id, ":tenant": o.Tenant, ":amount": o.Amount, ":pay_date": o.Pay_date, ":reference": o.Reference},
+		Named: map[string]any{":account_id": o.Account_id, ":tenant": o.Tenant, ":amount": o.Amount, ":pay_date": o.Pay_date, ":reference": o.Reference},
 	})
 	if err != nil {
 		return err

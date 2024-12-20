@@ -18,6 +18,10 @@ func Search{{$objName}}(w http.ResponseWriter, r *http.Request) {
         fmt.Fprintf(w, "%s", err.Error())
         return
     }
+    {{ $uniqKeys := index $ (print $objName "_uniqFields") -}}
+    {{ $lookupFType := (index $ $objName).FieldType -}}
+    obj.Where = "{{range $idx, $uniqueF := $uniqKeys}}{{$uniqueF}} LIKE :{{$uniqueF}}{{ if ne $idx (add ($uniqKeys|len) -1) }} AND {{end}}{{end}}"
+	obj.WhereNamedArg = map[string]any{ {{range $idx, $uniqueF := $uniqKeys}}":{{$uniqueF}}": {{$fType := index $lookupFType (title $uniqueF) }}"%" + {{if eq $fType "int64"}} strconv.FormatInt(obj.{{$uniqueF|title}}, 10){{else}} obj.{{$uniqueF|title}} {{end}} + "%"{{ if ne $idx (add ($uniqKeys|len) -1) }}, {{end}}{{end}} }
     out := obj.Search()
     rows := []map[string]any{}
 	fieldList := []string{}

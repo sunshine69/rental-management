@@ -3,10 +3,8 @@ package model
 
 import (
 	"context"
-	"strings"
-	"time"
-
 	u "github.com/sunshine69/golang-tools/utils"
+	"strings"
 	"zombiezen.com/go/sqlite"
 	"zombiezen.com/go/sqlite/sqlitex"
 )
@@ -48,19 +46,10 @@ func ParseContractFromStmt(stmt *sqlite.Stmt) (o Contract) {
 			o.Tenants = col_val.(string)
 		case "start_date":
 			o.Start_date = col_val.(string)
-			if o.Start_date == "" {
-				o.Start_date = time.Now().Format(u.TimeISO8601LayOut)
-			}
 		case "end_date":
 			o.End_date = col_val.(string)
-			if o.End_date == "" {
-				o.End_date = time.Now().Format(u.TimeISO8601LayOut)
-			}
 		case "signed_date":
 			o.Signed_date = col_val.(string)
-			if o.Signed_date == "" {
-				o.Signed_date = time.Now().Format(u.TimeISO8601LayOut)
-			}
 		case "term":
 			o.Term = col_val.(string)
 		case "rent":
@@ -155,7 +144,7 @@ func (o *Contract) Search() []Contract {
 	}
 	DB := u.Must(DbPool.Take(context.TODO()))
 	defer DbPool.Put(DB)
-	err := sqlitex.Execute(DB, "SELECT * FROM tenant WHERE "+o.Where, &sqlitex.ExecOptions{
+	err := sqlitex.Execute(DB, "SELECT * FROM contract WHERE "+o.Where, &sqlitex.ExecOptions{
 		Named: o.WhereNamedArg,
 		ResultFunc: func(stmt *sqlite.Stmt) error {
 			t := ParseContractFromStmt(stmt)
@@ -199,7 +188,7 @@ func (o *Contract) Save() error {
 	defer DbPool.Put(DB)
 	sqlstr := `INSERT INTO contract(property,property_manager,tenant_main,tenants,start_date,end_date,signed_date,term,rent,rent_period,rent_paid_on,water_charged,document_file_path,url,note) VALUES(:property,:property_manager,:tenant_main,:tenants,:start_date,:end_date,:signed_date,:term,:rent,:rent_period,:rent_paid_on,:water_charged,:document_file_path,:url,:note) ON CONFLICT( property,start_date,tenant_main) DO UPDATE SET property=excluded.property,property_manager=excluded.property_manager,tenant_main=excluded.tenant_main,tenants=excluded.tenants,start_date=excluded.start_date,end_date=excluded.end_date,signed_date=excluded.signed_date,term=excluded.term,rent=excluded.rent,rent_period=excluded.rent_period,rent_paid_on=excluded.rent_paid_on,water_charged=excluded.water_charged,document_file_path=excluded.document_file_path,url=excluded.url,note=excluded.note`
 	err := sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
-		Named: map[string]any{":id": o.Id, ":property": o.Property, ":property_manager": o.Property_manager, ":tenant_main": o.Tenant_main, ":tenants": o.Tenants, ":start_date": o.Start_date, ":end_date": o.End_date, ":signed_date": o.Signed_date, ":term": o.Term, ":rent": o.Rent, ":rent_period": o.Rent_period, ":rent_paid_on": o.Rent_paid_on, ":water_charged": o.Water_charged, ":document_file_path": o.Document_file_path, ":url": o.Url, ":note": o.Note},
+		Named: map[string]any{":property": o.Property, ":property_manager": o.Property_manager, ":tenant_main": o.Tenant_main, ":tenants": o.Tenants, ":start_date": o.Start_date, ":end_date": o.End_date, ":signed_date": o.Signed_date, ":term": o.Term, ":rent": o.Rent, ":rent_period": o.Rent_period, ":rent_paid_on": o.Rent_paid_on, ":water_charged": o.Water_charged, ":document_file_path": o.Document_file_path, ":url": o.Url, ":note": o.Note},
 	})
 	if err != nil {
 		return err

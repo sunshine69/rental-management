@@ -8,12 +8,12 @@ import (
 	"github.com/sunshine69/rental-management/model"
 )
 
-func GetTemplateData() (data map[string]any) {
+func GetTemplateData(structTagPtn string) (data map[string]any) {
 	data = map[string]any{}
 	objs := []string{}
 
 	for _, it := range model.AllModelObjects {
-		sInfo := u.ReflectStruct(it, `form:"([^"]+)"`)
+		sInfo := u.ReflectStruct(it, structTagPtn)
 		objs = append(objs, sInfo.Name)
 		data[sInfo.Name] = sInfo
 	}

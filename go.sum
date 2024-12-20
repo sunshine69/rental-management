@@ -69,6 +69,8 @@ github.com/sunshine69/golang-tools/utils v0.0.0-20241123021205-cd97dc709185 h1:K
 github.com/sunshine69/golang-tools/utils v0.0.0-20241123021205-cd97dc709185/go.mod h1:eAo1v9VyXiQE0o05ZZv19recmYfmueSbvDkcy4YO2qE=
 github.com/sunshine69/golang-tools/utils v0.0.0-20241217103924-271159ccad12 h1:JKykWdM/lgPugFokjtr0U0X4VZpmZ404PJGKSh11/Tc=
 github.com/sunshine69/golang-tools/utils v0.0.0-20241217103924-271159ccad12/go.mod h1:YzjwsPyXeFPUq22EkTjAE8DokVlwMoL009ZoGhk4TRU=
+github.com/sunshine69/golang-tools/utils v0.0.0-20241217114920-cd10ec608666 h1:hfHi/0D08T+J9V60clKnRbA+f0eR7BmgdrKAEWce1Bo=
+github.com/sunshine69/golang-tools/utils v0.0.0-20241217114920-cd10ec608666/go.mod h1:YzjwsPyXeFPUq22EkTjAE8DokVlwMoL009ZoGhk4TRU=
 github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyCJ6HpOuEn7z0Csc=
 github.com/valyala/fasttemplate v1.0.1/go.mod h1:UQGH1tvbgY+Nz5t2n7tXsz52dQxojPUpymEIMZ47gx8=
 golang.org/x/crypto v0.29.0 h1:L5SG1JTTXupVV3n6sUqMTeWbjAyfPwoda2DLX8J8FrQ=

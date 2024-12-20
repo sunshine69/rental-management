@@ -115,7 +115,7 @@ func (o *{{.typename|title}}) Search() []{{.typename|title}} {
 	}
 	DB := u.Must(DbPool.Take(context.TODO()))
 	defer DbPool.Put(DB)
-	err := sqlitex.Execute(DB, "SELECT * FROM tenant WHERE "+o.Where, &sqlitex.ExecOptions{
+	err := sqlitex.Execute(DB, "SELECT * FROM {{.typename}} WHERE "+o.Where, &sqlitex.ExecOptions{
 		Named: o.WhereNamedArg,
 		ResultFunc: func(stmt *sqlite.Stmt) error {
 			t := Parse{{ .typename|title  }}FromStmt(stmt)
@@ -160,7 +160,7 @@ func (o *{{.typename|title}}) Save() error {
 	defer DbPool.Put(DB)
 	sqlstr := `INSERT INTO {{.typename}}({{range $idx, $f := .fieldsList}}{{if ne $f "id"}}{{$f}}{{end}}{{if ne $f "id"}}{{if ne $idx (add ($.fieldsList|len) -1)}},{{end}}{{end}}{{end}}) VALUES({{range $idx, $f := .fieldsList}}{{if ne $f "id"}}:{{$f}}{{end}}{{if ne $f "id"}}{{if ne $idx (add ($.fieldsList|len) -1)}},{{end}}{{end}}{{end}}) ON CONFLICT( {{range $idx, $f := .uniqueFields}}{{$f}}{{if ne $idx (add ($.uniqueFields|len) -1)}},{{end}}{{end}}) DO UPDATE SET {{range $idx, $f := .fieldsList}}{{if ne $f "id"}}{{$f}}=excluded.{{$f}}{{end}}{{if ne $f "id"}}{{if ne $idx (add ($.fieldsList|len) -1)}},{{end}}{{end}}{{end}}`
 	err := sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
-		Named: map[string]any{ {{- range $idx, $f := .fieldsList -}}":{{$f}}": o.{{$f|title}} {{ if ne $idx (add ($.fieldsList|len) -1) }},{{ end }} {{- end -}} },
+		Named: map[string]any{ {{- range $idx, $f := .fieldsList -}}{{if ne $f "id"}}":{{$f}}": o.{{$f|title}} {{ if ne $idx (add ($.fieldsList|len) -1) }},{{end}}{{end}}{{end}} },
 	})
 	if err != nil {
 		return err

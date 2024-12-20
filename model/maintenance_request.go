@@ -3,10 +3,8 @@ package model
 
 import (
 	"context"
-	"strings"
-	"time"
-
 	u "github.com/sunshine69/golang-tools/utils"
+	"strings"
 	"zombiezen.com/go/sqlite"
 	"zombiezen.com/go/sqlite/sqlitex"
 )
@@ -31,9 +29,6 @@ func ParseMaintenance_requestFromStmt(stmt *sqlite.Stmt) (o Maintenance_request)
 			o.Id = col_val.(int64)
 		case "request_date":
 			o.Request_date = col_val.(string)
-			if o.Request_date == "" {
-				o.Request_date = time.Now().Format(u.TimeISO8601LayOut)
-			}
 		case "type":
 			o.Type = col_val.(string)
 		case "status":
@@ -121,7 +116,7 @@ func (o *Maintenance_request) Search() []Maintenance_request {
 	}
 	DB := u.Must(DbPool.Take(context.TODO()))
 	defer DbPool.Put(DB)
-	err := sqlitex.Execute(DB, "SELECT * FROM tenant WHERE "+o.Where, &sqlitex.ExecOptions{
+	err := sqlitex.Execute(DB, "SELECT * FROM maintenance_request WHERE "+o.Where, &sqlitex.ExecOptions{
 		Named: o.WhereNamedArg,
 		ResultFunc: func(stmt *sqlite.Stmt) error {
 			t := ParseMaintenance_requestFromStmt(stmt)
@@ -165,7 +160,7 @@ func (o *Maintenance_request) Save() error {
 	defer DbPool.Put(DB)
 	sqlstr := `INSERT INTO maintenance_request(request_date,type,status,cost,invoice_id,contract_id) VALUES(:request_date,:type,:status,:cost,:invoice_id,:contract_id) ON CONFLICT( contract_id,request_date) DO UPDATE SET request_date=excluded.request_date,type=excluded.type,status=excluded.status,cost=excluded.cost,invoice_id=excluded.invoice_id,contract_id=excluded.contract_id`
 	err := sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
-		Named: map[string]any{":id": o.Id, ":request_date": o.Request_date, ":type": o.Type, ":status": o.Status, ":cost": o.Cost, ":invoice_id": o.Invoice_id, ":contract_id": o.Contract_id},
+		Named: map[string]any{":request_date": o.Request_date, ":type": o.Type, ":status": o.Status, ":cost": o.Cost, ":invoice_id": o.Invoice_id, ":contract_id": o.Contract_id},
 	})
 	if err != nil {
 		return err

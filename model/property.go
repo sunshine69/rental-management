@@ -106,7 +106,7 @@ func (o *Property) Search() []Property {
 	}
 	DB := u.Must(DbPool.Take(context.TODO()))
 	defer DbPool.Put(DB)
-	err := sqlitex.Execute(DB, "SELECT * FROM tenant WHERE "+o.Where, &sqlitex.ExecOptions{
+	err := sqlitex.Execute(DB, "SELECT * FROM property WHERE "+o.Where, &sqlitex.ExecOptions{
 		Named: o.WhereNamedArg,
 		ResultFunc: func(stmt *sqlite.Stmt) error {
 			t := ParsePropertyFromStmt(stmt)
@@ -150,7 +150,7 @@ func (o *Property) Save() error {
 	defer DbPool.Put(DB)
 	sqlstr := `INSERT INTO property(code,address,note) VALUES(:code,:address,:note) ON CONFLICT( code) DO UPDATE SET code=excluded.code,address=excluded.address,note=excluded.note`
 	err := sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
-		Named: map[string]any{":id": o.Id, ":code": o.Code, ":address": o.Address, ":note": o.Note},
+		Named: map[string]any{":code": o.Code, ":address": o.Address, ":note": o.Note},
 	})
 	if err != nil {
 		return err

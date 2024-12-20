@@ -8,7 +8,7 @@ require (
 	github.com/go-playground/form/v4 v4.2.1
 	github.com/go-playground/validator/v10 v10.22.1
 	github.com/joho/godotenv v1.5.1
-	github.com/sunshine69/golang-tools/utils v0.0.0-20241217103924-271159ccad12
+	github.com/sunshine69/golang-tools/utils v0.0.0-20241217114920-cd10ec608666
 	modernc.org/sqlite v1.34.0
 	zombiezen.com/go/sqlite v1.4.0
 )

@@ -3,10 +3,8 @@ package model
 
 import (
 	"context"
-	"strings"
-	"time"
-
 	u "github.com/sunshine69/golang-tools/utils"
+	"strings"
 	"zombiezen.com/go/sqlite"
 	"zombiezen.com/go/sqlite/sqlitex"
 )
@@ -42,9 +40,6 @@ func ParseTenantFromStmt(stmt *sqlite.Stmt) (o Tenant) {
 			o.Email = col_val.(string)
 		case "join_date":
 			o.Join_date = col_val.(string)
-			if o.Join_date == "" {
-				o.Join_date = time.Now().Format(u.TimeISO8601LayOut)
-			}
 		case "note":
 			o.Note = col_val.(string)
 		}
@@ -167,7 +162,7 @@ func (o *Tenant) Save() error {
 	defer DbPool.Put(DB)
 	sqlstr := `INSERT INTO tenant(first_name,last_name,address,contact_number,email,join_date,note) VALUES(:first_name,:last_name,:address,:contact_number,:email,:join_date,:note) ON CONFLICT( email) DO UPDATE SET first_name=excluded.first_name,last_name=excluded.last_name,address=excluded.address,contact_number=excluded.contact_number,email=excluded.email,join_date=excluded.join_date,note=excluded.note`
 	err := sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
-		Named: map[string]any{":id": o.Id, ":first_name": o.First_name, ":last_name": o.Last_name, ":address": o.Address, ":contact_number": o.Contact_number, ":email": o.Email, ":join_date": o.Join_date, ":note": o.Note},
+		Named: map[string]any{":first_name": o.First_name, ":last_name": o.Last_name, ":address": o.Address, ":contact_number": o.Contact_number, ":email": o.Email, ":join_date": o.Join_date, ":note": o.Note},
 	})
 	if err != nil {
 		return err

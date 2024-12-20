@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"reflect"
 	"strconv"
 	"strings"
 
@@ -89,7 +88,6 @@ func Maintenance_requestStructLevelValidation(sl validator.StructLevel) {
 
 // Common action for processing all forms.
 func ProcessPreSteps[T any](w http.ResponseWriter, r *http.Request, currentFormType T) (T, error) {
-	fmt.Fprintf(os.Stderr, "[DEBUG] Form of Type '%s'\n", reflect.TypeOf(currentFormType).Name())
 	u.CheckErr(r.ParseForm(), "[ERROR] can not parse form")
 	var err, err1 error
 	var newT T
@@ -157,10 +155,11 @@ func SearchTenant(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "%s", err.Error())
 		return
 	}
+	obj.Where = "email LIKE :email"
+	obj.WhereNamedArg = map[string]any{":email": "%" + obj.Email + "%"}
 	out := obj.Search()
 	rows := []map[string]any{}
 	fieldList := []string{}
-	println("[DEBUG] ", u.JsonDump(out, ""))
 	for _, v := range out {
 		_fieldList, r := u.ConvertStruct2Map(v)
 		rows = append(rows, r)
@@ -216,6 +215,8 @@ func SearchProperty_manager(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "%s", err.Error())
 		return
 	}
+	obj.Where = "email LIKE :email"
+	obj.WhereNamedArg = map[string]any{":email": "%" + obj.Email + "%"}
 	out := obj.Search()
 	rows := []map[string]any{}
 	fieldList := []string{}
@@ -274,6 +275,8 @@ func SearchProperty(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "%s", err.Error())
 		return
 	}
+	obj.Where = "code LIKE :code"
+	obj.WhereNamedArg = map[string]any{":code": "%" + obj.Code + "%"}
 	out := obj.Search()
 	rows := []map[string]any{}
 	fieldList := []string{}
@@ -332,6 +335,8 @@ func SearchContract(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "%s", err.Error())
 		return
 	}
+	obj.Where = "property LIKE :property AND tenant_main LIKE :tenant_main AND start_date LIKE :start_date"
+	obj.WhereNamedArg = map[string]any{":property": "%" + obj.Property + "%", ":tenant_main": "%" + obj.Tenant_main + "%", ":start_date": "%" + obj.Start_date + "%"}
 	out := obj.Search()
 	rows := []map[string]any{}
 	fieldList := []string{}
@@ -390,6 +395,8 @@ func SearchAccount(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "%s", err.Error())
 		return
 	}
+	obj.Where = "contract_id LIKE :contract_id"
+	obj.WhereNamedArg = map[string]any{":contract_id": "%" + strconv.FormatInt(obj.Contract_id, 10) + "%"}
 	out := obj.Search()
 	rows := []map[string]any{}
 	fieldList := []string{}
@@ -448,6 +455,8 @@ func SearchPayment(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "%s", err.Error())
 		return
 	}
+	obj.Where = "account_id LIKE :account_id AND pay_date LIKE :pay_date"
+	obj.WhereNamedArg = map[string]any{":account_id": "%" + strconv.FormatInt(obj.Account_id, 10) + "%", ":pay_date": "%" + obj.Pay_date + "%"}
 	out := obj.Search()
 	rows := []map[string]any{}
 	fieldList := []string{}
@@ -506,6 +515,8 @@ func SearchInvoice(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "%s", err.Error())
 		return
 	}
+	obj.Where = "number LIKE :number AND issuer LIKE :issuer"
+	obj.WhereNamedArg = map[string]any{":number": "%" + obj.Number + "%", ":issuer": "%" + obj.Issuer + "%"}
 	out := obj.Search()
 	rows := []map[string]any{}
 	fieldList := []string{}
@@ -564,6 +575,8 @@ func SearchMaintenance_request(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "%s", err.Error())
 		return
 	}
+	obj.Where = "request_date LIKE :request_date AND contract_id LIKE :contract_id"
+	obj.WhereNamedArg = map[string]any{":request_date": "%" + obj.Request_date + "%", ":contract_id": "%" + strconv.FormatInt(obj.Contract_id, 10) + "%"}
 	out := obj.Search()
 	rows := []map[string]any{}
 	fieldList := []string{}

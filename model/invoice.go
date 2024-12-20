@@ -50,9 +50,6 @@ func ParseInvoiceFromStmt(stmt *sqlite.Stmt) (o Invoice) {
 			o.Property = col_val.(string)
 		case "due_date":
 			o.Due_date = col_val.(string)
-			if o.Due_date == "" {
-				o.Due_date = time.Now().Format(u.TimeISO8601LayOut)
-			}
 		}
 	}
 	return
@@ -130,7 +127,7 @@ func (o *Invoice) Search() []Invoice {
 	}
 	DB := u.Must(DbPool.Take(context.TODO()))
 	defer DbPool.Put(DB)
-	err := sqlitex.Execute(DB, "SELECT * FROM tenant WHERE "+o.Where, &sqlitex.ExecOptions{
+	err := sqlitex.Execute(DB, "SELECT * FROM invoice WHERE "+o.Where, &sqlitex.ExecOptions{
 		Named: o.WhereNamedArg,
 		ResultFunc: func(stmt *sqlite.Stmt) error {
 			t := ParseInvoiceFromStmt(stmt)
@@ -174,7 +171,7 @@ func (o *Invoice) Save() error {
 	defer DbPool.Put(DB)
 	sqlstr := `INSERT INTO invoice(date,description,amount,number,issuer,payer,property,due_date) VALUES(:date,:description,:amount,:number,:issuer,:payer,:property,:due_date) ON CONFLICT( number,issuer) DO UPDATE SET date=excluded.date,description=excluded.description,amount=excluded.amount,number=excluded.number,issuer=excluded.issuer,payer=excluded.payer,property=excluded.property,due_date=excluded.due_date`
 	err := sqlitex.Execute(DB, sqlstr, &sqlitex.ExecOptions{
-		Named: map[string]any{":id": o.Id, ":date": o.Date, ":description": o.Description, ":amount": o.Amount, ":number": o.Number, ":issuer": o.Issuer, ":payer": o.Payer, ":property": o.Property, ":due_date": o.Due_date},
+		Named: map[string]any{":date": o.Date, ":description": o.Description, ":amount": o.Amount, ":number": o.Number, ":issuer": o.Issuer, ":payer": o.Payer, ":property": o.Property, ":due_date": o.Due_date},
 	})
 	if err != nil {
 		return err
