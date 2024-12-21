@@ -59,7 +59,6 @@ func Get{{$objName}}ById(w http.ResponseWriter, r *http.Request) {
     } else {
         fmt.Fprint(w, "[ERROR] ParseIdFromRequest Get{{$objName}}ById")
     }
-    return
 }
 {{- end }}
 

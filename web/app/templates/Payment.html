@@ -1,15 +1,15 @@
 {{ block "FormPayment"  .}}
 	{{if not .Id }}<div id="FormPayment" class="form-group" style="display:none;">{{end}}
 	<form>
-		<label for="Payment-Account_id">Account id *:</label>
+		<label for="Payment-Account_id">Account id<span style="color:red">*</span>:</label>
 		<input type="text" id="Payment-Account_id" name="Account_id" value="{{ or .Account_id "" }}" placeholder="Enter Account id" />
-		<label for="Payment-Tenant">Tenant :</label>
+		<label for="Payment-Tenant">Tenant:</label>
 		<input type="text" id="Payment-Tenant" name="Tenant" value="{{ or .Tenant "" }}" placeholder="Enter Tenant" />
-		<label for="Payment-Amount">Amount :</label>
+		<label for="Payment-Amount">Amount:</label>
 		<input type="text" id="Payment-Amount" name="Amount" value="{{ or .Amount "" }}" placeholder="Enter Amount" />
-		<label for="Payment-Pay_date">Pay date *:</label>
+		<label for="Payment-Pay_date">Pay date<span style="color:red">*</span>:</label>
 		<input type="text" id="Payment-Pay_date" name="Pay_date" value="{{ or .Pay_date "" }}" placeholder="Enter Pay date" />
-		<label for="Payment-Reference">Reference :</label>
+		<label for="Payment-Reference">Reference:</label>
 		<input type="text" id="Payment-Reference" name="Reference" value="{{ or .Reference "" }}" placeholder="Enter Reference" />
 		<input type="button" id="save-Payment" name="save" value="Update" hx-post="/payment" hx-target="this" />
 		<input type="button" id="search-Payment" name="search" value="Search by key fields" hx-post="/payment/search" hx-target="#post-response" />

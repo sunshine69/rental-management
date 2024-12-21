@@ -1,11 +1,11 @@
 {{ block "FormProperty"  .}}
 	{{if not .Id }}<div id="FormProperty" class="form-group" style="display:none;">{{end}}
 	<form>
-		<label for="Property-Code">Code *:</label>
+		<label for="Property-Code">Code<span style="color:red">*</span>:</label>
 		<input type="text" id="Property-Code" name="Code" value="{{ or .Code "" }}" placeholder="Enter Code" />
-		<label for="Property-Address">Address :</label>
+		<label for="Property-Address">Address:</label>
 		<input type="text" id="Property-Address" name="Address" value="{{ or .Address "" }}" placeholder="Enter Address" />
-		<label for="Property-Note">Note :</label>
+		<label for="Property-Note">Note:</label>
 		<textarea id="Property-Note" name="Note" placeholder="Enter Note" onchange="SetUpdateButtonLabelProperty();">{{ or .Note "" }}</textarea>
 		<input type="button" id="save-Property" name="save" value="Update" hx-post="/property" hx-target="this" />
 		<input type="button" id="search-Property" name="search" value="Search by key fields" hx-post="/property/search" hx-target="#post-response" />

@@ -1,13 +1,13 @@
 {{ block "FormAccount"  .}}
 	{{if not .Id }}<div id="FormAccount" class="form-group" style="display:none;">{{end}}
 	<form>
-		<label for="Account-Balance">Balance :</label>
+		<label for="Account-Balance">Balance:</label>
 		<input type="text" id="Account-Balance" name="Balance" value="{{ or .Balance "" }}" placeholder="Enter Balance" />
-		<label for="Account-Contract_id">Contract id *:</label>
+		<label for="Account-Contract_id">Contract id<span style="color:red">*</span>:</label>
 		<input type="text" id="Account-Contract_id" name="Contract_id" value="{{ or .Contract_id "" }}" placeholder="Enter Contract id" />
-		<label for="Account-Tenant_main">Tenant main :</label>
+		<label for="Account-Tenant_main">Tenant main:</label>
 		<input type="text" id="Account-Tenant_main" name="Tenant_main" value="{{ or .Tenant_main "" }}" placeholder="Enter Tenant main" />
-		<label for="Account-Note">Note :</label>
+		<label for="Account-Note">Note:</label>
 		<textarea id="Account-Note" name="Note" placeholder="Enter Note" onchange="SetUpdateButtonLabelAccount();">{{ or .Note "" }}</textarea>
 		<input type="button" id="save-Account" name="save" value="Update" hx-post="/account" hx-target="this" />
 		<input type="button" id="search-Account" name="search" value="Search by key fields" hx-post="/account/search" hx-target="#post-response" />

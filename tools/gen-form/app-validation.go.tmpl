@@ -10,7 +10,6 @@ func {{$objName}}StructLevelValidation(sl validator.StructLevel) {
 
 // Common action for processing all forms.
 func ProcessPreSteps[T any](w http.ResponseWriter, r *http.Request, currentFormType T) (T, error) {
-	fmt.Fprintf(os.Stderr, "[DEBUG] Form of Type '%s'\n", reflect.TypeOf(currentFormType).Name())
 	u.CheckErr(r.ParseForm(), "[ERROR] can not parse form")
 	var err, err1 error
 	var newT T

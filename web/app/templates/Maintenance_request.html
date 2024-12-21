@@ -1,17 +1,17 @@
 {{ block "FormMaintenance_request"  .}}
 	{{if not .Id }}<div id="FormMaintenance_request" class="form-group" style="display:none;">{{end}}
 	<form>
-		<label for="Maintenance_request-Request_date">Request date *:</label>
+		<label for="Maintenance_request-Request_date">Request date<span style="color:red">*</span>:</label>
 		<input type="text" id="Maintenance_request-Request_date" name="Request_date" value="{{ or .Request_date "" }}" placeholder="Enter Request date" />
-		<label for="Maintenance_request-Type">Type :</label>
+		<label for="Maintenance_request-Type">Type:</label>
 		<input type="text" id="Maintenance_request-Type" name="Type" value="{{ or .Type "" }}" placeholder="Enter Type" />
-		<label for="Maintenance_request-Status">Status :</label>
+		<label for="Maintenance_request-Status">Status:</label>
 		<input type="text" id="Maintenance_request-Status" name="Status" value="{{ or .Status "" }}" placeholder="Enter Status" />
-		<label for="Maintenance_request-Cost">Cost :</label>
+		<label for="Maintenance_request-Cost">Cost:</label>
 		<input type="text" id="Maintenance_request-Cost" name="Cost" value="{{ or .Cost "" }}" placeholder="Enter Cost" />
-		<label for="Maintenance_request-Invoice_id">Invoice id :</label>
+		<label for="Maintenance_request-Invoice_id">Invoice id:</label>
 		<input type="text" id="Maintenance_request-Invoice_id" name="Invoice_id" value="{{ or .Invoice_id "" }}" placeholder="Enter Invoice id" />
-		<label for="Maintenance_request-Contract_id">Contract id *:</label>
+		<label for="Maintenance_request-Contract_id">Contract id<span style="color:red">*</span>:</label>
 		<input type="text" id="Maintenance_request-Contract_id" name="Contract_id" value="{{ or .Contract_id "" }}" placeholder="Enter Contract id" />
 		<input type="button" id="save-Maintenance_request" name="save" value="Update" hx-post="/maintenance_request" hx-target="this" />
 		<input type="button" id="search-Maintenance_request" name="search" value="Search by key fields" hx-post="/maintenance_request/search" hx-target="#post-response" />

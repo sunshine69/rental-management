@@ -4,11 +4,11 @@
 		{{ range $fName := .fList -}}
 		{{ $fp := (index $.fieldProp $fName) -}}
 		{{ if index $fp "display" -}}
-		<label for="{{$.formName}}-{{$fName}}">{{replace $fName "_" " "}} {{index $fp "label"}}:</label>
+		<label for="{{$.formName}}-{{$fName}}">{{$fName|replace "_" " " }}{{index $fp "label"}}:</label>
 		{{if eq (index $fp "ele") "textarea" -}}
-		<textarea id="{{$.formName}}-{{$fName}}" name="{{$fName}}" placeholder="Enter {{replace $fName "_" " "}}" onchange="SetUpdateButtonLabel{{$.formName}}();">{{"{{ or ."}}{{$fName}}{{ " \"\" }}"}}</textarea>
+		<textarea id="{{$.formName}}-{{$fName}}" name="{{$fName}}" placeholder="Enter {{$fName|replace "_" " " }}" onchange="SetUpdateButtonLabel{{$.formName}}();">{{"{{ or ."}}{{$fName}}{{ " \"\" }}"}}</textarea>
 		{{else -}}
-        <{{ index $fp "ele" }} type="{{index $fp "type"}}" id="{{$.formName}}-{{$fName}}" name="{{$fName}}" value="{{"{{ or ."}}{{$fName}}{{ " \"\" }}"}}" placeholder="Enter {{replace $fName "_" " "}}" {{ index $fp "close_ele" }}
+        <{{ index $fp "ele" }} type="{{index $fp "type"}}" id="{{$.formName}}-{{$fName}}" name="{{$fName}}" value="{{"{{ or ."}}{{$fName}}{{ " \"\" }}"}}" placeholder="Enter {{$fName|replace "_" " " }}" {{ index $fp "close_ele" }}
 		{{end -}}
 		{{ end -}}
 		{{ end -}}
@@ -21,7 +21,7 @@
 		function ClearKeyFields{{.formName}}() {
 			{{ range $fName := .fList -}}
 			{{ $fp := (index $.fieldProp $fName) -}}
-			{{ if eq (index $fp "label") "*" -}}
+			{{ if contains "*" (index $fp "label") -}}
 			document.getElementById("{{$.formName}}-{{$fName}}").value = "";
 			{{end -}}
 			{{end -}}

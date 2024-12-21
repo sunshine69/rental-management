@@ -36,7 +36,7 @@ func FormGen(structType any, writeDirectory string) {
 				fieldProp[v]["display"] = false
 			}
 			if tagset[1] == "db" && len(tagset) >= 3 && strings.Contains(tagset[2], "unique") {
-				fieldProp[v]["label"] = "*"
+				fieldProp[v]["label"] = `<span style="color:red">*</span>`
 			}
 			if tagset[1] == "form" && len(tagset) >= 3 && strings.Contains(tagset[2], "ele=textarea") {
 				fieldProp[v]["ele"] = "textarea"

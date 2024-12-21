@@ -194,7 +194,6 @@ func GetTenantById(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Fprint(w, "[ERROR] ParseIdFromRequest GetTenantById")
 	}
-	return
 }
 func Property_manager(w http.ResponseWriter, r *http.Request) {
 	obj, err := ProcessPreSteps(w, r, model.Property_manager{})
@@ -254,7 +253,6 @@ func GetProperty_managerById(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Fprint(w, "[ERROR] ParseIdFromRequest GetProperty_managerById")
 	}
-	return
 }
 func Property(w http.ResponseWriter, r *http.Request) {
 	obj, err := ProcessPreSteps(w, r, model.Property{})
@@ -314,7 +312,6 @@ func GetPropertyById(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Fprint(w, "[ERROR] ParseIdFromRequest GetPropertyById")
 	}
-	return
 }
 func Contract(w http.ResponseWriter, r *http.Request) {
 	obj, err := ProcessPreSteps(w, r, model.Contract{})
@@ -374,7 +371,6 @@ func GetContractById(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Fprint(w, "[ERROR] ParseIdFromRequest GetContractById")
 	}
-	return
 }
 func Account(w http.ResponseWriter, r *http.Request) {
 	obj, err := ProcessPreSteps(w, r, model.Account{})
@@ -434,7 +430,6 @@ func GetAccountById(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Fprint(w, "[ERROR] ParseIdFromRequest GetAccountById")
 	}
-	return
 }
 func Payment(w http.ResponseWriter, r *http.Request) {
 	obj, err := ProcessPreSteps(w, r, model.Payment{})
@@ -494,7 +489,6 @@ func GetPaymentById(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Fprint(w, "[ERROR] ParseIdFromRequest GetPaymentById")
 	}
-	return
 }
 func Invoice(w http.ResponseWriter, r *http.Request) {
 	obj, err := ProcessPreSteps(w, r, model.Invoice{})
@@ -554,7 +548,6 @@ func GetInvoiceById(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Fprint(w, "[ERROR] ParseIdFromRequest GetInvoiceById")
 	}
-	return
 }
 func Maintenance_request(w http.ResponseWriter, r *http.Request) {
 	obj, err := ProcessPreSteps(w, r, model.Maintenance_request{})
@@ -614,7 +607,6 @@ func GetMaintenance_requestById(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Fprint(w, "[ERROR] ParseIdFromRequest GetMaintenance_requestById")
 	}
-	return
 }
 
 func AddHandler(mux *http.ServeMux, Cfg *configs.Config) {
